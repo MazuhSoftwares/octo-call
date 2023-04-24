@@ -17,7 +17,7 @@ But remember, this is just a proof of concept of WebRTC knowledge, and is
 supposed to be of cheap maintenance. So that's good enough. You can learn more
 about it on
 [WebRTC.Ventures](https://webrtc.ventures/2021/06/webrtc-mesh-architecture/)
-and [BlogGeek.me](https://bloggeek.me/webrtcglossary/mesh/) posts.
+and [BlogGeek.me](https://bloggeek.me/webrtc-p2p-mesh/) posts.
 They're also awesome vendors in this field.
 
 ## Setting up for local development
@@ -48,10 +48,15 @@ serverless approach for sharing realtime data.
 First, setup up your cloud environment:
 
 - Go to [Firebase Console](https://console.firebase.google.com/).
-- Create a new project for you to store your testing Octo Call data (no need of Analytics).
+- Create a new project for you to store your testing Octo Call data
+  (no need of Analytics).
 - Create credentials for Web and it'll output your Firebase config values.
-- Create a ".env.development.local" with your data, but
-  following ".env.development.sample" structure.
+- Create a `.env.development.local` with your data, but
+  following `.env.development.sample` structure.
+- On Firebase Console, go to "Authentication" menu option,
+  and enable Google authentication provider.
+- On Firebase Console, go to "Firestore Database" menu option,
+  and create one for you (in "testing mode" for local tests).
 
 Restart your development server so they can load.
 
@@ -70,6 +75,86 @@ npm run test:watch
 ```
 
 Happy coding!
+
+## More non-functional requirements
+
+### Technology stack
+
+Following the "low budget approach" by design, here's the stack:
+
+- Only client side rendering with React without framework.
+- Realtime signaling with Firebase (while the media is still peer-to-peer).
+- TypeScript and Jest for code integrity.
+
+In theory, the WebRTC portion could be used as a library for another UI,
+and the signaling server could be replaced too. But having Mesh topology
+is a major assumption for all the project layers.
+
+### Folders architecture
+
+Under `src/`, there should be:
+
+- `features/`: the only folder to have subfolders, each subfolder would be a
+  feature domain.
+
+  - Mostly user interaction logic, the core behaviors should decoupled be
+    elsewhere.
+  - At least one integration test suite for each feature like
+    `[subfolder].test.tsx`.
+
+- `ui/`: common user interface components and used more than once.
+
+  - Only visual logic, so if it has more than that it's probably a component
+    beloging to a domain feature.
+  - Unit tests required. Every file must have its `[filename].test.tsx`.
+
+- `state/`: shared state structures, global or contextual.
+
+  - Heavy business logic, but made of pure functions, relying on integration
+    with services and WebRTC layers to decouple side effects.
+  - Unit and integration tests required. Every file must have its
+    `[filename].test.tsx`.
+
+- `services/`: for third-party connections and integrations.
+
+  - No data logic, no business logic, exposing generic interfaces as possible.
+  - Almost everything here will be mocked during tests of other stuff,
+    so it must be kept dumb and be easily replaced.
+
+- `webrtc/`: all communications logic, from handling devices to
+  signaling messages, exposing generic interfaces for the rest of the code.
+
+  - Everything that uses WebRTC APIs must rely on this folder, and this folder
+    must be agnositc to all other layers (including React itself).
+  - Unit tests required and high coverage. Every file must have its
+    `[filename].test.tsx`.
+
+- `assets/`: for multimidia like pictures and sounds.
+  - No tests required.
+
+No extra levels of subfolders shall be created, so this flat
+structure must be maintained.
+
+### Browsers support
+
+Supported mobile devices:
+
+- iOS.
+- Android.
+
+And their browsers:
+
+- Chrome.
+- Firefox.
+- Safari.
+
+Only up-to-date versions.
+
+## Features
+
+As a proof of concept, features are limited. But there's a try to follow
+minimal standards discussed by vendors:
+https://www.youtube.com/watch?v=EmI4QvicZTY
 
 ## License
 
