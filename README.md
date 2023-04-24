@@ -31,12 +31,26 @@ npm install
 And start the development server:
 
 ```sh
-npm run dev
+npm start
 ```
 
 Read the output. Your local environment should be now ready to be
 opened in your browser. While Chrome would be the best option,
 it really should be working on other major modern browsers as well.
+
+For tests, you can run:
+
+```
+npm test
+```
+
+Or its variant for a live testing experience:
+
+```sh
+npm run test:watch
+```
+
+Happy coding!
 
 ## Licensing
 

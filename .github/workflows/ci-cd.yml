@@ -8,25 +8,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup Node
+      - name: Node
         uses: actions/setup-node@v1
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install
         uses: bahmutov/npm-install@v1
 
-      - name: Build project
+      - name: Test
+        run: npm test
+
+      - name: Build
         run: npm run build
 
-      - name: Upload production-ready build files
-        uses: actions/upload-artifact@v2
-        with:
-          name: production-files
-          path: ./dist
+  #     - name: Upload
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: production-files
+  #         path: ./dist
 
   # deploy:
   #   name: Deploy
@@ -35,7 +38,7 @@ jobs:
   #   if: github.ref == 'refs/heads/main'
 
   #   steps:
-  #     - name: Download artifact
+  #     - name: Download
   #       uses: actions/download-artifact@v2
   #       with:
   #         name: production-files
