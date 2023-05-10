@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { User } from "../webrtc";
+import firestoreAuth from "../services/firestore-auth";
 import type { RootState } from ".";
 
 type UserStatus = "idle" | "pending" | "authenticated" | "error";
@@ -10,7 +11,7 @@ export interface UserState extends User {
   errorMessage: string;
 }
 
-const initialState: UserState = {
+export const userInitialState: UserState = {
   uid: "",
   displayName: "",
   email: "",
@@ -20,10 +21,8 @@ const initialState: UserState = {
 
 export const userSlice = createSlice({
   name: "user",
-  initialState,
-  reducers: {
-    logoff: () => initialState,
-  },
+  initialState: userInitialState,
+  reducers: {},
   extraReducers: (builder) => {
     builder.addCase(login.pending, (state) => {
       state.uid = "";
@@ -48,19 +47,18 @@ export const userSlice = createSlice({
       state.status = "error";
       state.errorMessage = action.error.message || "Unknown error.";
     });
+
+    builder.addCase(logoff.fulfilled, () => userInitialState);
   },
 });
 
 export const login = createAsyncThunk("user/login", async () => {
-  await new Promise((r) => setTimeout(r, 1000)); // TODO: add real auth
-  return {
-    uid: "abc123def456", // TODO: add real user credentials
-    displayName: "Jane Doe",
-    email: "jane@example.com",
-  };
+  return firestoreAuth.login();
 });
 
-export const { logoff } = userSlice.actions;
+export const logoff = createAsyncThunk("user/logoff", async () => {
+  return firestoreAuth.logoff();
+});
 
 export const selectCurrentUser = (state: RootState) => state.user;
 

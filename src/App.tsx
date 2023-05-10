@@ -14,7 +14,7 @@ export default function App() {
   );
 }
 
-function CurrentUserStateIndicator() {
+export function CurrentUserStateIndicator() {
   const user = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
 
