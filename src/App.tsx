@@ -1,4 +1,5 @@
 import "./App.css";
+import LoginView from "./features/auth/LoginView";
 import { db } from "./services/firestore-connection";
 import { useAppDispatch, useAppSelector } from "./state";
 import { login, logoff, selectCurrentUser } from "./state/user";
@@ -10,6 +11,7 @@ export default function App() {
     <>
       <h1>Hello World.</h1>
       <CurrentUserStateIndicator />
+      <LoginView />
     </>
   );
 }
