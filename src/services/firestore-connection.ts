@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { GoogleAuthProvider } from "firebase/auth";
 
 if (!import.meta.env.VITE_FIREBASE_API_KEY) {
   console.error("Missing Firebase config variables.");
@@ -16,3 +17,5 @@ export const app = initializeApp({
 });
 
 export const db = getFirestore(app);
+
+export const googleAuthProvider = new GoogleAuthProvider();
