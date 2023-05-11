@@ -1,9 +1,10 @@
 import "./testing-helpers/mock-firestore-auth";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import App, { CurrentUserStateIndicator } from "./App";
+import App from "./App";
 import fullRender from "./testing-helpers/fullRender";
 import { userInitialState } from "./state/user";
 import firestoreAuth from "./services/firestore-auth";
+import { CurrentUserStateIndicator } from "./features/auth/CurrentUserStateIndicator";
 
 describe("App", () => {
   beforeEach(() => {
@@ -15,10 +16,19 @@ describe("App", () => {
     fullRender(<App />);
 
     const headingElement = screen.getByRole("heading", {
-      name: "Hello World.",
+      name: "Hello, World.",
     });
 
     expect(headingElement).toBeInTheDocument();
+  });
+
+  it("should render the current user name", async () => {
+    const { container } = fullRender(<App />);
+
+    const loginButtonElement = screen.getByRole("button", { name: "Login" });
+    await act(() => fireEvent.click(loginButtonElement));
+
+    await waitFor(() => expect(container.textContent).toMatch(/Jane Doe/));
   });
 
   it("should render the current user status", () => {

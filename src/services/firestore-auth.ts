@@ -1,3 +1,6 @@
+import { getAuth, signInWithPopup, signOut } from "firebase/auth";
+import { googleAuthProvider } from "./firestore-connection";
+
 const firestoreAuth = {
   login,
   logoff,
@@ -6,15 +9,28 @@ const firestoreAuth = {
 export default firestoreAuth;
 
 async function login() {
-  // TODO: implement real thing.
-  await new Promise((r) => setTimeout(r, 1000));
-  return {
-    uid: "abc123def456",
-    displayName: "Jane Doe",
-    email: "jane@example.com",
-  };
+  try {
+    const auth = getAuth();
+    const result = await signInWithPopup(auth, googleAuthProvider);
+    const {
+      user: { uid, displayName, email },
+    } = result;
+
+    if (!email) {
+      signOut(auth);
+      throw new Error("Login blocked: unidentified user");
+    }
+
+    return {
+      uid,
+      displayName: displayName ?? email,
+      email,
+    };
+  } catch (error) {
+    throw new Error("Login error.");
+  }
 }
 
 async function logoff() {
-  // TODO: implement real thing.
+  signOut(getAuth());
 }
