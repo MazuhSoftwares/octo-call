@@ -6,9 +6,11 @@ import {
   PreloadedState,
 } from "@reduxjs/toolkit";
 import user from "./user";
+import devices from "./devices";
 
 const rootReducer = combineReducers({
   user,
+  devices,
 });
 
 export const setupAppStore = (preloadedState?: PreloadedState<RootState>) =>

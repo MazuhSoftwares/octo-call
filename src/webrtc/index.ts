@@ -1,3 +1,5 @@
+import { retrieveMediaInputs } from "./media-devices";
+
 export interface User extends UniqueEntity {
   displayName: string;
   email: string;
@@ -22,6 +24,17 @@ export interface CallUserP2PDescription extends UniqueEntity {
   oldestParticipantUid: string;
   oldestParticipantAnswerSDP: string;
 }
+
+export type MediaType = "audio" | "video";
+
+export type MediaDeviceData = Pick<
+  MediaDeviceInfo,
+  "deviceId" | "kind" | "label"
+>;
+
+export default {
+  retrieveMediaInputs,
+};
 
 interface UniqueEntity {
   uid: string;
