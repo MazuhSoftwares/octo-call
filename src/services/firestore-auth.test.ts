@@ -1,3 +1,4 @@
+import "../testing-helpers/mock-firestore-auth";
 import firestoreAuth from "./firestore-auth";
 
 describe("firestoreAuth", () => {
