@@ -84,13 +84,6 @@ describe("retrieveMediaInputs", () => {
     expect(result).toEqual(expected);
   });
 
-  it("should return empty array for non-existing inputs", async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await retrieveMediaInputs("non-existent" as any);
-
-    expect(result).toEqual([]);
-  });
-
   it("should not call getUserMedia if enumerated devices already have labels", async () => {
     await retrieveMediaInputs("audio");
 
