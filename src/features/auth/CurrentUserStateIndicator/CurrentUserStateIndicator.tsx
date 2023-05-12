@@ -1,6 +1,5 @@
-import "../../App.css";
-import { useAppDispatch, useAppSelector } from "../../state";
-import { login, logoff, selectCurrentUser } from "../../state/user";
+import { useAppDispatch, useAppSelector } from "../../../state";
+import { login, logoff, selectCurrentUser } from "../../../state/user";
 
 export default function CurrentUserStateIndicator() {
   const user = useAppSelector(selectCurrentUser);
