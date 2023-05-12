@@ -95,25 +95,29 @@ is a major assumption for all the project layers.
 Under `src/`, there should be:
 
 - `features/`: the only folder to have subfolders, each subfolder would be a
-  feature domain.
+  feature domain, with its local or contextual state and its components.
 
-  - Mostly user interaction logic, the core behaviors should decoupled be
-    elsewhere.
+  - Mostly user interaction and code integration logic, components made to be
+    used probably once in its own context. Any core behaviors should decoupled
+    be other modules.
   - At least one integration test suite for each feature like
     `[subfolder].test.tsx`.
 
-- `ui/`: common user interface components and used more than once.
+- `ui/`: common user interface components potentially used more than once.
 
-  - Only visual logic, so if it has more than that it's probably a component
-    beloging to a domain feature.
-  - Unit tests required. Every file must have its `[filename].test.tsx`.
+  - Visual logic, maybe integrating with the stateful modules.
+  - Unit and/or integration tests required.
+    Every file must have its `[filename].test.tsx`.
 
-- `state/`: shared state structures, global or contextual.
+- `state/`: global state structures.
 
   - Heavy business logic, but made of pure functions, relying on integration
-    with services and WebRTC layers to decouple side effects.
-  - Unit and integration tests required. Every file must have its
-    `[filename].test.tsx`.
+    with services and WebRTC layers to decouple side effects. Currently
+    Firebase is the big source of side effects, but this state module
+    should be prepared to easily replace its Firebase dependency with
+    very little effort.
+  - High coverage is required, but such coverage must come from integration
+    tests made for components.
 
 - `services/`: for third-party connections and integrations.
 
@@ -121,8 +125,9 @@ Under `src/`, there should be:
   - Almost everything here will be mocked during tests of other stuff,
     so it must be kept dumb and be easily replaced.
 
-- `webrtc/`: all communications logic, from handling devices to
-  signaling messages, exposing generic interfaces for the rest of the code.
+- `webrtc/`: directly handles native WebRTC API for gathering devices,
+  permissions, initializing P2P connections and such, exposing generic
+  interfaces for the rest of the code.
 
   - Everything that uses WebRTC APIs must rely on this folder, and this folder
     must be agnositc to all other layers (including React itself).
@@ -134,6 +139,9 @@ Under `src/`, there should be:
 
 No extra levels of subfolders shall be created, so this flat
 structure must be maintained.
+
+The `services/` and `webrtc/` layers must never be accessed directly by the UI,
+it should always rely on `state/` as middleware.
 
 ### Browsers support
 
