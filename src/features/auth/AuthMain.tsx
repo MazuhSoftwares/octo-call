@@ -1,4 +1,4 @@
-import { CurrentUserStateIndicator } from "./CurrentUserStateIndicator";
+import CurrentUserStateIndicator from "./CurrentUserStateIndicator";
 
 export default function AuthMain() {
   return (

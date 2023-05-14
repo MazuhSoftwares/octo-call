@@ -2,7 +2,7 @@ import "../../App.css";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { login, logoff, selectCurrentUser } from "../../state/user";
 
-export function CurrentUserStateIndicator() {
+export default function CurrentUserStateIndicator() {
   const user = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
 

@@ -1,9 +1,9 @@
 import "../../testing-helpers/mock-firestore-auth";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import firestoreAuth from "../../services/firestore-auth";
-import { CurrentUserStateIndicator } from "./CurrentUserStateIndicator";
 import fullRender from "../../testing-helpers/fullRender";
 import { userInitialState } from "../../state/user";
+import CurrentUserStateIndicator from "./CurrentUserStateIndicator";
 
 describe("CurrentUserStateIndicator", () => {
   beforeEach(() => {
