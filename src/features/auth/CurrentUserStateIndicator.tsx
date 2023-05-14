@@ -14,6 +14,8 @@ export function CurrentUserStateIndicator() {
   return (
     <section>
       <p>
+        {user.displayName ? `Hi, ${user.displayName}.` : "Hi."}
+        <br />
         User status is <code>{user.status}</code>.
       </p>
       {isAuthenticated ? (

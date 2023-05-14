@@ -61,5 +61,6 @@ export const logoff = createAsyncThunk("user/logoff", async () => {
 });
 
 export const selectCurrentUser = (state: RootState) => state.user;
+export const selectIsAuthenticated = (state: RootState) => !!state.user.uid;
 
 export default userSlice.reducer;

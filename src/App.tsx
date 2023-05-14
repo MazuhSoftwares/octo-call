@@ -1,19 +1,33 @@
 import "./App.css";
-import { CurrentUserStateIndicator } from "./features/auth/CurrentUserStateIndicator";
+import { Switch, Route, Router, Redirect } from "wouter";
 import { useAppSelector } from "./state";
-import { selectCurrentUser } from "./state/user";
+import { selectIsAuthenticated } from "./state/user";
+import AuthMain from "./features/auth/AuthMain";
+import CallSelectionMain from "./features/call-selection/CallSelectionMain";
+import P2PCallMain from "./features/p2p-call/P2PCallMain";
 
 export default function App() {
-  const user = useAppSelector(selectCurrentUser);
-  const userName = user.displayName || "World";
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
   return (
-    <>
-      <h1>{`Hello, ${userName}.`}</h1>
-      <CurrentUserStateIndicator />
-      {/* <AudioInputSelector />
-      <br />
-      <VideoInputSelector /> */}
-    </>
+    <Router base="/octo-call">
+      <Switch>
+        <Route
+          path="/"
+          component={isAuthenticated ? CallSelectionMain : AuthMain}
+        />
+        <Route
+          path="/p2p/:callUid"
+          component={isAuthenticated ? P2PCallMain : RedirectToRoot}
+        />
+        <Route>
+          <RedirectToRoot />
+        </Route>
+      </Switch>
+    </Router>
   );
+}
+
+function RedirectToRoot() {
+  return <Redirect to="/" />;
 }
