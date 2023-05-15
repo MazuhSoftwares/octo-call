@@ -5,4 +5,7 @@ jest.mock("../services/firestore-auth.ts", () => ({
     email: "jane@example.com",
   }),
   logoff: jest.fn().mockResolvedValue(null),
+  loadUser: jest
+    .fn()
+    .mockResolvedValue({ uid: "", displayName: "", email: "" }),
 }));

@@ -39,7 +39,9 @@ describe("firestoreAuth", () => {
         photoURL: "",
       },
     });
-    await expect(firestoreAuth.login()).rejects.toThrow("Login error.");
+    await expect(firestoreAuth.login()).rejects.toThrow(
+      "Login blocked: unidentified user."
+    );
   });
 
   it("should successfully log off without throwing an error", async () => {

@@ -1,13 +1,19 @@
 import "./App.css";
 import { Switch, Route, Router, Redirect } from "wouter";
-import { useAppSelector } from "./state";
-import { selectIsAuthenticated } from "./state/user";
+import { useAppDispatch, useAppSelector } from "./state";
+import { loadUser, selectIsAuthenticated } from "./state/user";
 import AuthMain from "./features/auth/AuthMain";
 import CallSelectionMain from "./features/call-selection/CallSelectionMain";
 import P2PCallMain from "./features/p2p-call/P2PCallMain";
+import { useEffect } from "react";
 
 export default function App() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(loadUser());
+  }, [dispatch]);
 
   return (
     <Router base="/octo-call">

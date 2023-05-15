@@ -11,6 +11,8 @@ jest.mock("firebase/auth", () => ({
     pb: null,
     a: ["profile"],
   })),
+  setPersistence: jest.fn(),
+  browserLocalPersistence: jest.fn(),
   signInWithPopup: jest.fn((_: Auth, __: AuthProvider) =>
     Promise.resolve({
       operationType: "signIn",
