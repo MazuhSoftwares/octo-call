@@ -39,17 +39,17 @@ export default function InitialMainCard({
           component="header"
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
-            alignItems: { xs: "start", sm: "center" },
+            flexDirection: { xs: subtitle ? "column" : "row", sm: "row" },
+            alignItems: { xs: subtitle ? "start" : "center", sm: "center" },
             justifyContent: "space-between",
-            mb: 2,
+            mb: 1,
           }}
         >
-          <Box>
+          <Box sx={{ pb: 1 }}>
             <Typography variant="h1">Octo Call</Typography>
             {!!subtitle && <Typography variant="h2">{subtitle}</Typography>}
           </Box>
-          <Box sx={{ marginLeft: { xs: "auto", sm: "initial" } }}>
+          <Box sx={{ marginLeft: { xs: "auto", sm: "initial" }, pb: 1 }}>
             {isAuthenticated && (
               <Button
                 aria-label="Logout"
