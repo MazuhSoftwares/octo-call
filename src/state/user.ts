@@ -48,7 +48,7 @@ export const userSlice = createSlice({
       state.errorMessage = action.error.message || "Unknown error.";
     });
 
-    builder.addCase(logoff.fulfilled, () => userInitialState);
+    builder.addCase(logout.fulfilled, () => userInitialState);
   },
 });
 
@@ -70,9 +70,9 @@ export const login = createAsyncThunk(
   }
 );
 
-export const logoff = createAsyncThunk(
-  "user/logoff",
-  () => firestoreAuth.logoff(),
+export const logout = createAsyncThunk(
+  "user/logout",
+  () => firestoreAuth.logout(),
   {
     condition: (_arg, thunkAPI) =>
       (thunkAPI.getState() as RootState).user.status === "authenticated",

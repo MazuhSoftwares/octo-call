@@ -13,7 +13,7 @@ import type { User } from "../webrtc";
 const firestoreAuth = {
   loadUser,
   login,
-  logoff,
+  logout,
 };
 
 export default firestoreAuth;
@@ -66,6 +66,6 @@ async function login(): Promise<User> {
   };
 }
 
-async function logoff() {
+async function logout() {
   signOut(getAuth());
 }

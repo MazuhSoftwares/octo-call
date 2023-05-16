@@ -1,8 +1,14 @@
 import { createTheme } from "@mui/material";
 
-export const SIZES = Object.freeze({
-  mainPopupWidth: 700,
-});
+export const DARK_COLORS = {
+  foreground: "#161929", // not so dark
+  middleground: "#08090F", // reasonable dark
+  background: "#000", // very dark
+  foregroundBorder: "#31385C", // between gray and blue
+  negative: "#E41C51", // red
+  text: "#D9D9D9", // white
+  primary: "#124BBF", // blue
+} as const;
 
 export const darkTheme = createTheme({
   typography: {
@@ -18,36 +24,49 @@ export const darkTheme = createTheme({
     button: {
       textTransform: "none",
       fontWeight: "500",
-      borderRadius: 8,
     },
   },
   components: {
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "8px",
           padding: 32,
+          borderRadius: 8,
+          border: "1px solid",
+          borderColor: DARK_COLORS.foregroundBorder,
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: 8,
+        },
+        outlinedSecondary: {
+          background: DARK_COLORS.foreground,
+          border: "1px solid",
+          borderColor: DARK_COLORS.foregroundBorder,
         },
       },
     },
   },
   palette: {
     mode: "dark",
-    text: {
-      primary: "#D9D9D9",
-    },
     background: {
-      default: "rgba(0, 0, 0, 0.8)",
-      paper: "#08090F",
+      default: DARK_COLORS.background,
+      paper: DARK_COLORS.middleground,
+    },
+    text: {
+      primary: DARK_COLORS.text,
     },
     primary: {
-      main: "#124BBF",
+      main: DARK_COLORS.primary,
     },
     secondary: {
-      main: "#0D378C",
+      main: DARK_COLORS.text,
     },
     error: {
-      main: "#E41C51",
+      main: DARK_COLORS.negative,
     },
   },
-});
+} as const);

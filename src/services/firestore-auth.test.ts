@@ -47,6 +47,6 @@ describe("firestoreAuth", () => {
   it("should successfully log off without throwing an error", async () => {
     jest.spyOn(firebaseAuth, "getAuth");
     jest.spyOn(firebaseAuth, "signOut");
-    await expect(firestoreAuth.logoff()).resolves.not.toThrow();
+    await expect(firestoreAuth.logout()).resolves.not.toThrow();
   });
 });
