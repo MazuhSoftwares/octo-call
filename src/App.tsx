@@ -7,7 +7,7 @@ import CallSelectionMain from "./features/call-selection/CallSelectionMain";
 import P2PCallMain from "./features/p2p-call/P2PCallMain";
 import { useEffect } from "react";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { darkTheme } from "./ui/constants";
+import { darkTheme } from "./ui/styles";
 
 export default function App() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);

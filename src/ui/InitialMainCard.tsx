@@ -2,7 +2,8 @@ import { ReactNode } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
-import { SIZES } from "./constants";
+import Button from "@mui/material/Button";
+import { SIZES } from "./styles";
 
 export interface InitialMainCardProps {
   children: ReactNode;
