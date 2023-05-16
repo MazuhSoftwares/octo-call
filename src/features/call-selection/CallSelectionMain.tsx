@@ -1,7 +1,10 @@
+import Typography from "@mui/material/Typography";
+import InitialMainCard from "../../ui/InitialMainCard";
+
 export default function CallSelectionMain() {
   return (
-    <main>
-      <p>Imagine a creation or join form here.</p>
-    </main>
+    <InitialMainCard subtitle="Create or join a call">
+      <Typography>Imagine a creation or join form here.</Typography>
+    </InitialMainCard>
   );
 }

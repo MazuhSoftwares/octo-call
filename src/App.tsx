@@ -6,6 +6,8 @@ import AuthMain from "./features/auth/AuthMain";
 import CallSelectionMain from "./features/call-selection/CallSelectionMain";
 import P2PCallMain from "./features/p2p-call/P2PCallMain";
 import { useEffect } from "react";
+import { CssBaseline, ThemeProvider } from "@mui/material";
+import { darkTheme } from "./ui/constants";
 
 export default function App() {
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
@@ -16,21 +18,24 @@ export default function App() {
   }, [dispatch]);
 
   return (
-    <Router base="/octo-call">
-      <Switch>
-        <Route
-          path="/"
-          component={isAuthenticated ? CallSelectionMain : AuthMain}
-        />
-        <Route
-          path="/p2p/:callUid"
-          component={isAuthenticated ? P2PCallMain : RedirectToRoot}
-        />
-        <Route>
-          <RedirectToRoot />
-        </Route>
-      </Switch>
-    </Router>
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Router base="/octo-call">
+        <Switch>
+          <Route
+            path="/"
+            component={isAuthenticated ? CallSelectionMain : AuthMain}
+          />
+          <Route
+            path="/p2p/:callUid"
+            component={isAuthenticated ? P2PCallMain : RedirectToRoot}
+          />
+          <Route>
+            <RedirectToRoot />
+          </Route>
+        </Switch>
+      </Router>
+    </ThemeProvider>
   );
 }
 
