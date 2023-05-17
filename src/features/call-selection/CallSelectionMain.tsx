@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { ChangeEvent, useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import InitialMainCard from "../../components/templates/InitialMainCard";
@@ -7,7 +7,7 @@ import { createCall, selectCall } from "../../state/call";
 import { selectCurrentUser } from "../../state/user";
 
 export default function CallSelectionMain() {
-  const displayNameInputRef = useRef<HTMLInputElement>(null);
+  const [callName, setCallName] = useState("");
   const user = useAppSelector(selectCurrentUser);
   const call = useAppSelector(selectCall);
   const dispatch = useAppDispatch();
@@ -15,8 +15,7 @@ export default function CallSelectionMain() {
   const isPending = call.status === "pending";
 
   const createNewCall = () => {
-    const displayName = displayNameInputRef.current?.value;
-    if (!displayName) {
+    if (!callName) {
       return;
     }
 
@@ -24,21 +23,26 @@ export default function CallSelectionMain() {
       createCall({
         hostId: user.uid,
         hostDisplayName: user.displayName,
-        displayName: displayName,
+        displayName: callName,
       })
     );
   };
 
+  const handleCallNameChange = (event: ChangeEvent<{ value: string }>) =>
+    setCallName(event.target.value);
+
   return (
     <InitialMainCard subtitle="Create or join a call">
       <TextField
-        inputRef={displayNameInputRef}
         required
-        id="outlined-required"
+        data-testid="call-name-input"
+        id="call-name-input"
         label="Call Name"
         name="displayName"
         variant="outlined"
         sx={{ width: "100%" }}
+        value={callName}
+        onChange={handleCallNameChange}
       />
       <Button
         onClick={createNewCall}
