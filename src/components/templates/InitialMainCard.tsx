@@ -5,9 +5,9 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
-import homeBgPattern from "../assets/home-bg-pattern.jpg";
-import { useAppDispatch, useAppSelector } from "../state";
-import { logout, selectIsAuthenticated } from "../state/user";
+import homeBgPattern from "../../assets/home-bg-pattern.jpg";
+import { useAppDispatch, useAppSelector } from "../../state";
+import { logout, selectIsAuthenticated } from "../../state/user";
 
 export interface InitialMainCardProps {
   children: ReactNode;

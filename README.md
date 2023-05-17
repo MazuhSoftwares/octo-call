@@ -1,6 +1,8 @@
 # Octo Call
 
-> Video conference app. A proof of concept.
+Video conference app. A proof of concept.
+
+## About it
 
 It implements WebRTC Mesh Architecture.
 
@@ -24,7 +26,7 @@ They're also awesome vendors in this field.
 
 ### Client code
 
-Using Node 18, clone this repository and install its dependencies:
+Using **Node 18**, clone this repository and install its dependencies:
 
 ```sh
 npm install
@@ -83,6 +85,7 @@ Happy coding!
 Following the "low budget approach" by design, here's the stack:
 
 - Only client side rendering with React without framework.
+- Material UI as base components library.
 - Realtime signaling with Firebase (while the media is still peer-to-peer).
 - TypeScript and Jest for code integrity.
 
@@ -92,56 +95,39 @@ is a major assumption for all the project layers.
 
 ### Folders architecture
 
+Regarding user interface modules, the code is inspired by
+[Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/).
+
 Under `src/`, there should be:
 
-- `features/`: the only folder to have subfolders, each subfolder would be a
-  feature domain, with its local or contextual state and its components.
+- `features/`: Each subfolder would be a feature domain,
+  with its local state and its private components. In Atomic Design,
+  these would be pages and organisms.
 
-  - Mostly user interaction and code integration logic, components made to be
-    used probably once in its own context. Any core behaviors should decoupled
-    be other modules.
-  - At least one integration test suite for each feature like
-    `[subfolder].test.tsx`.
+- `components/`: common React components potentially used more than once,
+  a few of them interacting with stateful modules. In Atomic Design,
+  these would be atoms, molecules and a few templates.
 
-- `ui/`: common user interface components potentially used more than once.
+- `state/`: global state structures. Heavy business logic, but made of pure
+  functions, relying on integration with services and WebRTC layers to
+  decouple side effects.
 
-  - Visual logic, maybe integrating with the stateful modules.
-  - Unit and/or integration tests required.
-    Every file must have its `[filename].test.tsx`.
-
-- `state/`: global state structures.
-
-  - Heavy business logic, but made of pure functions, relying on integration
-    with services and WebRTC layers to decouple side effects. Currently
-    Firebase is the big source of side effects, but this state module
-    should be prepared to easily replace its Firebase dependency with
-    very little effort.
-  - High coverage is required, but such coverage must come from integration
-    tests made for components.
-
-- `services/`: for third-party connections and integrations.
-
-  - No data logic, no business logic, exposing generic interfaces as possible.
-  - Almost everything here will be mocked during tests of other stuff,
-    so it must be kept dumb and be easily replaced.
+- `services/`: for third-party connections and integrations. Currently
+  Firebase is the big service behind a lot of what's happening, but
+  the code desing must be prepared for it to be easily replaced later.
 
 - `webrtc/`: directly handles native WebRTC API for gathering devices,
   permissions, initializing P2P connections and such, exposing generic
-  interfaces for the rest of the code.
-
-  - Everything that uses WebRTC APIs must rely on this folder, and this folder
-    must be agnositc to all other layers (including React itself).
-  - Unit tests required and high coverage. Every file must have its
-    `[filename].test.tsx`.
+  interfaces for the rest of the code. This folder must be agnositc to
+  all other layers (including React itself).
 
 - `assets/`: for multimidia like pictures and sounds.
-  - No tests required.
 
-No extra levels of subfolders shall be created, so this flat
-structure must be maintained.
+The `services/` and `webrtc/` layers must never be accessed directly by the
+UI, it should always rely on `state/` as middleware.
 
-The `services/` and `webrtc/` layers must never be accessed directly by the UI,
-it should always rely on `state/` as middleware.
+A reasonable code coverage is required to keep it all together, as there's a
+fairly complex frontend code here.
 
 ### Browsers support
 
@@ -161,10 +147,11 @@ Only up-to-date versions.
 ## Features
 
 As a proof of concept, features are limited. But there's a try to follow
-minimal standards discussed by vendors:
+minimal standards discussed by industry vendors:
 https://www.youtube.com/watch?v=EmI4QvicZTY
 
 ## License
 
-This a project lead by [Mazuh](https://github.com/Mazuh)
-and under [MIT License](./LICENSE).
+This a project lead by
+[Marcell (Mazuh) G. C. da Silva](https://github.com/Mazuh)
+and it's under [MIT License](./LICENSE).

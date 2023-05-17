@@ -1,5 +1,5 @@
-import { useAppDispatch, useAppSelector } from "../state";
-import { retrieveAudioInputs, selectAudioDevices } from "../state/devices";
+import { useAppDispatch, useAppSelector } from "../../state";
+import { retrieveAudioInputs, selectAudioDevices } from "../../state/devices";
 import { useEffect } from "react";
 
 export default function AudioInputSelector() {

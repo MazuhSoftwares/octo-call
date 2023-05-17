@@ -1,5 +1,5 @@
 import Typography from "@mui/material/Typography";
-import InitialMainCard from "../../ui/InitialMainCard";
+import InitialMainCard from "../../components/templates/InitialMainCard";
 
 export default function CallSelectionMain() {
   return (

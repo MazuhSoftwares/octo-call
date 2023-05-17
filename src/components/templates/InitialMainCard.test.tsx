@@ -1,9 +1,9 @@
-import "../testing-helpers/mock-firestore-auth";
+import "../../testing-helpers/mock-firestore-auth";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import InitialMainCard from "./InitialMainCard";
-import fullRender from "../testing-helpers/fullRender";
-import firestoreAuth from "../services/firestore-auth";
-import { userInitialState } from "../state/user";
+import InitialMainCard from "../templates/InitialMainCard";
+import fullRender from "../../testing-helpers/fullRender";
+import firestoreAuth from "../../services/firestore-auth";
+import { userInitialState } from "../../state/user";
 
 describe("InitialMainCard", () => {
   beforeEach(() => {

@@ -1,9 +1,9 @@
 import { screen, waitFor } from "@testing-library/react";
 import VideoInputSelector from "./VideoInputSelector";
-import fullRender from "../testing-helpers/fullRender";
-import webrtc from "../webrtc";
+import fullRender from "../../testing-helpers/fullRender";
+import webrtc from "../../webrtc";
 
-jest.mock("../webrtc", () => ({
+jest.mock("../../webrtc", () => ({
   retrieveMediaInputs: jest.fn(),
 }));
 

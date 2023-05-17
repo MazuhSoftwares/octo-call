@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import GoogleIcon from "@mui/icons-material/Google";
-import InitialMainCard from "../../ui/InitialMainCard";
+import InitialMainCard from "../../components/templates/InitialMainCard";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { login, selectCurrentUser } from "../../state/user";
 
