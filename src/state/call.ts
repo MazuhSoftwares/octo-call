@@ -3,7 +3,7 @@ import type { Call } from "../webrtc";
 import firestoreCrud from "../services/firestore-crud";
 import { RootState } from ".";
 
-type CallStatus = "pending" | "inProgress" | "error";
+type CallStatus = "idle" | "pending" | "inProgress" | "error";
 
 export interface CallState extends Call {
   status: CallStatus;
@@ -16,7 +16,7 @@ export const callInitialState: CallState = {
   hostId: "",
   hostDisplayName: "",
   participantsUids: [],
-  status: "pending",
+  status: "idle",
   errorMessage: "",
 };
 
@@ -43,7 +43,7 @@ export const callSlice = createSlice({
         state.hostId = action.payload.hostId;
         state.hostDisplayName = action.payload.hostDisplayName;
         state.participantsUids = action.payload.participantsUids;
-        state.status = "inProgress";
+        state.status = action.payload.uid ? "inProgress" : "idle";
         state.errorMessage = "";
       }
     );
@@ -78,5 +78,7 @@ export const createCall = createAsyncThunk(
       (thunkAPI.getState() as RootState).user.status === "authenticated",
   }
 );
+
+export const selectCall = (state: RootState) => state.call;
 
 export default callSlice.reducer;

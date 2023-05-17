@@ -1,14 +1,18 @@
-import Typography from "@mui/material/Typography";
-import InitialMainCard from "../../components/templates/InitialMainCard";
 import { useRef } from "react";
+import Button from "@mui/material/Button";
+import TextField from "@mui/material/TextField";
+import InitialMainCard from "../../components/templates/InitialMainCard";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { createCall } from "../../state/call";
+import { createCall, selectCall } from "../../state/call";
 import { selectCurrentUser } from "../../state/user";
 
 export default function CallSelectionMain() {
   const displayNameInputRef = useRef<HTMLInputElement>(null);
   const user = useAppSelector(selectCurrentUser);
+  const call = useAppSelector(selectCall);
   const dispatch = useAppDispatch();
+
+  const isPending = call.status === "pending";
 
   const createNewCall = () => {
     const displayName = displayNameInputRef.current?.value;
@@ -27,14 +31,24 @@ export default function CallSelectionMain() {
 
   return (
     <InitialMainCard subtitle="Create or join a call">
-      <Typography>Imagine a creation or join form here.</Typography>
-      <label htmlFor="create-call-input">Call Name</label>
-      <input
-        id="create-call-input"
+      <TextField
+        inputRef={displayNameInputRef}
+        required
+        id="outlined-required"
+        label="Call Name"
         name="displayName"
-        ref={displayNameInputRef}
+        variant="outlined"
+        sx={{ width: "100%" }}
       />
-      <button onClick={createNewCall}>Create</button>
+      <Button
+        onClick={createNewCall}
+        disabled={isPending}
+        color="primary"
+        variant="contained"
+        sx={{ marginTop: "25px", width: "100%" }}
+      >
+        {isPending ? "Creating..." : "Create"}
+      </Button>
     </InitialMainCard>
   );
 }
