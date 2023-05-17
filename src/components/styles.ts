@@ -140,7 +140,7 @@ export const darkTheme = createTheme({
       styleOverrides: {
         root: {
           "&.Mui-selected": {
-            color: "white",
+            color: DARK_COLORS.text,
             fontWeight: "bold",
           },
         },
