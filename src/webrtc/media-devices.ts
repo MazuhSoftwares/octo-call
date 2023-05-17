@@ -33,7 +33,9 @@ export async function retrieveMediaInputs(
   }
 
   if (areAllEmpty) {
-    return [];
+    throw new Error(
+      "Detected that only temporary permissions were given, but that's not enough."
+    );
   }
 
   return devices;

@@ -108,8 +108,39 @@ describe("retrieveMediaInputs", () => {
       },
     ]);
 
-    await retrieveMediaInputs("audio");
+    await retrieveMediaInputs("audio").catch(() => null);
 
     expect(global.navigator.mediaDevices.getUserMedia).toHaveBeenCalledTimes(1);
+  });
+
+  it("triggers permission error if it can find devices but having empty labels", async () => {
+    expect.assertions(1);
+
+    (
+      global.navigator.mediaDevices.enumerateDevices as jest.Mock
+    ).mockResolvedValue([
+      { deviceId: "111a", kind: "audioinput", label: "" },
+      { deviceId: "222b", kind: "audioinput", label: "" },
+      {
+        deviceId: "333c",
+        kind: "videoinput",
+        label: "Webcam A (gathered from WebRTC API)",
+      },
+      {
+        deviceId: "555e",
+        kind: "audiooutput",
+        label: "Speakers I (gathered from WebRTC API)",
+      },
+    ]);
+
+    try {
+      await retrieveMediaInputs("audio");
+    } catch (error) {
+      expect(error).toEqual(
+        new Error(
+          "Detected that only temporary permissions were given, but that's not enough."
+        )
+      );
+    }
   });
 });

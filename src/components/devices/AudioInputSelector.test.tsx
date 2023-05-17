@@ -1,7 +1,8 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import AudioInputSelector from "./AudioInputSelector";
 import fullRender from "../../testing-helpers/fullRender";
 import webrtc from "../../webrtc";
+import { devicesInitialState } from "../../state/devices";
 
 jest.mock("../../webrtc", () => ({
   retrieveMediaInputs: jest.fn(),
@@ -25,7 +26,7 @@ describe("AudioInputSelector", () => {
   });
 
   it("renders", async () => {
-    fullRender(<AudioInputSelector />);
+    await act(() => fullRender(<AudioInputSelector />));
 
     await waitFor(() => screen.getByText(/Audio input/));
   });
@@ -35,13 +36,13 @@ describe("AudioInputSelector", () => {
       new Error("Permission denied.")
     );
 
-    fullRender(<AudioInputSelector />);
+    await act(() => fullRender(<AudioInputSelector />));
 
     await waitFor(() => screen.getByText(/Permission denied./));
   });
 
   it("shows options from webrtc", async () => {
-    fullRender(<AudioInputSelector />);
+    await act(() => fullRender(<AudioInputSelector />));
 
     await waitFor(() =>
       expect(
@@ -64,5 +65,105 @@ describe("AudioInputSelector", () => {
         })
       ).toBeInTheDocument()
     );
+  });
+
+  it("can select an audio", async () => {
+    await act(() => fullRender(<AudioInputSelector />));
+
+    const selectEl = screen.getByRole("combobox");
+    const optionEl = screen.getByRole("option", {
+      name: "Microphone 2 (gathered from WebRTC API)",
+    });
+    fireEvent.change(selectEl, {
+      target: { value: optionEl.getAttribute("value") },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByRole("combobox")).toHaveValue(
+        optionEl.getAttribute("value")
+      )
+    );
+  });
+
+  it("can unselect the audio", async () => {
+    await act(() =>
+      fullRender(<AudioInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userAudioId: "222b",
+            userAudioLabel: "Microphone 2 (gathered from WebRTC API)",
+          },
+        },
+      })
+    );
+
+    const selectEl = screen.getByRole("combobox");
+    const optionEl = screen.getByRole("option", {
+      name: "Disabled microphone",
+    });
+    fireEvent.change(selectEl, {
+      target: { value: optionEl.getAttribute("value") },
+    });
+
+    await waitFor(() => expect(screen.getByRole("combobox")).toHaveValue(""));
+  });
+
+  it("finds a fixed equivalent device id from webrtc module after loading outdated id from state", async () => {
+    await act(() =>
+      fullRender(<AudioInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userAudioId: "123outdated321",
+            userAudioLabel: "Microphone 2 (gathered from WebRTC API)",
+          },
+        },
+      })
+    );
+
+    const optionEl = screen.getByRole("option", {
+      name: "Microphone 2 (gathered from WebRTC API)",
+    });
+    await waitFor(() => expect(optionEl).toHaveValue("222b"));
+
+    const selectEl = screen.getByRole("combobox");
+    expect(selectEl).toHaveValue("222b");
+  });
+
+  it("resets selected device to a default if state mod has nothing close to what webrtc mod found", async () => {
+    await act(() =>
+      fullRender(<AudioInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userAudioId: "666",
+            userAudioLabel: "Microphone 666 (maybe an unpluged accessory)",
+          },
+        },
+      })
+    );
+
+    const selectEl = screen.getByRole("combobox");
+    await waitFor(() => expect(selectEl).toHaveValue("111a"));
+  });
+
+  it("clears selected device if state mod has no options from webrtc mod", async () => {
+    (webrtc.retrieveMediaInputs as jest.Mock).mockResolvedValue([]);
+
+    await act(() =>
+      fullRender(<AudioInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userAudioId: "666",
+            userAudioLabel: "Microphone 666 (maybe an unpluged accessory)",
+          },
+        },
+      })
+    );
+
+    const selectEl = screen.getByRole("combobox");
+    await waitFor(() => expect(selectEl).toHaveValue(""));
   });
 });
