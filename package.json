@@ -56,6 +56,7 @@
       "./jest-setup.js"
     ],
     "moduleNameMapper": {
+      "\\.(png|pdf|svg|jpg|jpeg)$": "<rootDir>/src/testing-helpers/fileMock.ts",
       "\\.(css|less)$": "identity-obj-proxy"
     }
   }

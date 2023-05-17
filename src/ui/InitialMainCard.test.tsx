@@ -74,6 +74,6 @@ describe("InitialMainCard", () => {
     const ButtonElement = screen.getByRole("button", { name: "Logout" });
     await act(() => fireEvent.click(ButtonElement));
 
-    expect(firestoreAuth.).toBeCalledTimes(1);
+    expect(firestoreAuth.logout).toBeCalledTimes(1);
   });
 });
