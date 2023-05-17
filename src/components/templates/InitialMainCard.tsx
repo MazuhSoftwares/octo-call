@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
@@ -8,6 +8,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import homeBgPattern from "../../assets/home-bg-patternpad.jpg";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { logout, selectIsAuthenticated } from "../../state/user";
+import SettingsModal from "../settings/SettingsModal";
 
 export interface InitialMainCardProps {
   children: ReactNode;
@@ -23,6 +24,10 @@ export default function InitialMainCard({
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
 
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const openSettings = () => setSettingsOpen(true);
+  const closeSettings = () => setSettingsOpen(false);
+
   return (
     <Box
       component="main"
@@ -34,7 +39,9 @@ export default function InitialMainCard({
         alignItems: "center",
         justifyContent: "center",
         backgroundImage: `url(${homeBgPattern})`,
-        backgroundSize: "contain",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "repeat",
       }}
     >
       <Card variant="outlined" sx={{ width: 700 }}>
@@ -66,7 +73,7 @@ export default function InitialMainCard({
             )}
             <Button
               aria-label="Settings"
-              onClick={() => console.warn("Not implemented yet.")}
+              onClick={openSettings}
               color="secondary"
               variant="outlined"
             >
@@ -76,6 +83,7 @@ export default function InitialMainCard({
         </Box>
         {children}
       </Card>
+      <SettingsModal isOpen={isSettingsOpen} close={closeSettings} />
     </Box>
   );
 }

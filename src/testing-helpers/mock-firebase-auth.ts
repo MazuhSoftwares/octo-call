@@ -13,6 +13,7 @@ jest.mock("firebase/auth", () => ({
   })),
   setPersistence: jest.fn(),
   browserLocalPersistence: jest.fn(),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   signInWithPopup: jest.fn((_: Auth, __: AuthProvider) =>
     Promise.resolve({
       operationType: "signIn",
@@ -38,5 +39,6 @@ jest.mock("firebase/auth", () => ({
       },
     })
   ),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   signOut: jest.fn((_: Auth) => Promise.resolve()),
 }));
