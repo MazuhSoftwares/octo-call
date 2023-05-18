@@ -8,6 +8,7 @@ import { selectCurrentUser } from "../../state/user";
 
 export default function CallSelectionMain() {
   const [callName, setCallName] = useState("");
+  const [isEmptyCallName, setEmptyCallName] = useState(false);
   const user = useAppSelector(selectCurrentUser);
   const call = useAppSelector(selectCall);
   const dispatch = useAppDispatch();
@@ -16,6 +17,7 @@ export default function CallSelectionMain() {
 
   const createNewCall = () => {
     if (!callName) {
+      setEmptyCallName(true);
       return;
     }
 
@@ -28,8 +30,10 @@ export default function CallSelectionMain() {
     );
   };
 
-  const handleCallNameChange = (event: ChangeEvent<{ value: string }>) =>
+  const handleCallNameChange = (event: ChangeEvent<{ value: string }>) => {
+    setEmptyCallName(false);
     setCallName(event.target.value);
+  };
 
   return (
     <InitialMainCard subtitle="Create or join a call">
@@ -40,7 +44,9 @@ export default function CallSelectionMain() {
         label="Call Name"
         name="displayName"
         variant="outlined"
-        sx={{ width: "100%" }}
+        fullWidth
+        error={isEmptyCallName}
+        helperText={isEmptyCallName ? "Call Name is required" : ""}
         value={callName}
         onChange={handleCallNameChange}
       />
