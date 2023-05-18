@@ -10,6 +10,7 @@ import {
   selectUserAudioId,
   setUserAudioId,
 } from "../../state/devices";
+import { spawnAudioMeter } from "../../webrtc/media-devices";
 
 export default function AudioInputSelector() {
   const selectFieldId = useId();
@@ -29,6 +30,14 @@ export default function AudioInputSelector() {
 
   const isDisabled = audioStatus !== "done" || audioInputs.length === 0;
   const isLoading = audioStatus === "pending";
+
+  useEffect(
+    () =>
+      spawnAudioMeter(userAudioId, (percentage) =>
+        console.warn("got it", percentage)
+      ),
+    [userAudioId]
+  );
 
   return (
     <Container>

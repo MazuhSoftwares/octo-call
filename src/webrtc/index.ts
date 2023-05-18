@@ -1,4 +1,9 @@
-import { retrieveMediaInputs } from "./media-devices";
+import { retrieveMediaInputs, spawnAudioMeter } from "./media-devices";
+
+export default {
+  retrieveMediaInputs,
+  spawnAudioMeter,
+};
 
 export interface User extends UniqueEntity {
   displayName: string;
@@ -31,10 +36,6 @@ export type MediaDeviceData = Pick<
   MediaDeviceInfo,
   "deviceId" | "kind" | "label"
 >;
-
-export default {
-  retrieveMediaInputs,
-};
 
 interface UniqueEntity {
   uid: string;
