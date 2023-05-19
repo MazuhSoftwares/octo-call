@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
 import { FormEvent, useId } from "react";
 import { Redirect } from "wouter";
 import get from "lodash.get";
@@ -35,11 +36,18 @@ export default function CallSelectionMain() {
 
   return (
     <InitialMainCard subtitle="Create or join a call">
-      <Box component="form" onSubmit={onSubmit}>
+      <Box
+        component="form"
+        onSubmit={onSubmit}
+        display="flex"
+        flexDirection="column"
+      >
+        <Typography variant="label" component="label" htmlFor={callNameInputId}>
+          Call Name
+        </Typography>
         <TextField
           required
           id={callNameInputId}
-          label="Call Name"
           name="callName"
           variant="outlined"
           fullWidth
