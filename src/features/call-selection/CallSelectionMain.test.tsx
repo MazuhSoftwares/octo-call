@@ -7,7 +7,7 @@ import { userInitialState } from "../../state/user";
 
 describe("CallSelectionMain", () => {
   beforeEach(() => {
-    (firestoreCrud.createDocument as jest.Mock).mockClear();
+    (firestoreCrud.create as jest.Mock).mockClear();
   });
 
   it("renders", () => {
@@ -35,6 +35,6 @@ describe("CallSelectionMain", () => {
     fireEvent.change(callNameInputElement, { target: { value: "Daily" } });
     await act(() => fireEvent.click(callCreationButtonElement));
 
-    expect(firestoreCrud.createDocument).toBeCalledTimes(1);
+    expect(firestoreCrud.create).toBeCalledTimes(1);
   });
 });

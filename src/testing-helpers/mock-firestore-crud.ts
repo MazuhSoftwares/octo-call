@@ -1,5 +1,5 @@
 jest.mock("../services/firestore-crud.ts", () => ({
-  createDocument: jest.fn().mockResolvedValue({
+  create: jest.fn().mockResolvedValue({
     uid: "1a2b3c",
     displayName: "Daily",
     hostId: "5g6h7j",
