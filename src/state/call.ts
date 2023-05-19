@@ -1,6 +1,6 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { Call } from "../webrtc";
-import firestoreCrud from "../services/firestore-crud";
+import firestoreSignaling from "../services/firestore-signaling";
 import { RootState } from ".";
 
 type CallStatus = "idle" | "pending" | "inProgress" | "error";
@@ -67,7 +67,7 @@ export const createCall = createAsyncThunk(
     hostDisplayName,
     displayName,
   }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">) =>
-    firestoreCrud.create("calls", {
+    firestoreSignaling.create("calls", {
       displayName,
       hostDisplayName,
       hostId,

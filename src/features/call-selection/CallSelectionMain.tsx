@@ -43,7 +43,7 @@ export default function CallSelectionMain() {
         flexDirection="column"
       >
         <Typography variant="label" component="label" htmlFor={callNameInputId}>
-          Call Name
+          Call Name *
         </Typography>
         <TextField
           required
