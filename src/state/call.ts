@@ -67,7 +67,7 @@ export const createCall = createAsyncThunk(
     hostDisplayName,
     displayName,
   }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">) =>
-    firestoreCrud.createDocument("calls", {
+    firestoreCrud.create("calls", {
       displayName,
       hostDisplayName,
       hostId,

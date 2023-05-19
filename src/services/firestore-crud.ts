@@ -2,14 +2,14 @@ import { addDoc, collection } from "firebase/firestore";
 import { db } from "./firestore-connection";
 
 const firestoreCrud = {
-  createDocument,
+  create,
 };
 
 export default firestoreCrud;
 
-export async function createDocument(
+export async function create<T extends Record<string, unknown>>(
   collectionName: string,
-  rawCreatingData: any
+  rawCreatingData: T
 ) {
   const docRef = await addDoc(collection(db, collectionName), rawCreatingData);
   return {
