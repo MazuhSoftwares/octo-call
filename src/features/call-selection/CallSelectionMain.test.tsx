@@ -1,13 +1,13 @@
-import "../../testing-helpers/mock-firestore-crud";
+import "../../testing-helpers/mock-firestore-signaling";
 import CallSelectionMain from "./CallSelectionMain";
 import { act, fireEvent, screen } from "@testing-library/react";
 import fullRender from "../../testing-helpers/fullRender";
-import firestoreCrud from "../../services/firestore-crud";
+import firestoreSignaling from "../../services/firestore-signaling";
 import { userInitialState } from "../../state/user";
 
 describe("CallSelectionMain", () => {
   beforeEach(() => {
-    (firestoreCrud.create as jest.Mock).mockClear();
+    (firestoreSignaling.create as jest.Mock).mockClear();
   });
 
   it("renders", () => {
@@ -35,6 +35,6 @@ describe("CallSelectionMain", () => {
     fireEvent.change(callNameInputElement, { target: { value: "Daily" } });
     await act(() => fireEvent.click(callCreationButtonElement));
 
-    expect(firestoreCrud.create).toBeCalledTimes(1);
+    expect(firestoreSignaling.create).toBeCalledTimes(1);
   });
 });
