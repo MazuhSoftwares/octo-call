@@ -26,7 +26,7 @@ describe("CallSelectionMain", () => {
       },
     });
 
-    const callNameInputElement = screen.getByLabelText("Call Name *");
+    const callNameInputElement = screen.getByLabelText("Call Name");
 
     const callCreationButtonElement = screen.getByRole("button", {
       name: "Create",
