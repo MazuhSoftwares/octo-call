@@ -1,7 +1,7 @@
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
-import { ChangeEvent, useEffect, useState } from "react";
-import { navigate } from "wouter/use-location";
+import { ChangeEvent, useState } from "react";
+import { Redirect } from "wouter";
 import InitialMainCard from "../../components/templates/InitialMainCard";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { createCall, selectCall } from "../../state/call";
@@ -13,14 +13,6 @@ export default function CallSelectionMain() {
   const user = useAppSelector(selectCurrentUser);
   const call = useAppSelector(selectCall);
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    if (call.status !== "inProgress") {
-      return;
-    }
-
-    navigate(`p2p/${call.uid}`);
-  }, [call.status, call.uid]);
 
   const createNewCall = () => {
     if (!callName) {
@@ -43,6 +35,10 @@ export default function CallSelectionMain() {
   };
 
   const isPending = call.status === "pending";
+
+  if (call.status === "inProgress") {
+    return <Redirect to={`/p2p/${call.uid}`} />;
+  }
 
   return (
     <InitialMainCard subtitle="Create or join a call">
