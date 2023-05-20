@@ -7,10 +7,12 @@ import {
 } from "@reduxjs/toolkit";
 import user from "./user";
 import devices from "./devices";
+import call from "./call";
 
 const rootReducer = combineReducers({
   user,
   devices,
+  call,
 });
 
 export const setupAppStore = (preloadedState?: PreloadedState<RootState>) =>
