@@ -21,7 +21,14 @@ export const callInitialState: CallUserState = {
 export const callUserSlice = createSlice({
   name: "callUser",
   initialState: callInitialState,
-  reducers: {},
+  reducers: {
+    setCallUser: (state, action) => {
+      state.uid = action.payload.uid;
+      state.userUid = action.payload.userUid;
+      state.userDisplayName = action.payload.userDisplayName;
+      state.joined = action.payload.joined;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(createCallUser.pending, (state) => {
       state.uid = "";
@@ -58,7 +65,7 @@ export const createCallUser = createAsyncThunk(
     userUid,
     userDisplayName,
   }: Pick<CallUserState, "userUid" | "userDisplayName">) =>
-    firestoreSignaling.create("calls", {
+    firestoreSignaling.create("callUsers", {
       userUid,
       userDisplayName,
     }),
@@ -69,5 +76,7 @@ export const createCallUser = createAsyncThunk(
 );
 
 export const selectCallUser = (state: RootState) => state.call;
+
+export const { setCallUser } = callUserSlice.actions;
 
 export default callUserSlice.reducer;
