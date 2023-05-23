@@ -1,8 +1,9 @@
-import { retrieveMediaInputs, spawnAudioMeter } from "./media-devices";
+import { retrieveMediaInputs } from "./media-devices";
+import { startAudioPreview } from "./media-devices-preview";
 
 export default {
   retrieveMediaInputs,
-  spawnAudioMeter,
+  startAudioPreview,
 };
 
 export interface User extends UniqueEntity {
