@@ -1,4 +1,4 @@
-import { SyntheticEvent, useContext, useEffect, useId } from "react";
+import { SyntheticEvent, useContext, useEffect, useId, useState } from "react";
 import Container from "@mui/material/Container";
 import FormControl from "@mui/material/FormControl";
 import NativeSelect from "@mui/material/NativeSelect";
@@ -81,12 +81,13 @@ interface AudioMeterProps {
 
 function AudioMeter({ deviceId }: AudioMeterProps) {
   const audioPreview = useContext(AudioPreviewContext);
+  const [percentage, setPercentage] = useState<number>(0);
 
   useEffect(() => {
-    console.log("Starting effect.", audioPreview);
     audioPreview.start(deviceId);
-    // return () => audioPreview.stop();
+    audioPreview.addOnResultListener((pct) => setPercentage(pct));
+    return () => audioPreview.stop();
   }, [audioPreview, deviceId]);
 
-  return <>{audioPreview.activityPct}%</>;
+  return <>{percentage}%</>;
 }
