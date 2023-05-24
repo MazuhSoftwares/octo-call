@@ -1,9 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { v4 as uuidv4 } from "uuid";
 import type { Call } from "../webrtc";
 import firestoreSignaling from "../services/firestore-signaling";
 import { RootState } from ".";
-import { setCallUser } from "./callUser";
 
 type CallStatus = "idle" | "pending" | "inProgress" | "error";
 
@@ -64,30 +62,17 @@ export const callSlice = createSlice({
 
 export const createCall = createAsyncThunk(
   "call",
-  async (
-    {
-      hostId,
-      hostDisplayName,
+  async ({
+    hostId,
+    hostDisplayName,
+    displayName,
+  }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">) => {
+    const newCallData = await firestoreSignaling.createCall({
       displayName,
-    }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">,
-    thunkAPI
-  ) => {
-    const newCallData = await firestoreSignaling.createCall(
-      {
-        uid: uuidv4(),
-        displayName,
-        hostDisplayName,
-        hostId,
-        participantsUids: [hostId],
-      },
-      {
-        uid: uuidv4(),
-        userUid: hostId,
-        userDisplayName: hostDisplayName,
-      }
-    );
-
-    thunkAPI.dispatch(setCallUser(newCallData.callUser));
+      hostDisplayName,
+      hostId,
+      participantsUids: [hostId],
+    });
 
     return newCallData.call;
   },

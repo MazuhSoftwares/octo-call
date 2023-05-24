@@ -1,4 +1,5 @@
 import { addDoc, collection, doc, writeBatch } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 import omit from "lodash.omit";
 import { db } from "./firestore-connection";
 import type { Call, CallUser } from "../webrtc";
@@ -21,19 +22,18 @@ export async function create<T extends Record<string, unknown>>(
   };
 }
 
-export async function createCall(callData: Call, callUserData: CallUser) {
-  const toDbData = (data: Call | CallUser) => omit(data, "uid");
-
+export async function createCall(callData: Omit<Call, "uid">) {
   const batch = writeBatch(db);
 
-  const docCallRef = doc(db, "calls", callData.uid);
-  batch.set(docCallRef, toDbData(callData));
+  const docCallRef = doc(db, "calls", uuidv4());
+  batch.set(docCallRef, { ...callData, uid: docCallRef.id });
 
-  const docCallUserRef = doc(
-    db,
-    `calls/${docCallRef.id}/users/${callUserData.uid}`
-  );
-  batch.set(docCallUserRef, toDbData(callUserData));
+  const docCallUserRef = doc(db, `calls/${docCallRef.id}/users/${uuidv4()}`);
+  batch.set(docCallUserRef, {
+    uid: docCallUserRef.id,
+    userUid: callData.hostId,
+    userDisplayName: callData.hostDisplayName,
+  });
 
   await batch.commit();
 
@@ -41,10 +41,6 @@ export async function createCall(callData: Call, callUserData: CallUser) {
     call: {
       ...callData,
       uid: docCallRef.id,
-    },
-    callUser: {
-      ...callUserData,
-      uid: docCallUserRef.id,
     },
   };
 }
