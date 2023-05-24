@@ -1,8 +1,7 @@
 import { addDoc, collection, doc, writeBatch } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
-import omit from "lodash.omit";
 import { db } from "./firestore-connection";
-import type { Call, CallUser } from "../webrtc";
+import type { Call } from "../webrtc";
 
 const firestoreSignaling = {
   create,
