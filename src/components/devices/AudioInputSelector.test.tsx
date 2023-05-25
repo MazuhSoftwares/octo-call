@@ -6,6 +6,7 @@ import { devicesInitialState } from "../../state/devices";
 
 jest.mock("../../webrtc", () => ({
   retrieveMediaInputs: jest.fn(),
+  startAudioPreview: jest.fn(),
 }));
 
 describe("AudioInputSelector", () => {
@@ -23,6 +24,9 @@ describe("AudioInputSelector", () => {
         label: "Microphone 2 (gathered from WebRTC API)",
       },
     ]);
+
+    (webrtc.startAudioPreview as jest.Mock).mockReset();
+    (webrtc.startAudioPreview as jest.Mock).mockResolvedValue(() => null);
   });
 
   it("renders", async () => {
@@ -165,5 +169,41 @@ describe("AudioInputSelector", () => {
 
     const selectEl = screen.getByRole("combobox");
     await waitFor(() => expect(selectEl).toHaveValue(""));
+  });
+
+  it("integrates with webrtc module to preview the (initial) selected device", async () => {
+    await act(() => fullRender(<AudioInputSelector />));
+
+    await waitFor(() =>
+      expect(webrtc.startAudioPreview).toHaveBeenCalledTimes(1)
+    );
+
+    const firstCall = (webrtc.startAudioPreview as jest.Mock).mock.calls[0];
+    const [arg0] = firstCall;
+    expect(arg0.audioInputDeviceId).toBe("111a");
+  });
+
+  it("integrates with webrtc module to stop a preview before selecting another", async () => {
+    const stopMock = jest.fn();
+    (webrtc.startAudioPreview as jest.Mock).mockResolvedValue(stopMock);
+
+    await act(() => fullRender(<AudioInputSelector />));
+
+    const selectEl = screen.getByRole("combobox");
+    const optionEl = screen.getByRole("option", {
+      name: "Microphone 2 (gathered from WebRTC API)",
+    });
+    await act(() =>
+      fireEvent.change(selectEl, {
+        target: { value: optionEl.getAttribute("value") },
+      })
+    );
+
+    expect(stopMock).toBeCalledTimes(1);
+
+    expect(webrtc.startAudioPreview).toBeCalledTimes(2);
+    const secondCall = (webrtc.startAudioPreview as jest.Mock).mock.calls[1];
+    const [arg0] = secondCall;
+    expect(arg0.audioInputDeviceId).toBe("222b");
   });
 });

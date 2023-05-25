@@ -1,4 +1,10 @@
 import { retrieveMediaInputs } from "./media-devices";
+import { startAudioPreview } from "./media-devices-preview";
+
+export default {
+  retrieveMediaInputs,
+  startAudioPreview,
+};
 
 export interface User extends UniqueEntity {
   displayName: string;
@@ -31,10 +37,6 @@ export type MediaDeviceData = Pick<
   MediaDeviceInfo,
   "deviceId" | "kind" | "label"
 >;
-
-export default {
-  retrieveMediaInputs,
-};
 
 interface UniqueEntity {
   uid: string;

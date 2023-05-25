@@ -99,7 +99,7 @@ export const darkTheme = createTheme({
         },
       },
     },
-    MuiIcon: {
+    MuiSvgIcon: {
       defaultProps: {
         fontSize: "small",
       },
