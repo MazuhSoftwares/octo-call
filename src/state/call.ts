@@ -62,12 +62,12 @@ export const callSlice = createSlice({
 
 export const createCall = createAsyncThunk(
   "call",
-  ({
+  async ({
     hostId,
     hostDisplayName,
     displayName,
   }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">) =>
-    firestoreSignaling.create("calls", {
+    firestoreSignaling.createCall({
       displayName,
       hostDisplayName,
       hostId,

@@ -35,6 +35,6 @@ describe("CallSelectionMain", () => {
     fireEvent.change(callNameInputElement, { target: { value: "Daily" } });
     await act(() => fireEvent.click(callCreationButtonElement));
 
-    expect(firestoreSignaling.create).toBeCalledTimes(1);
+    expect(firestoreSignaling.createCall).toBeCalledTimes(1);
   });
 });
