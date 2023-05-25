@@ -1,8 +1,12 @@
 import { SyntheticEvent, useContext, useEffect, useId, useState } from "react";
+import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import FormControl from "@mui/material/FormControl";
 import NativeSelect from "@mui/material/NativeSelect";
 import Typography from "@mui/material/Typography";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
+import { visuallyHidden } from "@mui/utils";
 import { useAppDispatch, useAppSelector } from "../../state";
 import {
   retrieveAudioInputs,
@@ -89,5 +93,39 @@ function AudioMeter({ deviceId }: AudioMeterProps) {
     return () => audioPreview.stop();
   }, [audioPreview, deviceId]);
 
-  return <>{percentage}%</>;
+  return (
+    <Box
+      aria-label="Audio meter"
+      sx={{ display: "flex", alignItems: "center", mt: 2 }}
+    >
+      {percentage ? (
+        <MicIcon aria-label="Mic on" sx={{ flexShrink: 0 }} />
+      ) : (
+        <MicOffIcon aria-label="Mic off" sx={{ flexShrink: 0 }} />
+      )}
+      <Box sx={{ marginLeft: 2, position: "relative", flexGrow: 1 }}>
+        <Box sx={visuallyHidden}>{`${percentage}%`}</Box>
+        <Box
+          sx={{
+            background: (theme) => theme.palette.background.paper,
+            height: 10,
+            width: "100%",
+            borderRadius: 8,
+          }}
+        />
+        <Box
+          sx={{
+            background: (theme) => theme.palette.primary.main,
+            height: 10,
+            position: "absolute",
+            top: 0,
+            borderRadius: 8,
+          }}
+          style={{
+            width: `${percentage}%`,
+          }}
+        />
+      </Box>
+    </Box>
+  );
 }
