@@ -44,8 +44,6 @@ describe("startAudioPreview", () => {
 
   it("the start command returns a cleanup function that can stop stream tracks and closes AudioContext to free resources", async () => {
     const mockTrackStop = jest.fn();
-
-    // Override the mocked getUserMedia to return a stream with a mock track
     Object.defineProperty(global.navigator, "mediaDevices", {
       value: {
         getUserMedia: jest.fn().mockResolvedValue({
@@ -71,6 +69,7 @@ describe("startAudioPreview", () => {
       close: mockClose,
     }));
 
+    // ok, doing it
     const cleanup = await startAudioPreview(audioPreviewOptions);
 
     // manually call cleanup, desired for this particular use case.
@@ -112,6 +111,7 @@ describe("startAudioPreview", () => {
       await startAudioPreview(audioPreviewOptions);
     } catch (e: unknown) {
       expect((e as Error).message).toBe("Some error.");
+      // consequences of automatic cleanup
       expect(mockTrackStop).toHaveBeenCalled();
       expect(mockClose).toHaveBeenCalled();
     }
