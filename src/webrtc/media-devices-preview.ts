@@ -38,9 +38,8 @@ export async function startAudioPreview({
     processor.onaudioprocess = (event) => {
       try {
         const inputData = event.inputBuffer.getChannelData(0);
-        const inputDataLength = inputData.length;
         const total = inputData.reduce((acc, it) => acc + Math.abs(it), 0);
-        const rootMeanSquare = Math.sqrt(total / inputDataLength);
+        const rootMeanSquare = Math.sqrt(total / inputData.length);
         const rawPercentage = rootMeanSquare * 100;
         const unsafeGainedPercentage = rawPercentage * visualGainRate;
         const percentage =
