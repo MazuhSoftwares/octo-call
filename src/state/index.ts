@@ -8,13 +8,11 @@ import {
 import user from "./user";
 import devices from "./devices";
 import call from "./call";
-import callUser from "./callUser";
 
 const rootReducer = combineReducers({
   user,
   devices,
   call,
-  callUser,
 });
 
 export const setupAppStore = (preloadedState?: PreloadedState<RootState>) =>
