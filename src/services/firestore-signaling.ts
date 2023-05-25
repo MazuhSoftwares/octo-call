@@ -21,15 +21,17 @@ export async function create<T extends Record<string, unknown>>(
   };
 }
 
-export async function createCall(callData: Omit<Call, "uid">) {
+export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
   const batch = writeBatch(db);
 
-  const docCallRef = doc(db, "calls", uuidv4());
-  batch.set(docCallRef, { ...callData, uid: docCallRef.id });
+  const callUid = uuidv4();
+  const docCallRef = doc(db, `calls/${callUid}`);
+  batch.set(docCallRef, { ...callData, uid: callUid });
 
-  const docCallUserRef = doc(db, `calls/${docCallRef.id}/users/${uuidv4()}`);
+  const callUserUid = uuidv4();
+  const docCallUserRef = doc(db, `calls/${callUid}/users/${callUserUid}`);
   batch.set(docCallUserRef, {
-    uid: docCallUserRef.id,
+    uid: callUserUid,
     userUid: callData.hostId,
     userDisplayName: callData.hostDisplayName,
   });
@@ -38,6 +40,6 @@ export async function createCall(callData: Omit<Call, "uid">) {
 
   return {
     ...callData,
-    uid: docCallRef.id,
+    uid: callUid,
   };
 }
