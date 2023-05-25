@@ -37,9 +37,7 @@ export async function createCall(callData: Omit<Call, "uid">) {
   await batch.commit();
 
   return {
-    call: {
-      ...callData,
-      uid: docCallRef.id,
-    },
+    ...callData,
+    uid: docCallRef.id,
   };
 }

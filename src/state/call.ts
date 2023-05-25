@@ -66,16 +66,13 @@ export const createCall = createAsyncThunk(
     hostId,
     hostDisplayName,
     displayName,
-  }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">) => {
-    const newCallData = await firestoreSignaling.createCall({
+  }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">) =>
+    firestoreSignaling.createCall({
       displayName,
       hostDisplayName,
       hostId,
       participantsUids: [hostId],
-    });
-
-    return newCallData.call;
-  },
+    }),
   {
     condition: (_arg, thunkAPI) =>
       (thunkAPI.getState() as RootState).user.status === "authenticated",
