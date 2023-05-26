@@ -36,11 +36,11 @@ describe("SettingsModal", () => {
     const audioTab = getByText("Microphone");
     fireEvent.click(audioTab);
     expect(queryByText("Audio input")).toBeVisible();
-    expect(queryByText("Video input")).not.toBeVisible();
+    expect(queryByText("Video input")).toBe(null);
 
     const videoTab = getByText("Camera");
     fireEvent.click(videoTab);
-    expect(queryByText("Audio input")).not.toBeVisible();
+    expect(queryByText("Audio input")).toBe(null);
     expect(queryByText("Video input")).toBeVisible();
   });
 

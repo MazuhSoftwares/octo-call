@@ -7,6 +7,9 @@ import DialogTitle from "@mui/material/DialogTitle";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import CloseIcon from "@mui/icons-material/Close";
+import SettingsIcon from "@mui/icons-material/Settings";
+import SettingsVoiceIcon from "@mui/icons-material/SettingsVoice";
+import VideoSettingsIcon from "@mui/icons-material/VideoSettings";
 import AudioInputSelector from "../devices/AudioInputSelector";
 import VideoInputSelector from "../devices/VideoInputSelector";
 
@@ -34,7 +37,12 @@ export default function SettingsModal({ isOpen, close }: SettingsModalProps) {
   return (
     <Dialog open={isOpen} onClose={close} aria-labelledby={titleId} fullWidth>
       <Box>
-        <DialogTitle id={titleId}>Settings</DialogTitle>
+        <DialogTitle
+          id={titleId}
+          sx={{ display: "flex", alignItems: "center" }}
+        >
+          <SettingsIcon sx={{ mr: 1 }} /> Settings
+        </DialogTitle>
         <IconButton
           aria-label="Close"
           onClick={close}
@@ -52,11 +60,15 @@ export default function SettingsModal({ isOpen, close }: SettingsModalProps) {
               aria-label="Settings"
             >
               <Tab
+                icon={<SettingsVoiceIcon />}
+                iconPosition="start"
                 label="Microphone"
                 id={audioTabId}
                 aria-controls={audioTabPanelId}
               />
               <Tab
+                icon={<VideoSettingsIcon />}
+                iconPosition="start"
                 label="Camera"
                 id={videoTabId}
                 aria-controls={videoTabPanelId}
@@ -70,7 +82,7 @@ export default function SettingsModal({ isOpen, close }: SettingsModalProps) {
             aria-labelledby={audioTabId}
             sx={{ pt: 3 }}
           >
-            <AudioInputSelector />
+            {selectedTabIndex === audioTabIndex && <AudioInputSelector />}
           </Box>
           <Box
             role="tabpanel"
@@ -79,7 +91,7 @@ export default function SettingsModal({ isOpen, close }: SettingsModalProps) {
             aria-labelledby={videoTabId}
             sx={{ pt: 3 }}
           >
-            <VideoInputSelector />
+            {selectedTabIndex === videoTabIndex && <VideoInputSelector />}
           </Box>
         </Box>
       </DialogContent>
