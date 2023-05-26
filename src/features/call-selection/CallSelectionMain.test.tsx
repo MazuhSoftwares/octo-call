@@ -26,10 +26,10 @@ describe("CallSelectionMain", () => {
       },
     });
 
-    const callNameInputElement = screen.getByLabelText("Call Name");
+    const callNameInputElement = screen.getByLabelText("Create a new call");
 
     const callCreationButtonElement = screen.getByRole("button", {
-      name: "Create",
+      name: "Create call",
     });
 
     fireEvent.change(callNameInputElement, { target: { value: "Daily" } });

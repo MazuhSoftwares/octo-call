@@ -12,6 +12,7 @@ export const DARK_COLORS = {
   background: "#000", // very dark
   commonBorder: "#31385C", // between gray and blue
   inputBorder: "#6B737A", // somewhat gray, lighter than the common border
+  focusBorder: "#1A73E8", // blue
   negative: "#E41C51", // red
   text: "#D9D9D9", // white
   primary: "#124BBF", // blue
@@ -57,11 +58,29 @@ export const darkTheme = createTheme({
         },
       },
     },
+    MuiTextField: {
+      defaultProps: {
+        variant: "standard",
+        InputProps: {
+          disableUnderline: true,
+        },
+      },
+    },
     MuiInputBase: {
       styleOverrides: {
         root: {
           "&.MuiInput-root": {
+            borderRadius: 8,
             marginTop: 0,
+          },
+        },
+        input: {
+          borderRadius: 8,
+          padding: "16px 14px",
+          border: "1px solid",
+          borderColor: DARK_COLORS.inputBorder,
+          "&:focus": {
+            borderColor: DARK_COLORS.focusBorder,
           },
         },
       },
@@ -77,6 +96,10 @@ export const darkTheme = createTheme({
           borderColor: `${DARK_COLORS.inputBorder} !important`,
           padding: "16px 14px !important",
           paddingRight: "40px !important",
+          "&:focus": {
+            borderRadius: 8,
+            borderColor: `${DARK_COLORS.focusBorder} !important`,
+          },
         },
         icon: {
           color: DARK_COLORS.inputBorder,

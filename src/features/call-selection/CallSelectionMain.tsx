@@ -43,13 +43,13 @@ export default function CallSelectionMain() {
         flexDirection="column"
       >
         <Typography variant="label" component="label" htmlFor={callNameInputId}>
-          Call Name
+          Create a new call
         </Typography>
         <TextField
           required
           id={callNameInputId}
           name="callName"
-          variant="outlined"
+          placeholder="What's the meeting about?"
           fullWidth
         />
         <Button
@@ -59,7 +59,7 @@ export default function CallSelectionMain() {
           variant="contained"
           sx={{ marginTop: "25px", width: "100%" }}
         >
-          {isPending ? "Creating..." : "Create"}
+          {isPending ? "Preparing it..." : "Create call"}
         </Button>
       </Box>
     </InitialMainCard>
