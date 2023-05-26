@@ -89,7 +89,7 @@ function AudioMeter({ deviceId }: AudioMeterProps) {
 
   useEffect(() => {
     audioPreview.start(deviceId);
-    audioPreview.addOnResultListener((pct) => setPercentage(pct));
+    audioPreview.setOnResultListener((pct) => setPercentage(pct));
     return () => audioPreview.stop();
   }, [audioPreview, deviceId]);
 

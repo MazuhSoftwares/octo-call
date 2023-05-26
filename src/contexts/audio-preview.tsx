@@ -1,27 +1,19 @@
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, createContext, useCallback, useMemo, useRef } from "react";
+import type { PreviewCleanup } from "../webrtc/media-devices-preview";
 import webrtc from "../webrtc";
 
 export interface AudioPreview {
-  status: AudioPreviewStatus;
-  deviceId: string;
   start: (deviceId: string) => Promise<void>;
   stop: () => void;
-  addOnResultListener: (callback: PercentageListener) => void;
+  setOnResultListener: (callback: PercentageListener) => void;
+  setOnStatusChangeListener: (callback: StatusListener) => void;
 }
 
 export const AudioPreviewContext = createContext<AudioPreview>({
-  status: "idle",
-  deviceId: "",
   start: () => Promise.resolve(),
   stop: () => null,
-  addOnResultListener: () => null,
+  setOnResultListener: () => null,
+  setOnStatusChangeListener: () => null,
 });
 
 export type AudioPreviewStatus = "idle" | "preparing" | "running" | "error";
@@ -32,72 +24,99 @@ export interface AudioPreviewProviderProps {
 
 export type PercentageListener = (percentage: number) => void;
 
+export type StatusListener = (status: AudioPreviewStatus) => void;
+
 export function AudioPreviewProvider({ children }: AudioPreviewProviderProps) {
-  const [activeDeviceId, setActiveDeviceId] = useState<string>("");
-  const [status, setStatus] = useState<AudioPreviewStatus>("idle");
+  const deviceLockRef = useRef<DeviceLock>({
+    deviceId: NO_DEVICE_ID,
+    cleanup: NO_CLEANUP,
+  });
 
   const onResultRef = useRef<PercentageListener>(() => null);
-  const addOnResultListener = useCallback((callback: PercentageListener) => {
+  const setOnResultListener = useCallback((callback: PercentageListener) => {
     onResultRef.current = callback;
   }, []);
 
-  const cleanupRef = useRef<(() => void) | null>(null);
+  const onStatusChangeRef = useRef<StatusListener>(() => null);
+  const setOnStatusChangeListener = useCallback((callback: StatusListener) => {
+    onStatusChangeRef.current = callback;
+  }, []);
 
   const stop = useCallback(() => {
-    if (!activeDeviceId) {
+    // destructuring to primitive stuff,
+    // to prevent (race condition) changes in the middle of the function.
+    const { deviceId, cleanup } = deviceLockRef.current;
+
+    if (deviceId === NO_DEVICE_ID) {
+      console.log(
+        "Tried to stop audio preview. But will be ignored, cause no device was in preview."
+      );
       return;
     }
 
-    console.log("Stopping audio preview for:", activeDeviceId);
-
-    if (cleanupRef.current) {
-      cleanupRef.current();
+    if (cleanup === NO_CLEANUP) {
+      // probably the start function locked it,
+      // but didn't have time yet to provide the cleanup,
+      // maybe react life cycle (in strict mode?) tried too soon.
+      console.warn(
+        "Tried to stop audio preview. But will be ignored, cause no cleanup was ready for:",
+        deviceId
+      );
+      return;
     }
 
-    cleanupRef.current = null;
-    setActiveDeviceId("");
-    setStatus("idle");
+    // actual cleanup.
+    console.log("Stopping audio preview for:", deviceId);
+    cleanup();
+
+    // release the locks.
+    deviceLockRef.current = {
+      deviceId: NO_DEVICE_ID,
+      cleanup: NO_CLEANUP,
+    };
+    onStatusChangeRef.current("idle");
     onResultRef.current(0);
-  }, [activeDeviceId]);
+  }, []);
 
-  const isBusy = status !== "idle";
+  const start = useCallback(async (deviceId: string) => {
+    if (deviceId === "") {
+      console.log("Tried to preview an empty device. Ignoring it.");
+      return;
+    }
 
-  const start = useCallback(
-    async (deviceId: string) => {
-      const isNone = deviceId === "";
-      const isAlreadyHandled = activeDeviceId === deviceId;
-      if (isAlreadyHandled || isNone || isBusy) {
-        return;
-      }
+    if (deviceLockRef.current.deviceId === deviceId) {
+      console.log(
+        "Tried to preview an audio that is already being previewed. Ignoring it:",
+        deviceId
+      );
+      return;
+    }
 
-      setActiveDeviceId(deviceId);
+    console.log("Preparing to preview audio:", deviceId);
+    deviceLockRef.current.deviceId = deviceId; // already lock it.
 
-      console.log("Preparing to preview audio:", deviceId);
-
-      setStatus("preparing");
-      try {
-        cleanupRef.current = await webrtc.startAudioPreview({
-          audioInputDeviceId: deviceId,
-          onResult: onResultRef.current,
-        });
-        setStatus("running");
-      } catch (error) {
-        console.error("Error on audio preview.", error);
-        setStatus("error");
-      }
-    },
-    [isBusy, activeDeviceId]
-  );
+    onStatusChangeRef.current("preparing");
+    try {
+      deviceLockRef.current.cleanup = await webrtc.startAudioPreview({
+        audioInputDeviceId: deviceId,
+        onResult: onResultRef.current,
+      });
+      onStatusChangeRef.current("running");
+      console.log("Running.", deviceId);
+    } catch (error) {
+      console.error("Error on audio preview:", deviceId, error);
+      onStatusChangeRef.current("error");
+    }
+  }, []);
 
   const audioPreview = useMemo<AudioPreview>(
     () => ({
-      status: "idle",
-      deviceId: "",
       start,
       stop,
-      addOnResultListener,
+      setOnResultListener,
+      setOnStatusChangeListener,
     }),
-    [start, stop, addOnResultListener]
+    [start, stop, setOnResultListener, setOnStatusChangeListener]
   );
 
   return (
@@ -106,3 +125,12 @@ export function AudioPreviewProvider({ children }: AudioPreviewProviderProps) {
     </AudioPreviewContext.Provider>
   );
 }
+
+interface DeviceLock {
+  deviceId: string;
+  cleanup: PreviewCleanup;
+}
+
+const NO_DEVICE_ID = "";
+
+const NO_CLEANUP = () => null;
