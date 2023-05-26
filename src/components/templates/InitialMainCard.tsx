@@ -2,7 +2,7 @@ import { ReactNode, useState } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import homeBgPattern from "../../assets/home-bg-patternpad.jpg";
@@ -59,26 +59,32 @@ export default function InitialMainCard({
             <Typography variant="h1">Octo Call</Typography>
             {!!subtitle && <Typography variant="h2">{subtitle}</Typography>}
           </Box>
-          <Box sx={{ marginLeft: { xs: "auto", sm: "initial" }, pb: 1 }}>
+          <Box
+            sx={{
+              display: "flex",
+              marginLeft: { xs: "initial", sm: "auto" },
+              pb: 1,
+            }}
+          >
             {isAuthenticated && (
-              <Button
+              <IconButton
                 aria-label="Logout"
+                title="Logout"
                 onClick={handleLogoutClick}
                 color="error"
-                variant="outlined"
                 sx={{ mr: 1 }}
               >
-                <LogoutIcon fontSize="small" />
-              </Button>
+                <LogoutIcon />
+              </IconButton>
             )}
-            <Button
+            <IconButton
               aria-label="Settings"
+              title="Settings"
               onClick={openSettings}
               color="secondary"
-              variant="outlined"
             >
-              <SettingsIcon fontSize="small" />
-            </Button>
+              <SettingsIcon />
+            </IconButton>
           </Box>
         </Box>
         {children}

@@ -33,7 +33,8 @@ export default function AuthMain() {
         color="primary"
         variant="contained"
         startIcon={<GoogleIcon />}
-        sx={{ marginTop: "25px", width: "100%" }}
+        fullWidth
+        sx={{ marginTop: 3 }}
       >
         {isPending ? "Checking..." : "Continue with Google"}
       </Button>

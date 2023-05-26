@@ -1,10 +1,11 @@
+import { FormEvent, useId } from "react";
+import { Redirect } from "wouter";
+import get from "lodash.get";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { FormEvent, useId } from "react";
-import { Redirect } from "wouter";
-import get from "lodash.get";
+import VideoCallIcon from "@mui/icons-material/VideoCall";
 import InitialMainCard from "../../components/templates/InitialMainCard";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { createCall, selectCall } from "../../state/call";
@@ -57,7 +58,9 @@ export default function CallSelectionMain() {
           disabled={isPending}
           color="primary"
           variant="contained"
-          sx={{ marginTop: "25px", width: "100%" }}
+          startIcon={<VideoCallIcon />}
+          fullWidth
+          sx={{ marginTop: 3 }}
         >
           {isPending ? "Preparing it..." : "Create call"}
         </Button>

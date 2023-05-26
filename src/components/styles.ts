@@ -109,7 +109,6 @@ export const darkTheme = createTheme({
     MuiButton: {
       defaultProps: {
         variant: "outlined",
-        size: "small",
       },
       styleOverrides: {
         root: {
@@ -128,9 +127,6 @@ export const darkTheme = createTheme({
       },
     },
     MuiIconButton: {
-      defaultProps: {
-        size: "small",
-      },
       styleOverrides: {
         root: {
           display: "flex",
