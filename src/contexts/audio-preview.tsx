@@ -99,7 +99,7 @@ export function AudioPreviewProvider({ children }: AudioPreviewProviderProps) {
     try {
       deviceLockRef.current.cleanup = await webrtc.startAudioPreview({
         audioInputDeviceId: deviceId,
-        onResult: onResultRef.current,
+        onResult: (percentage) => onResultRef.current(percentage),
       });
       onStatusChangeRef.current("running");
       console.log("Running.", deviceId);
