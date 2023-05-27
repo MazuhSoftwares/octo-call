@@ -13,6 +13,7 @@ export async function startAudioPreview({
 }: AudioPreviewOptions): Promise<PreviewCleanup> {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: { deviceId: audioInputDeviceId },
+    video: false,
   });
 
   const audioContext = new AudioContext();
@@ -52,6 +53,32 @@ export async function startAudioPreview({
         processor.onaudioprocess = null;
       }
     };
+  } catch (error) {
+    cleanup();
+    throw error;
+  }
+
+  return cleanup;
+}
+
+export interface VideoPreviewOptions {
+  videoInputDeviceId: string;
+  onStream: (stream: MediaStream | null) => void;
+}
+
+export async function startVideoPreview({
+  videoInputDeviceId,
+  onStream,
+}: VideoPreviewOptions): Promise<PreviewCleanup> {
+  const stream = await navigator.mediaDevices.getUserMedia({
+    audio: false,
+    video: { deviceId: videoInputDeviceId },
+  });
+
+  const cleanup = () => stream.getTracks().forEach((t) => t.stop());
+
+  try {
+    onStream(stream);
   } catch (error) {
     cleanup();
     throw error;

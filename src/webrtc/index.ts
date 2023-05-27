@@ -1,9 +1,10 @@
 import { retrieveMediaInputs } from "./media-devices";
-import { startAudioPreview } from "./media-devices-preview";
+import { startAudioPreview, startVideoPreview } from "./media-devices-preview";
 
 export default {
   retrieveMediaInputs,
   startAudioPreview,
+  startVideoPreview,
 };
 
 export interface User extends UniqueEntity {

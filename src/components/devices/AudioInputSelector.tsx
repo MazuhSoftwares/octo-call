@@ -6,6 +6,7 @@ import NativeSelect from "@mui/material/NativeSelect";
 import Typography from "@mui/material/Typography";
 import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
+import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { visuallyHidden } from "@mui/utils";
 import { useAppDispatch, useAppSelector } from "../../state";
 import {
@@ -14,8 +15,7 @@ import {
   selectUserAudioId,
   setUserAudioId,
 } from "../../state/devices";
-import {
-  DevicePreviewContext,
+import DevicePreviewContext, {
   DevicePreviewProvider,
 } from "../../contexts/DevicePreviewContext";
 
@@ -63,9 +63,9 @@ export default function AudioInputSelector() {
           <Typography
             variant="caption"
             color="error"
-            sx={{ display: "block", mt: 1 }}
+            sx={{ display: "flex", mt: 1 }}
           >
-            {audioErrorMessage}
+            <ErrorOutlineIcon /> {audioErrorMessage}
           </Typography>
         )}
         {isLoading && (
@@ -88,15 +88,16 @@ function AudioMeter({ deviceId }: AudioMeterProps) {
   const [percentage, setPercentage] = useState<number>(0);
 
   useEffect(() => {
-    audioPreview.start(deviceId);
     audioPreview.setResultListener((pct: number) => setPercentage(pct));
+
+    audioPreview.start(deviceId);
     return () => audioPreview.stop();
   }, [audioPreview, deviceId]);
 
   return (
     <Box
       aria-label="Audio meter"
-      sx={{ display: "flex", alignItems: "center", mt: 2 }}
+      sx={{ display: "flex", alignItems: "center", mt: 3 }}
     >
       {percentage ? (
         <MicIcon aria-label="Mic on" sx={{ flexShrink: 0 }} />

@@ -16,6 +16,8 @@ export const DevicePreviewContext = createContext<DevicePreview<MediaType>>({
   setStatusChangeListener: () => null,
 });
 
+export default DevicePreviewContext;
+
 export type DevicePreviewStatus = "idle" | "preparing" | "running" | "error";
 
 export type ResultListener<T extends MediaType> = T extends "audio"
