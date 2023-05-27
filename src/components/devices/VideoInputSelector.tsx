@@ -167,6 +167,7 @@ function VideoMirror({ deviceId }: VideoMirrorProps) {
           sx={{
             display: "flex",
             width: "100%",
+            transform: "scale(-1, 1)",
           }}
           disablePictureInPicture
           autoPlay

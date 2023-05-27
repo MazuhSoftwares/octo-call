@@ -1,3 +1,8 @@
+import {
+  makeStandardAudioConstraints,
+  makeStandardVideoConstraints,
+} from "./media-constraints";
+
 export type PreviewCleanup = () => void;
 
 export interface AudioPreviewOptions {
@@ -12,7 +17,7 @@ export async function startAudioPreview({
   visualGainRate = 1.5,
 }: AudioPreviewOptions): Promise<PreviewCleanup> {
   const stream = await navigator.mediaDevices.getUserMedia({
-    audio: { deviceId: audioInputDeviceId },
+    audio: makeStandardAudioConstraints(audioInputDeviceId),
     video: false,
   });
 
@@ -72,7 +77,7 @@ export async function startVideoPreview({
 }: VideoPreviewOptions): Promise<PreviewCleanup> {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: false,
-    video: { deviceId: videoInputDeviceId },
+    video: makeStandardVideoConstraints(videoInputDeviceId),
   });
 
   const cleanup = () => stream.getTracks().forEach((t) => t.stop());
