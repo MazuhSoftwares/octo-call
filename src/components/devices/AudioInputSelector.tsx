@@ -15,9 +15,9 @@ import {
   setUserAudioId,
 } from "../../state/devices";
 import {
-  AudioPreviewContext,
-  AudioPreviewProvider,
-} from "../../contexts/audio-preview";
+  DevicePreviewContext,
+  DevicePreviewProvider,
+} from "../../contexts/DevicePreviewContext";
 
 export default function AudioInputSelector() {
   const selectFieldId = useId();
@@ -39,7 +39,7 @@ export default function AudioInputSelector() {
   const isLoading = audioStatus === "pending";
 
   return (
-    <AudioPreviewProvider>
+    <DevicePreviewProvider type="audio">
       <Container>
         <FormControl fullWidth>
           <Typography variant="label" component="label" htmlFor={selectFieldId}>
@@ -75,7 +75,7 @@ export default function AudioInputSelector() {
         )}
         <AudioMeter deviceId={userAudioId} />
       </Container>
-    </AudioPreviewProvider>
+    </DevicePreviewProvider>
   );
 }
 
@@ -84,12 +84,12 @@ interface AudioMeterProps {
 }
 
 function AudioMeter({ deviceId }: AudioMeterProps) {
-  const audioPreview = useContext(AudioPreviewContext);
+  const audioPreview = useContext(DevicePreviewContext);
   const [percentage, setPercentage] = useState<number>(0);
 
   useEffect(() => {
     audioPreview.start(deviceId);
-    audioPreview.setOnResultListener((pct) => setPercentage(pct));
+    audioPreview.setResultListener((pct: number) => setPercentage(pct));
     return () => audioPreview.stop();
   }, [audioPreview, deviceId]);
 

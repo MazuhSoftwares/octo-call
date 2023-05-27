@@ -30,7 +30,7 @@ describe("startAudioPreview", () => {
 
     audioPreviewOptions = {
       audioInputDeviceId: "inputDeviceId",
-      onResult: jest.fn(),
+      onPercentage: jest.fn(),
       visualGainRate: 1.5,
     };
   });
@@ -117,7 +117,7 @@ describe("startAudioPreview", () => {
     }
   });
 
-  it("calls onResult callback with a given percentage", async () => {
+  it("calls onPercentage callback with a given percentage", async () => {
     const inputData = Float32Array.from([0.5, -0.5, 0.5]);
 
     const audioProcessingEvent = {
@@ -140,18 +140,18 @@ describe("startAudioPreview", () => {
       close: jest.fn(),
     }));
 
-    const mockOnResult = jest.fn();
+    const mockOnPercentage = jest.fn();
 
     // finally, let's do it!
     await startAudioPreview({
       audioInputDeviceId: "default",
-      onResult: mockOnResult,
+      onPercentage: mockOnPercentage,
       visualGainRate: 1,
     });
 
     // Given the three 0.5 data pieces of `inputData`, its total is 1.5 and
     // its RMS is ~0.708, thus implicating in 71% percentage
     // of voice activity after calcs and ceilings.
-    expect(mockOnResult).toHaveBeenCalledWith(71);
+    expect(mockOnPercentage).toHaveBeenCalledWith(71);
   });
 });

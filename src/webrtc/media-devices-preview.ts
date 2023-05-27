@@ -2,13 +2,13 @@ export type PreviewCleanup = () => void;
 
 export interface AudioPreviewOptions {
   audioInputDeviceId: string;
-  onResult: (percentage: number) => void;
+  onPercentage: (percentage: number) => void;
   visualGainRate?: number;
 }
 
 export async function startAudioPreview({
   audioInputDeviceId,
-  onResult,
+  onPercentage,
   visualGainRate = 1.5,
 }: AudioPreviewOptions): Promise<PreviewCleanup> {
   const stream = await navigator.mediaDevices.getUserMedia({
@@ -46,7 +46,7 @@ export async function startAudioPreview({
           Math.ceil(unsafeGainedPercentage) >= 100
             ? 100
             : Math.ceil(unsafeGainedPercentage);
-        onResult(percentage);
+        onPercentage(percentage);
       } catch (error) {
         cleanup();
         processor.onaudioprocess = null;
