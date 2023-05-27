@@ -6,6 +6,7 @@ import { devicesInitialState } from "../../state/devices";
 
 jest.mock("../../webrtc", () => ({
   retrieveMediaInputs: jest.fn(),
+  startVideoPreview: jest.fn(),
 }));
 
 describe("VideoInputSelector", () => {
@@ -23,6 +24,9 @@ describe("VideoInputSelector", () => {
         label: "Webcam B (gathered from WebRTC API)",
       },
     ]);
+
+    (webrtc.startVideoPreview as jest.Mock).mockReset();
+    (webrtc.startVideoPreview as jest.Mock).mockResolvedValue(() => null);
   });
 
   it("renders", async () => {
@@ -165,5 +169,41 @@ describe("VideoInputSelector", () => {
 
     const selectEl = screen.getByRole("combobox");
     await waitFor(() => expect(selectEl).toHaveValue(""));
+  });
+
+  it("integrates with webrtc module to preview the (initial) selected device", async () => {
+    await act(() => fullRender(<VideoInputSelector />));
+
+    await waitFor(() =>
+      expect(webrtc.startVideoPreview).toHaveBeenCalledTimes(1)
+    );
+
+    const firstCall = (webrtc.startVideoPreview as jest.Mock).mock.calls[0];
+    const [arg0] = firstCall;
+    expect(arg0.videoInputDeviceId).toBe("333c");
+  });
+
+  it("integrates with webrtc module to stop a preview before selecting another", async () => {
+    const stopMock = jest.fn();
+    (webrtc.startVideoPreview as jest.Mock).mockResolvedValue(stopMock);
+
+    await act(() => fullRender(<VideoInputSelector />));
+
+    const selectEl = screen.getByRole("combobox");
+    const optionEl = screen.getByRole("option", {
+      name: "Webcam B (gathered from WebRTC API)",
+    });
+    await act(() =>
+      fireEvent.change(selectEl, {
+        target: { value: optionEl.getAttribute("value") },
+      })
+    );
+
+    expect(stopMock).toBeCalledTimes(1);
+
+    expect(webrtc.startVideoPreview).toBeCalledTimes(2);
+    const secondCall = (webrtc.startVideoPreview as jest.Mock).mock.calls[1];
+    const [arg0] = secondCall;
+    expect(arg0.videoInputDeviceId).toBe("444d");
   });
 });

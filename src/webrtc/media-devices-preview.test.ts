@@ -1,6 +1,8 @@
 import {
   startAudioPreview,
   AudioPreviewOptions,
+  startVideoPreview,
+  VideoPreviewOptions,
 } from "./media-devices-preview";
 
 describe("startAudioPreview", () => {
@@ -29,7 +31,7 @@ describe("startAudioPreview", () => {
     }));
 
     audioPreviewOptions = {
-      audioInputDeviceId: "inputDeviceId",
+      audioInputDeviceId: "audio-device-123",
       onPercentage: jest.fn(),
       visualGainRate: 1.5,
     };
@@ -42,7 +44,7 @@ describe("startAudioPreview", () => {
     expect(window.AudioContext).toHaveBeenCalledTimes(1);
   });
 
-  it("the start command returns a cleanup function that can stop stream tracks and closes AudioContext to free resources", async () => {
+  it("the start command returns a cleanup function that stops stream tracks and closes AudioContext to free resources", async () => {
     const mockTrackStop = jest.fn();
     Object.defineProperty(global.navigator, "mediaDevices", {
       value: {
@@ -81,7 +83,7 @@ describe("startAudioPreview", () => {
     expect(mockClose).toHaveBeenCalled();
   });
 
-  it("will automatically will do cleanup if something goes wrong", async () => {
+  it("will automatically do cleanup if something goes wrong", async () => {
     expect.assertions(3);
 
     const mockTrackStop = jest.fn();
@@ -153,5 +155,111 @@ describe("startAudioPreview", () => {
     // its RMS is ~0.708, thus implicating in 71% percentage
     // of voice activity after calcs and ceilings.
     expect(mockOnPercentage).toHaveBeenCalledWith(71);
+  });
+});
+
+describe("startVideoPreview", () => {
+  let videoPreviewOptions: VideoPreviewOptions;
+
+  beforeEach(() => {
+    Object.defineProperty(global.navigator, "mediaDevices", {
+      value: {
+        getUserMedia: jest.fn().mockResolvedValue({
+          getTracks: jest.fn().mockReturnValue([]),
+        }),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    videoPreviewOptions = {
+      videoInputDeviceId: "video-device-123",
+      onStream: jest.fn(),
+    };
+  });
+
+  it("starts video preview is mainly an integration of GetUserMedia", async () => {
+    await startVideoPreview(videoPreviewOptions);
+
+    expect(global.navigator.mediaDevices.getUserMedia).toHaveBeenCalledTimes(1);
+  });
+
+  it("the start command returns a cleanup function that stops stream tracks to free resources", async () => {
+    const mockTrackStop = jest.fn();
+    Object.defineProperty(global.navigator, "mediaDevices", {
+      value: {
+        getUserMedia: jest.fn().mockResolvedValue({
+          getTracks: jest.fn().mockReturnValue([
+            {
+              stop: mockTrackStop,
+            },
+          ]),
+        }),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    // ok, doing it
+    const cleanup = await startVideoPreview(videoPreviewOptions);
+
+    // manually call cleanup, desired for this particular use case.
+    expect(cleanup).toBeInstanceOf(Function);
+    cleanup();
+
+    // consequences of the manual cleanup.
+    expect(mockTrackStop).toHaveBeenCalled();
+  });
+
+  it("will automatically do cleanup if something goes wrong", async () => {
+    expect.assertions(2);
+
+    const mockTrackStop = jest.fn();
+    Object.defineProperty(global.navigator, "mediaDevices", {
+      value: {
+        getUserMedia: jest.fn().mockResolvedValue({
+          getTracks: jest.fn().mockReturnValue([
+            {
+              stop: mockTrackStop,
+            },
+          ]),
+        }),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    try {
+      await startVideoPreview({
+        ...videoPreviewOptions,
+        onStream: () => {
+          throw new Error("My own client error.");
+        },
+      });
+    } catch (error: unknown) {
+      expect((error as Error).message).toBe("My own client error.");
+      expect(mockTrackStop).toHaveBeenCalled();
+    }
+  });
+
+  it("calls stream callback with the native stream, so UI can attach it anywhere", async () => {
+    const mockStream = { test: "native stream" };
+
+    Object.defineProperty(global.navigator, "mediaDevices", {
+      value: {
+        getUserMedia: jest.fn().mockResolvedValue(mockStream),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    const mockOnStreamCb = jest.fn();
+    await startVideoPreview({
+      ...videoPreviewOptions,
+      onStream: mockOnStreamCb,
+    });
+
+    expect(mockOnStreamCb).toHaveBeenCalledTimes(1);
+    expect(mockOnStreamCb).toHaveBeenCalledWith(mockStream);
   });
 });
