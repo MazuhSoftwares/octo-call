@@ -54,6 +54,8 @@ export function DevicePreviewProvider({
     []
   );
 
+  const hasPendingCancelationRef = useRef<boolean>(false);
+
   const onStatusChangeRef = useRef<StatusListener>(() => null);
   const setStatusChangeListener = useCallback((callback: StatusListener) => {
     onStatusChangeRef.current = callback;
@@ -74,12 +76,24 @@ export function DevicePreviewProvider({
     if (cleanup === NO_CLEANUP) {
       // It means the `start` function locked it,
       // but didn't have time yet to be done and provide a valid `cleanup`.
-      // Maybe react life cycle (in strict mode?) tried too soon,
-      // so let's give up, and it'll probably try again another time.
-      console.warn(
-        "Tried to stop preview. But will be ignored, cause no cleanup was ready for:",
-        deviceId
-      );
+      // (Input devices usually have some delay to physically turn on.)
+      if (hasPendingCancelationRef.current) {
+        // This `stop` is probably already being executed as a cancelation.
+        // And yet, no `cleanup` is ready... it's tricky a bug, have fun.
+        console.error(
+          "Tried to handle preview cancelation. But still no cleanup available for:",
+          deviceId
+        );
+      } else {
+        // Let's mark for cancelation so the `start` itself will stop as soon
+        // as it ends its async ops.
+        console.log(
+          "Tried to stop preview, but no cleanup was ready. Marking for cancelation:",
+          deviceId
+        );
+      }
+
+      hasPendingCancelationRef.current = true;
       return;
     }
 
@@ -120,10 +134,19 @@ export function DevicePreviewProvider({
       }
 
       if (deviceLockRef.current.deviceId === deviceId) {
-        console.log(
-          "Tried to preview an device that is already being previewed. Ignoring it:",
-          deviceId
-        );
+        if (hasPendingCancelationRef.current) {
+          console.log(
+            "Tried to preview a device that is currently canceled. Minds change. Cleaning cancelation for:",
+            deviceId
+          );
+          hasPendingCancelationRef.current = false;
+        } else {
+          console.log(
+            "Tried to preview a device that still has a pending previewing. Ignoring it:",
+            deviceId
+          );
+        }
+
         return;
       }
 
@@ -146,13 +169,23 @@ export function DevicePreviewProvider({
           });
         }
 
-        onStatusChangeRef.current("running");
+        if (hasPendingCancelationRef.current) {
+          console.log(
+            "Preview ready but got canceled, so will be cleaned for:",
+            deviceId
+          );
+          hasPendingCancelationRef.current = false;
+          stop();
+        } else {
+          console.log("Previewing device:", deviceId);
+          onStatusChangeRef.current("running");
+        }
       } catch (error) {
         console.error("Error on device preview:", deviceId, error);
         onStatusChangeRef.current("error");
       }
     },
-    [type]
+    [type, stop]
   );
 
   const audioPreview = useMemo<DevicePreview<typeof type>>(
