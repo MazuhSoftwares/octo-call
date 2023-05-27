@@ -158,7 +158,8 @@ function VideoMirror({ deviceId }: VideoMirrorProps) {
           border: "1px solid",
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           borderColor: (theme: any) =>
-            theme.components.MuiCard.styleOverrides.root.borderColor,
+            theme?.components?.MuiCard?.styleOverrides?.root?.borderColor ||
+            "none",
         }}
       >
         <Box
