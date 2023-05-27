@@ -1,8 +1,12 @@
+import { StrictMode, useContext, useEffect } from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import VideoInputSelector from "./VideoInputSelector";
 import fullRender from "../../testing-helpers/fullRender";
 import webrtc from "../../webrtc";
 import { devicesInitialState } from "../../state/devices";
+import DevicePreviewContext, {
+  DevicePreviewProvider,
+} from "../../contexts/DevicePreviewContext";
 
 jest.mock("../../webrtc", () => ({
   retrieveMediaInputs: jest.fn(),
@@ -205,5 +209,63 @@ describe("VideoInputSelector", () => {
     const secondCall = (webrtc.startVideoPreview as jest.Mock).mock.calls[1];
     const [arg0] = secondCall;
     expect(arg0.videoInputDeviceId).toBe("444d");
+  });
+
+  it("(STRESS) it releases its resources even if it was gathered too late after unmounting", async () => {
+    // usually caused if media gathering took too long and the person closed the component before that
+
+    const mockStop = jest.fn();
+    (webrtc.startVideoPreview as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve(mockStop), 300))
+    );
+
+    const { unmount } = await act(() =>
+      fullRender(<VideoInputSelector />, { wrapper: StrictMode })
+    );
+    unmount();
+
+    expect(webrtc.startVideoPreview).toBeCalledTimes(1);
+    expect(mockStop).not.toBeCalled();
+
+    await new Promise((r) => setTimeout(r, 300));
+
+    expect(webrtc.startVideoPreview).toBeCalledTimes(1);
+    expect(mockStop).toBeCalledTimes(1);
+  });
+
+  it("(STRESS) has its Context being able to protect webrtc layer from concurrent attempts to pull resources", async () => {
+    // usually an issue caused by multiple and super quickly re-renderings
+
+    (webrtc.startVideoPreview as jest.Mock).mockImplementation(
+      () => new Promise((r) => setTimeout(r, 300))
+    );
+
+    function BadSuperComponent() {
+      return (
+        <DevicePreviewProvider type="video">
+          <BadSubComponent />
+        </DevicePreviewProvider>
+      );
+    }
+
+    function BadSubComponent() {
+      const devicePreview = useContext(DevicePreviewContext);
+
+      useEffect(() => {
+        (async () => {
+          devicePreview.start("my-cool-device-123"); // started for this device
+          devicePreview.stop(); // didnt await for the above, force cancelation handling
+          await devicePreview.start("my-cool-device-123"); // ops, resumed cancelation again
+        })();
+      }, [devicePreview]);
+
+      return <>Running.</>;
+    }
+
+    await act(() => fullRender(<BadSuperComponent />, { wrapper: StrictMode }));
+
+    // because it started and then resumed, it should be actually just a single call
+    // to prevent leaking multiple unecessary calls for the same device.
+    expect(webrtc.startVideoPreview).toBeCalledTimes(1);
   });
 });

@@ -1,3 +1,4 @@
+import { FC, ReactElement } from "react";
 import { Provider } from "react-redux";
 import { RenderOptions, RenderResult, render } from "@testing-library/react";
 import { RootState, AppStore, setupAppStore } from "../state";
@@ -12,11 +13,20 @@ interface FullRenderOptions extends Omit<RenderOptions, "queries"> {
 }
 
 export default function fullRender(
-  ui: React.ReactElement,
+  ui: ReactElement,
   options: FullRenderOptions = {}
 ): FullRenderResult {
-  const { preloadedState, ...renderOptions } = options;
+  const {
+    preloadedState,
+    wrapper: CustomWrapper = ({ children }) => children,
+    ...renderOptions
+  } = options;
   const store = setupAppStore(preloadedState);
-  const result = render(<Provider store={store}>{ui}</Provider>, renderOptions);
+  const Wrapper: FC = () => (
+    <CustomWrapper>
+      <Provider store={store}>{ui}</Provider>
+    </CustomWrapper>
+  );
+  const result = render(ui, { ...renderOptions, wrapper: Wrapper });
   return { ...result, store };
 }
