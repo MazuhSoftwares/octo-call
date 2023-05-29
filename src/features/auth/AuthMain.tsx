@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import GoogleIcon from "@mui/icons-material/Google";
-import InitialMainCard from "../../components/templates/InitialMainCard";
+import HomeTemplate from "../../components/templates/HomeTemplate";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { login, selectCurrentUser } from "../../state/user";
 
@@ -15,7 +15,7 @@ export default function AuthMain() {
   const isPending = user.status === "pending";
 
   return (
-    <InitialMainCard>
+    <HomeTemplate>
       <Typography
         sx={{
           display: { xs: "flex", sm: "block" },
@@ -38,6 +38,6 @@ export default function AuthMain() {
       >
         {isPending ? "Checking..." : "Continue with Google"}
       </Button>
-    </InitialMainCard>
+    </HomeTemplate>
   );
 }

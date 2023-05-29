@@ -5,7 +5,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
-import InitialMainCard from "../../components/templates/InitialMainCard";
+import HomeTemplate from "../../components/templates/HomeTemplate";
 import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { createCall, selectCall } from "../../state/call";
@@ -39,7 +39,7 @@ export default function CallSelectionMain() {
   }
 
   return (
-    <InitialMainCard subtitle="Create or join a call">
+    <HomeTemplate subtitle="Create or join a call">
       <Box
         component="form"
         onSubmit={onSubmit}
@@ -74,6 +74,6 @@ export default function CallSelectionMain() {
           {isPending ? "Preparing it..." : "Create call"}
         </Button>
       </Box>
-    </InitialMainCard>
+    </HomeTemplate>
   );
 }

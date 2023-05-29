@@ -10,15 +10,15 @@ import { useAppDispatch, useAppSelector } from "../../state";
 import { logout, selectIsAuthenticated } from "../../state/user";
 import SettingsModal from "../settings/SettingsModal";
 
-export interface InitialMainCardProps {
+export interface HomeTemplateProps {
   children: ReactNode;
   subtitle?: string;
 }
 
-export default function InitialMainCard({
+export default function HomeTemplate({
   children,
   subtitle,
-}: InitialMainCardProps) {
+}: HomeTemplateProps) {
   const dispatch = useAppDispatch();
   const handleLogoutClick = () => dispatch(logout());
 

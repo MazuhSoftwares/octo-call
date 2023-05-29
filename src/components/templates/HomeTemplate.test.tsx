@@ -1,20 +1,20 @@
 import "../../testing-helpers/mock-firestore-auth";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
-import InitialMainCard from "../templates/InitialMainCard";
+import HomeTemplate from "../templates/HomeTemplate";
 import fullRender from "../../testing-helpers/fullRender";
 import firestoreAuth from "../../services/firestore-auth";
 import { userInitialState } from "../../state/user";
 
-describe("InitialMainCard", () => {
+describe("HomeTemplate", () => {
   beforeEach(() => {
     (firestoreAuth.logout as jest.Mock).mockClear();
   });
 
   it("renders heading and a given content", () => {
     fullRender(
-      <InitialMainCard>
+      <HomeTemplate>
         <p>Hello World!</p>
-      </InitialMainCard>
+      </HomeTemplate>
     );
 
     expect(
@@ -25,9 +25,9 @@ describe("InitialMainCard", () => {
 
   it("also renders subtitle along with existing heading and content", () => {
     fullRender(
-      <InitialMainCard subtitle="Greetings">
+      <HomeTemplate subtitle="Greetings">
         <p>Hello World!</p>
-      </InitialMainCard>
+      </HomeTemplate>
     );
 
     expect(
@@ -41,9 +41,9 @@ describe("InitialMainCard", () => {
 
   it("can logout", async () => {
     fullRender(
-      <InitialMainCard>
+      <HomeTemplate>
         <p>Hello World!</p>
-      </InitialMainCard>,
+      </HomeTemplate>,
       {
         preloadedState: {
           user: { ...userInitialState, uid: "123", status: "authenticated" },
@@ -61,9 +61,9 @@ describe("InitialMainCard", () => {
 
   it("logout is integrated with firestore", async () => {
     fullRender(
-      <InitialMainCard>
+      <HomeTemplate>
         <p>Hello World!</p>
-      </InitialMainCard>,
+      </HomeTemplate>,
       {
         preloadedState: {
           user: { ...userInitialState, uid: "123", status: "authenticated" },
