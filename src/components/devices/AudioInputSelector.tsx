@@ -6,8 +6,9 @@ import NativeSelect from "@mui/material/NativeSelect";
 import Typography from "@mui/material/Typography";
 import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { visuallyHidden } from "@mui/utils";
+import ErrorAlert from "../basic/ErrorAlert";
+import InfoAlert from "../basic/InfoAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
 import {
   retrieveAudioInputs,
@@ -41,6 +42,10 @@ export default function AudioInputSelector() {
   return (
     <DevicePreviewProvider type="audio">
       <Container>
+        <ErrorAlert message={audioErrorMessage} />
+        {isLoading && (
+          <InfoAlert message="Checking device/browser permission... This possibly requires your manual approval." />
+        )}
         <FormControl fullWidth>
           <Typography variant="label" component="label" htmlFor={selectFieldId}>
             Audio input
@@ -59,20 +64,6 @@ export default function AudioInputSelector() {
             ))}
           </NativeSelect>
         </FormControl>
-        {audioErrorMessage && (
-          <Typography
-            variant="caption"
-            color="error"
-            sx={{ display: "flex", mt: 1 }}
-          >
-            <ErrorOutlineIcon /> {audioErrorMessage}
-          </Typography>
-        )}
-        {isLoading && (
-          <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-            Checking permission...
-          </Typography>
-        )}
         <AudioMeter deviceId={userAudioId} />
       </Container>
     </DevicePreviewProvider>

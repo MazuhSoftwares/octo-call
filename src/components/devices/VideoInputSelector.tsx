@@ -14,7 +14,8 @@ import NativeSelect from "@mui/material/NativeSelect";
 import Typography from "@mui/material/Typography";
 import PendingIcon from "@mui/icons-material/Pending";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
-import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
+import ErrorAlert from "../basic/ErrorAlert";
+import InfoAlert from "../basic/InfoAlert";
 import BlockIcon from "@mui/icons-material/Block";
 import { useAppDispatch, useAppSelector } from "../../state";
 import {
@@ -50,6 +51,10 @@ export default function VideoInputSelector() {
   return (
     <DevicePreviewProvider type="video">
       <Container>
+        {isLoading && (
+          <InfoAlert message="Checking device/browser permission... This possibly requires your manual approval." />
+        )}
+        <ErrorAlert message={videoErrorMessage} />
         <FormControl fullWidth>
           <Typography variant="label" component="label" htmlFor={selectFieldId}>
             Video input
@@ -68,20 +73,6 @@ export default function VideoInputSelector() {
             ))}
           </NativeSelect>
         </FormControl>
-        {videoErrorMessage && (
-          <Typography
-            variant="caption"
-            color="error"
-            sx={{ display: "flex", mt: 1 }}
-          >
-            <ErrorOutlineIcon /> {videoErrorMessage}
-          </Typography>
-        )}
-        {isLoading && (
-          <Typography variant="caption" sx={{ display: "block", mt: 1 }}>
-            Checking permission...
-          </Typography>
-        )}
         <VideoMirror deviceId={userVideoId} />
       </Container>
     </DevicePreviewProvider>

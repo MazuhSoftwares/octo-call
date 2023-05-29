@@ -1,30 +1,33 @@
 import { FormEvent, useId } from "react";
 import { Redirect } from "wouter";
-import get from "lodash.get";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
 import InitialMainCard from "../../components/templates/InitialMainCard";
+import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { createCall, selectCall } from "../../state/call";
-import { selectCurrentUser } from "../../state/user";
 
 export default function CallSelectionMain() {
-  const callNameInputId = useId();
-  const user = useAppSelector(selectCurrentUser);
+  const callDisplayNameInputId = useId();
   const call = useAppSelector(selectCall);
   const dispatch = useAppDispatch();
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const callName = get(event, "target.callName.value", "");
+
+    const callDisplayName = (
+      (
+        (event.target as HTMLFormElement)
+          .callDisplayName as HTMLInputElement | null
+      )?.value || ""
+    ).trim();
+
     dispatch(
       createCall({
-        hostId: user.uid,
-        hostDisplayName: user.displayName,
-        displayName: callName,
+        displayName: callDisplayName,
       })
     );
   };
@@ -43,14 +46,20 @@ export default function CallSelectionMain() {
         display="flex"
         flexDirection="column"
       >
-        <Typography variant="label" component="label" htmlFor={callNameInputId}>
+        <ErrorAlert message={call.errorMessage} />
+        <Typography
+          variant="label"
+          component="label"
+          htmlFor={callDisplayNameInputId}
+        >
           Create a new call
         </Typography>
         <TextField
-          required
-          id={callNameInputId}
-          name="callName"
+          id={callDisplayNameInputId}
+          name="callDisplayName"
           placeholder="What's the meeting about?"
+          autoComplete="off"
+          required
           fullWidth
         />
         <Button

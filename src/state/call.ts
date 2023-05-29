@@ -61,18 +61,17 @@ export const callSlice = createSlice({
 });
 
 export const createCall = createAsyncThunk(
-  "call",
-  async ({
-    hostId,
-    hostDisplayName,
-    displayName,
-  }: Pick<CallState, "hostId" | "hostDisplayName" | "displayName">) =>
-    firestoreSignaling.createCall({
+  "create-call",
+  async ({ displayName }: Pick<Call, "displayName">, thunkAPI) => {
+    const user = (thunkAPI.getState() as RootState).user;
+
+    return firestoreSignaling.createCall({
       displayName,
-      hostDisplayName,
-      hostId,
-      participantsUids: [hostId],
-    }),
+      hostDisplayName: user.displayName,
+      hostId: user.uid,
+      participantsUids: [user.uid],
+    });
+  },
   {
     condition: (_arg, thunkAPI) =>
       (thunkAPI.getState() as RootState).user.status === "authenticated",
