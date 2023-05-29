@@ -113,6 +113,7 @@ export const darkTheme = createTheme({
     MuiButton: {
       defaultProps: {
         variant: "outlined",
+        color: "secondary",
       },
       styleOverrides: {
         root: {

@@ -7,10 +7,12 @@ import MenuItem from "@mui/material/MenuItem";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HelpIcon from "@mui/icons-material/Help";
+import PeopleIcon from "@mui/icons-material/People";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { selectCallDisplayName } from "../../state/call";
 import { getThemedColor } from "../styles";
 import { logout, selectCurrentUser } from "../../state/user";
+import ParticipantsModal from "../participants/ParticipantsModal";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -83,12 +85,12 @@ function CallHeader() {
       </Box>
       <Box>
         <Button
+          title="More user options"
           id={profileBtnId}
           aria-controls={isProfileMenuOpen ? profileMenuId : undefined}
           aria-haspopup="true"
           aria-expanded={isProfileMenuOpen ? "true" : undefined}
           variant="outlined"
-          color="secondary"
           size="large"
           endIcon={<MoreVertIcon fontSize="large" />}
           onClick={handleClick}
@@ -125,6 +127,10 @@ function CallMain({ children }: { children: ReactNode }) {
 }
 
 function CallFooter() {
+  const [isParticipantsOpen, setParticipantsOpen] = useState(false);
+  const openParticipants = () => setParticipantsOpen(true);
+  const closeParticipants = () => setParticipantsOpen(false);
+
   return (
     <Box
       component="footer"
@@ -139,9 +145,23 @@ function CallFooter() {
         borderColor: getThemedColor("commonBorder"),
       }}
     >
-      <Box>Participants.</Box>
+      <Box>
+        <Button
+          aria-label="Participants"
+          title="Participants"
+          onClick={openParticipants}
+          startIcon={<PeopleIcon />}
+        >
+          3
+        </Button>
+      </Box>
       <Box>A/V Controls.</Box>
       <Box>Leave.</Box>
+
+      <ParticipantsModal
+        isOpen={isParticipantsOpen}
+        close={closeParticipants}
+      />
     </Box>
   );
 }

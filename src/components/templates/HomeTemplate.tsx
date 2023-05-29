@@ -81,7 +81,6 @@ export default function HomeTemplate({
               aria-label="Settings"
               title="Settings"
               onClick={openSettings}
-              color="secondary"
             >
               <SettingsIcon />
             </IconButton>
