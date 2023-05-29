@@ -6,7 +6,11 @@ declare module "@mui/material/Typography" {
   }
 }
 
-export const DARK_COLORS = {
+export function getThemedColor(key: keyof typeof DARK_COLORS): string {
+  return DARK_COLORS[key] || "none";
+}
+
+const DARK_COLORS = {
   foreground: "#161929", // not so dark
   middleground: "#08090F", // reasonable dark
   background: "#000", // very dark

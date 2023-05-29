@@ -1,7 +1,9 @@
+import CallTemplate from "../../components/templates/CallTemplate";
+
 export default function P2PCallMain() {
   return (
-    <main>
+    <CallTemplate>
       <p>Imagine a P2P call happening here.</p>
-    </main>
+    </CallTemplate>
   );
 }

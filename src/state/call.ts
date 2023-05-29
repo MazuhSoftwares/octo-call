@@ -80,4 +80,7 @@ export const createCall = createAsyncThunk(
 
 export const selectCall = (state: RootState) => state.call;
 
+export const selectCallDisplayName = (state: RootState) =>
+  state.call.displayName;
+
 export default callSlice.reducer;
