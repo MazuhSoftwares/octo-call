@@ -35,7 +35,7 @@ export default function DialogModal({
               {icon}
             </Box>
           )}
-          {title}
+          <Box component="span">{title}</Box>
         </DialogTitle>
         <IconButton
           aria-label="Close"

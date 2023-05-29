@@ -1,6 +1,8 @@
 import { ReactNode, useId, useState } from "react";
+import { visuallyHidden } from "@mui/utils";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
@@ -8,6 +10,10 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HelpIcon from "@mui/icons-material/Help";
 import PeopleIcon from "@mui/icons-material/People";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
+import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { selectCallDisplayName } from "../../state/call";
 import { getThemedColor } from "../styles";
@@ -131,6 +137,12 @@ function CallFooter() {
   const openParticipants = () => setParticipantsOpen(true);
   const closeParticipants = () => setParticipantsOpen(false);
 
+  const [isAudioEnabled, setAudioEnabled] = useState(true);
+  const handleToggleMicClick = () => setAudioEnabled((current) => !current);
+
+  const [isVideoEnabled, setVideoEnabled] = useState(false);
+  const handleToggleCamClick = () => setVideoEnabled((current) => !current);
+
   return (
     <Box
       component="footer"
@@ -150,12 +162,55 @@ function CallFooter() {
           aria-label="Participants"
           title="Participants"
           onClick={openParticipants}
-          startIcon={<PeopleIcon />}
+          startIcon={<PeopleIcon fontSize="medium" />}
+          size="large"
         >
           3
         </Button>
       </Box>
-      <Box>A/V Controls.</Box>
+
+      <Box sx={{ display: "flex" }}>
+        <IconButton
+          aria-label="Toggle microphone"
+          title="Toggle microphone"
+          onClick={handleToggleMicClick}
+          size="large"
+          color={isAudioEnabled ? "info" : "error"}
+          sx={{ mr: 1 }}
+        >
+          {isAudioEnabled ? (
+            <>
+              <Box sx={visuallyHidden}>Microphone is on.</Box>
+              <MicIcon fontSize="medium" />
+            </>
+          ) : (
+            <>
+              <Box sx={visuallyHidden}>Microphone is off.</Box>
+              <MicOffIcon fontSize="medium" />
+            </>
+          )}
+        </IconButton>
+        <IconButton
+          aria-label="Toggle camera"
+          title="Toggle camera"
+          onClick={handleToggleCamClick}
+          size="large"
+          color={isVideoEnabled ? "info" : "error"}
+        >
+          {isVideoEnabled ? (
+            <>
+              <Box sx={visuallyHidden}>Camera is on.</Box>
+              <VideocamIcon fontSize="medium" />
+            </>
+          ) : (
+            <>
+              <Box sx={visuallyHidden}>Camera is off.</Box>
+              <VideocamOffIcon fontSize="medium" />
+            </>
+          )}
+        </IconButton>
+      </Box>
+
       <Box>Leave.</Box>
 
       <ParticipantsModal
