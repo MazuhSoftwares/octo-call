@@ -45,7 +45,7 @@ export default function CallTemplate({ children }: CallTemplateProps) {
         boxSizing: "border-box",
         width: "100vw",
         height: "100vh",
-        overflow: "hidden",
+        // overflow: "hidden", // TODO: uncoment after experiments
       }}
     >
       <CallHeader />
