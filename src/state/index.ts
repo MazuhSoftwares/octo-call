@@ -15,7 +15,9 @@ const rootReducer = combineReducers({
   call,
 });
 
-export const setupAppStore = (preloadedState?: PreloadedState<RootState>) =>
+export type PreloadedAppState = PreloadedState<RootState>;
+
+export const setupAppStore = (preloadedState?: PreloadedAppState) =>
   configureStore({
     reducer: rootReducer,
     preloadedState,
