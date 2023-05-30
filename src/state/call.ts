@@ -57,6 +57,16 @@ export const callSlice = createSlice({
       state.status = "error";
       state.errorMessage = action.error.message ?? "Unknown error.";
     });
+
+    builder.addCase(leaveCall.fulfilled, (state) => {
+      state.uid = "";
+      state.displayName = "";
+      state.hostId = "";
+      state.hostDisplayName = "";
+      state.participantsUids = [];
+      state.status = "idle";
+      state.errorMessage = "";
+    });
   },
 });
 
@@ -78,9 +88,16 @@ export const createCall = createAsyncThunk(
   }
 );
 
+export const leaveCall = createAsyncThunk("leave-call", async () => {
+  return true; // TODO
+});
+
 export const selectCall = (state: RootState) => state.call;
 
 export const selectCallDisplayName = (state: RootState) =>
   state.call.displayName;
+
+export const selectHasLeftCall = (state: RootState) =>
+  state.call.status === "idle";
 
 export default callSlice.reducer;

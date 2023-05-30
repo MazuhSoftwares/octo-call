@@ -14,17 +14,29 @@ import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
+import CallEndIcon from "@mui/icons-material/CallEnd";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { selectCallDisplayName } from "../../state/call";
+import {
+  leaveCall,
+  selectCallDisplayName,
+  selectHasLeftCall,
+} from "../../state/call";
 import { getThemedColor } from "../styles";
 import { logout, selectCurrentUser } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
+import { Redirect } from "wouter";
 
 export interface CallTemplateProps {
   children: ReactNode;
 }
 
 export default function CallTemplate({ children }: CallTemplateProps) {
+  const hasLeftCall = useAppSelector(selectHasLeftCall);
+
+  if (hasLeftCall) {
+    return <Redirect to="/" />;
+  }
+
   return (
     <Box
       sx={{
@@ -133,6 +145,8 @@ function CallMain({ children }: { children: ReactNode }) {
 }
 
 function CallFooter() {
+  const dispatch = useAppDispatch();
+
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
   const closeParticipants = () => setParticipantsOpen(false);
@@ -142,6 +156,8 @@ function CallFooter() {
 
   const [isVideoEnabled, setVideoEnabled] = useState(false);
   const handleToggleCamClick = () => setVideoEnabled((current) => !current);
+
+  const handleLeaveClick = () => dispatch(leaveCall());
 
   return (
     <Box
@@ -157,7 +173,7 @@ function CallFooter() {
         borderColor: getThemedColor("commonBorder"),
       }}
     >
-      <Box>
+      <Box sx={{ display: "flex" }}>
         <Button
           aria-label="Participants"
           title="Participants"
@@ -211,7 +227,16 @@ function CallFooter() {
         </IconButton>
       </Box>
 
-      <Box>Leave.</Box>
+      <Box sx={{ display: "flex" }}>
+        <Button
+          onClick={handleLeaveClick}
+          startIcon={<CallEndIcon fontSize="medium" />}
+          size="large"
+          color="error"
+        >
+          Leave this call
+        </Button>
+      </Box>
 
       <ParticipantsModal
         isOpen={isParticipantsOpen}
