@@ -29,20 +29,24 @@ export default function P2PCallMain() {
   let newestCall = await p2p.makeP2PCall({
     audio: false,
     video: true,
-    // onLocalStream: () => console.warn("Newest local track, ignoring."),
     onLocalStream: (stream) => (nLocal.srcObject = stream),
-    // onRemoteStream: () => console.warn("Newest remote track, ignoring."),
     onRemoteStream: (stream) => (nRemote.srcObject = stream),
+    onIceCandidate: (candidate) => {
+      console.log("Sending candidate from newest to oldest.");
+      p2p.handleIceCandidate(oldestCall, candidate);
+    },
   });
   (window as any).newestCall = newestCall;
 
   let oldestCall = await p2p.makeP2PCall({
     audio: false,
     video: true,
-    // onLocalStream: () => console.warn("Oldest local track, ignoring."),
     onLocalStream: (stream) => (oLocal.srcObject = stream),
-    // onRemoteStream: () => console.warn("Oldest remote track, ignoring."),
     onRemoteStream: (stream) => (oRemote.srcObject = stream),
+    onIceCandidate: (candidate) => {
+      console.log("Sending candidate from oldest to newest.");
+      p2p.handleIceCandidate(newestCall, candidate);
+    },
   });
   (window as any).oldestCall = oldestCall;
 
@@ -69,6 +73,7 @@ export default function P2PCallMain() {
   );
 
   console.log("Ok.");
+
   (window as any).experimentStop = () => {
     newestCall.stop();
     oldestCall.stop();

@@ -37,6 +37,11 @@ Javascript Session Establishment Protocol (JSEP) flow:
 
 At the end, both sides will have its own SDP equivalent pair.
 
+There's also an important ICE trickling process happening thru the signaling,
+omitted in the flow above, which is, accordingly to MDN, the "process of
+continuing to send candidates after the initial offer or answer has already
+been sent to the other peer."
+
 */
 
 import { makeStandardAudioConstraints } from "./media-constraints";
@@ -46,6 +51,7 @@ export interface P2PCallOptions {
   video?: string | boolean;
   onLocalStream?: (localStream: MediaStream) => void;
   onRemoteStream?: (remoteStream: MediaStream) => void;
+  onIceCandidate?: (iceCandidate: RTCIceCandidate) => void;
 }
 
 export interface P2PCall {
@@ -77,9 +83,9 @@ export async function makeP2PCall(options: P2PCallOptions): Promise<P2PCall> {
     }
 
     connection.addEventListener("track", (event) => {
-      if (event.streams.length > 1) {
+      if (event.streams.length !== 1) {
         console.warn(
-          "Got more than one remote track, is it a programming error?",
+          "Unusual stream quantity found in track event:",
           event.streams.length
         );
       }
@@ -95,8 +101,17 @@ export async function makeP2PCall(options: P2PCallOptions): Promise<P2PCall> {
       console.warn("Not implemented, on iceconnectionstatechange", event);
     });
 
-    connection.addEventListener("icecandidate", (event) => {
-      console.warn("Not implemented, on icecandidate", event);
+    connection.addEventListener("icecandidate", async (event) => {
+      if (!event.candidate) {
+        console.log("Finished ICE gathering.");
+        return;
+      }
+
+      console.log("ICE candidate:", event.candidate);
+
+      if (options.onIceCandidate) {
+        options.onIceCandidate(event.candidate);
+      }
     });
   } catch (error) {
     stop();
@@ -147,4 +162,12 @@ export async function handleOldestPeerAction(
   };
   await call.connection.setRemoteDescription(oldestPeerAnswer);
   return { ...call, oldestPeerAnswerSDP: oldestPeerAnswer.sdp };
+}
+
+export async function handleIceCandidate(
+  call: P2PCall,
+  candidate: RTCIceCandidate
+): Promise<P2PCall> {
+  call.connection.addIceCandidate(candidate);
+  return call;
 }
