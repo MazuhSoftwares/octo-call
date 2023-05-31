@@ -1,4 +1,12 @@
-import { addDoc, collection, doc, writeBatch } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  writeBatch,
+} from "firebase/firestore";
+import type { DocumentData } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./firestore-connection";
 import type { Call, CallP2PDescription, CallUser } from "../webrtc";
@@ -65,5 +73,20 @@ export function listenCallP2PDescriptions(
     callUid,
     listener
   );
-  // TODO: some onSnapshot magic, only call listener if the user is participating.
+}
+
+// TODO: some onSnapshot magic, only call listener if the user is participating.
+
+export function listenCallUsers(
+  callUid: string,
+  callback: (params: CallUser[]) => void
+) {
+  const q = query(collection(db, `calls/${callUid}/users`));
+  return onSnapshot(q, (querySnapshot) => {
+    const callUsers: CallUser[] = [];
+    querySnapshot.forEach((doc: DocumentData) => {
+      callUsers.push(doc.data() as CallUser);
+    });
+    callback(callUsers);
+  });
 }
