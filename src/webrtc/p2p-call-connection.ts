@@ -4,7 +4,7 @@ Javascript Session Establishment Protocol (JSEP), let's follow this algorithm:
 
 +----------+                              +----------+ 
 |          | Create/sets local Offer      |          | Newest must:
-|          | ---+                         |          | `doNewestPeerAction`
+|          | ---+                         |          | `doNewestPeerOffer`
 |          |    |                         |          |
 |          | <--+                         |          |
 |          |                              |          |
@@ -14,13 +14,13 @@ Javascript Session Establishment Protocol (JSEP), let's follow this algorithm:
 |          |                              |          |
 |          |                              |          | 
 |  Newest  |            Sets remote Offer |  Oldest  | Oldest must:
-|   Peer   |                         +--- |   Peer   | `handleNewestPeerAction`
+|   Peer   |                         +--- |   Peer   | `handleNewestPeerOffer`
 |          |                         |    |          |
 |          |                         +--> |          |
 |          |                              |          |
 |          |                              |          | 
 |          |    Creates/sets local Answer |          | Oldest must:
-|          |                         +--- |          | `doOldestPeerAction`
+|          |                         +--- |          | `doOldestPeerAnswer`
 |          |                         |    |          |
 |          |                         +--> |          |
 |          |                              |          |
@@ -30,7 +30,7 @@ Javascript Session Establishment Protocol (JSEP), let's follow this algorithm:
 |          |                              |          |
 |          |                              |          | 
 |          | Sets remote Answer           |          | Newest must:
-|          | ---+                         |          | `handleOldestPeerAction`
+|          | ---+                         |          | `handleOldestPeerAnswer`
 |          |    |                         |          |
 |          | <--+                         |          |
 +----------+                              +----------+
