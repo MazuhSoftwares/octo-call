@@ -1,36 +1,23 @@
-import { useEffect, forwardRef, RefObject } from "react";
-import Box from "@mui/material/Box";
+import { useEffect, forwardRef, RefObject, HTMLProps } from "react";
+import Box, { BoxProps } from "@mui/material/Box";
 import { getThemedColor } from "../styles";
+import webrtc from "../../webrtc";
 
-export interface VideoProps {
-  "aria-label": string;
-  id?: string;
+export interface VideoProps extends HTMLProps<HTMLVideoElement> {
+  wrapperBoxProps?: BoxProps;
 }
 
 export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
   (props, ref) => {
+    const { wrapperBoxProps = {}, ...videoProps } = props;
     const videoRef = ref as RefObject<HTMLVideoElement>;
 
     useEffect(() => {
-      if (!videoRef) {
-        console.error(
-          "Programming error, there is a Video component without ref."
-        );
-        return;
-      }
-
-      if (!videoRef.current) {
-        console.error(
-          "Unavailable video element while handling Video component setup effect."
-        );
-        return;
-      }
-
-      videoRef.current.muted = true;
+      webrtc.domHelpers.initVideoElement(videoRef.current as HTMLVideoElement);
     }, [videoRef]);
 
     return (
-      <Box aria-label={props["aria-label"]} sx={{ mt: 3 }}>
+      <Box {...wrapperBoxProps}>
         <Box
           sx={{
             position: "relative",
@@ -41,16 +28,10 @@ export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
           }}
         >
           <Box
-            id={props.id}
+            {...videoProps}
             component="video"
             ref={videoRef}
-            sx={{
-              display: "flex",
-              width: "100%",
-            }}
-            disablePictureInPicture
-            autoPlay
-            playsInline
+            sx={{ display: "flex", width: "100%" }}
           />
         </Box>
       </Box>

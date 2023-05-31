@@ -33,12 +33,14 @@ export default function P2PCallMain() {
   // oldest participant
 
   const oldestCall = webrtc.makeP2PCallConnection({
-    audio: false,
+    audio: true,
     video: true,
     isLocalPeerTheOfferingNewest: false,
     outgoingSignaling: {
       onLocalJsepAction: async (localJsep) => {
         console.log("Sending jsep from oldest to newest.", localJsep);
+        // let's pretend it was sent elsewhere
+
         // and let's pretend it came magically here from the network on the other side:
         newestCall.incomingSignaling.handleRemoteJsepAction(localJsep);
       },
@@ -47,6 +49,8 @@ export default function P2PCallMain() {
           "Sending candidate from oldest to newest.",
           localIceCandidate
         );
+        // let's pretend it was sent elsewhere
+
         // and let's pretend it came magically here from the network on the other side:
         newestCall.incomingSignaling.handleRemoteIceCandidate(
           localIceCandidate
@@ -54,18 +58,22 @@ export default function P2PCallMain() {
       },
     },
   });
-  oldestCall.onLocalStream = (stream) => (oLocal.srcObject = stream);
-  oldestCall.onRemoteStream = (stream) => (oRemote.srcObject = stream);
+  oldestCall.onLocalStream = (stream) =>
+    webrtc.domHelpers.attachLocalStream(oLocal, stream);
+  oldestCall.onRemoteStream = (stream) =>
+    webrtc.domHelpers.attachRemoteStream(oRemote, stream);
 
   // newest participant
 
   const newestCall = webrtc.makeP2PCallConnection({
-    audio: false,
+    audio: true,
     video: true,
     isLocalPeerTheOfferingNewest: true,
     outgoingSignaling: {
       onLocalJsepAction: async (localJsep) => {
         console.log("Sending jsep from newest to oldest.", localJsep);
+        // let's pretend it was sent elsewhere
+
         // and let's pretend it came magically here from the network on the other side:
         oldestCall.incomingSignaling.handleRemoteJsepAction(localJsep);
       },
@@ -74,6 +82,8 @@ export default function P2PCallMain() {
           "Sending candidate from newest to oldest.",
           localIceCandidate
         );
+        // let's pretend it was sent elsewhere
+
         // and let's pretend it came magically here from the network on the other side:
         oldestCall.incomingSignaling.handleRemoteIceCandidate(
           localIceCandidate
@@ -81,8 +91,10 @@ export default function P2PCallMain() {
       },
     },
   });
-  newestCall.onLocalStream = (stream) => (nLocal.srcObject = stream);
-  newestCall.onRemoteStream = (stream) => (nRemote.srcObject = stream);
+  newestCall.onLocalStream = (stream) =>
+    webrtc.domHelpers.attachLocalStream(nLocal, stream);
+  newestCall.onRemoteStream = (stream) =>
+    webrtc.domHelpers.attachRemoteStream(nRemote, stream);
 
   // let's do it.
 

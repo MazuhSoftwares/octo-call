@@ -1,3 +1,4 @@
+import * as domHelpers from "./dom-helpers";
 import { retrieveMediaInputs } from "./media-devices";
 import { startAudioPreview, startVideoPreview } from "./media-devices-preview";
 import { makeP2PCallConnection } from "./p2p-call-connection";
@@ -7,6 +8,7 @@ export type * from "./media-devices-preview";
 export type * from "./p2p-call-connection";
 
 export default {
+  domHelpers,
   retrieveMediaInputs,
   startAudioPreview,
   startVideoPreview,
