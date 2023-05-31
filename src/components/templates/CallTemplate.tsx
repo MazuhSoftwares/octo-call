@@ -1,4 +1,4 @@
-import { ReactNode, useId, useState } from "react";
+import { ReactNode, useContext, useId, useState } from "react";
 import { visuallyHidden } from "@mui/utils";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
@@ -25,6 +25,9 @@ import { getThemedColor } from "../styles";
 import { logout, selectCurrentUser } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
 import { Redirect } from "wouter";
+import CallGuestsContext, {
+  CallGuestsProvider,
+} from "../../contexts/CallGuestsContext";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -38,20 +41,22 @@ export default function CallTemplate({ children }: CallTemplateProps) {
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        boxSizing: "border-box",
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
-      <CallHeader />
-      <CallMain>{children}</CallMain>
-      <CallFooter />
-    </Box>
+    <CallGuestsProvider>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          boxSizing: "border-box",
+          width: "100vw",
+          height: "100vh",
+          overflow: "hidden",
+        }}
+      >
+        <CallHeader />
+        <CallMain>{children}</CallMain>
+        <CallFooter />
+      </Box>
+    </CallGuestsProvider>
   );
 }
 
@@ -147,6 +152,8 @@ function CallMain({ children }: { children: ReactNode }) {
 function CallFooter() {
   const dispatch = useAppDispatch();
 
+  const callGuestsContext = useContext(CallGuestsContext);
+
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
   const closeParticipants = () => setParticipantsOpen(false);
@@ -158,6 +165,8 @@ function CallFooter() {
   const handleToggleCamClick = () => setVideoEnabled((current) => !current);
 
   const handleLeaveClick = () => dispatch(leaveCall());
+
+  const numberOfParticipants = callGuestsContext.participants.length;
 
   return (
     <Box
@@ -181,7 +190,7 @@ function CallFooter() {
           startIcon={<PeopleIcon fontSize="medium" />}
           size="large"
         >
-          3
+          {numberOfParticipants}
         </Button>
       </Box>
 
