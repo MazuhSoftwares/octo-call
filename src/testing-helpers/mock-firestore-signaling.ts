@@ -15,4 +15,5 @@ jest.mock("../services/firestore-signaling.ts", () => ({
       participantsUids: ["5g6h7j"],
     },
   }),
+  listenCallUsers: jest.fn().mockReturnValue(jest.fn()),
 }));
