@@ -5,11 +5,12 @@ import webrtc from "../../webrtc";
 
 export interface VideoProps extends HTMLProps<HTMLVideoElement> {
   wrapperBoxProps?: BoxProps;
+  sx?: BoxProps["sx"];
 }
 
 export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
   (props, ref) => {
-    const { wrapperBoxProps = {}, ...videoProps } = props;
+    const { wrapperBoxProps = {}, sx = {}, ...videoProps } = props;
     const videoRef = ref as RefObject<HTMLVideoElement>;
 
     useEffect(() => {
@@ -31,7 +32,7 @@ export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
             {...videoProps}
             component="video"
             ref={videoRef}
-            sx={{ display: "flex", width: "100%" }}
+            sx={{ ...sx, display: "flex", width: "100%" }}
           />
         </Box>
       </Box>

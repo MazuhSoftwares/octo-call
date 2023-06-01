@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import Box from "@mui/material/Box";
 import CallTemplate from "../../components/templates/CallTemplate";
 import Video from "../../components/basic/Video";
 import webrtc from "../../webrtc";
@@ -12,10 +13,38 @@ export default function P2PCallMain() {
   return (
     <CallTemplate>
       <p>Imagine a P2P call happening here.</p>
-      <Video aria-label="Oldest" id="o-local" ref={cRef} />
-      <Video aria-label="Oldest" id="o-remote" ref={dRef} />
-      <Video aria-label="Newest" id="n-local" ref={aRef} />
-      <Video aria-label="Newest" id="n-remote" ref={bRef} />
+      <p>
+        Using Console Inspector, type <code>experimentStart()</code>. Open{" "}
+        <code>chrome://webrtc-internals/</code> to see 2 calls in place. Then
+        finish it with <code>experimentStop()</code> to observe these calls
+        vanishing.
+      </p>
+      <Box sx={{ display: "flex" }}>
+        <Video
+          title="Oldest local"
+          id="o-local"
+          ref={cRef}
+          sx={{ maxWidth: "300px" }}
+        />
+        <Video
+          title="Oldest remote"
+          id="o-remote"
+          ref={dRef}
+          sx={{ maxWidth: "300px" }}
+        />
+        <Video
+          title="Newest local"
+          id="n-local"
+          ref={aRef}
+          sx={{ maxWidth: "300px" }}
+        />
+        <Video
+          title="Newest remote"
+          id="n-remote"
+          ref={bRef}
+          sx={{ maxWidth: "300px" }}
+        />
+      </Box>
     </CallTemplate>
   );
 }
