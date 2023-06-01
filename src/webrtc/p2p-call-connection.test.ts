@@ -11,7 +11,10 @@ import {
   handleNewestPeerOffer,
   handleOldestPeerAnswer,
   handleRemoteIceCandidate,
+  makeP2PCallConnection,
 } from "./p2p-call-connection";
+
+jest.mock("uuid", () => ({ v4: jest.fn(() => "random-123-uuid-321-abcd") }));
 
 describe("ICE trickling", () => {
   const mockIceCandidate = {
@@ -271,5 +274,150 @@ describe("Media gathering for RTC connection", () => {
     expect(mockTracks[0].stop).toHaveBeenCalledTimes(1);
     expect(mockTracks[1].stop).toHaveBeenCalledTimes(1);
     expect(mockP2PCall.onLocalStream).toHaveBeenCalledWith(null);
+  });
+});
+
+describe("makeP2PCallConnection", () => {
+  let mockConnection: RTCPeerConnection;
+  let mockOptions: P2PCallConnectionOptions;
+  let mockGetUserMedia: typeof global.navigator.mediaDevices.getUserMedia;
+  let mockStream: MediaStream;
+  let mockTracks: MediaStreamTrack[];
+
+  beforeEach(() => {
+    mockOptions = {
+      audio: true,
+      video: true,
+      isLocalPeerTheOfferingNewest: false,
+      outgoingSignaling: {
+        onLocalJsepAction: jest.fn(),
+        onLocalIceCandidate: jest.fn(),
+      },
+    };
+
+    mockTracks = [
+      {
+        kind: "audio",
+        stop: jest.fn(),
+      },
+      {
+        kind: "video",
+        stop: jest.fn(),
+      },
+    ] as unknown as MediaStreamTrack[];
+
+    mockStream = {
+      getTracks: jest.fn().mockReturnValue(mockTracks),
+    } as unknown as MediaStream;
+
+    Object.defineProperty(global.navigator, "mediaDevices", {
+      value: {
+        getUserMedia: jest.fn().mockResolvedValue(mockStream),
+      },
+      writable: true,
+      configurable: true,
+    });
+
+    mockGetUserMedia = global.navigator.mediaDevices.getUserMedia;
+
+    mockConnection = {
+      addIceCandidate: jest.fn(),
+      createOffer: jest.fn().mockResolvedValue({
+        type: "offer",
+        sdp: "mock SDP",
+      }),
+      createAnswer: jest.fn().mockResolvedValue({
+        type: "answer",
+        sdp: "mock SDP",
+      }),
+      setLocalDescription: jest.fn(),
+      setRemoteDescription: jest.fn(),
+      addEventListener: jest.fn(),
+      addTrack: jest.fn(),
+      close: jest.fn(),
+    } as unknown as RTCPeerConnection;
+
+    global.RTCPeerConnection = jest
+      .fn()
+      .mockImplementation(() => mockConnection) as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  });
+
+  test("correctly initializes it with unique identifier, RTC peer connection and preserved options", () => {
+    const p2pCall = makeP2PCallConnection(mockOptions);
+
+    expect(p2pCall.uuid).toEqual("random-123-uuid-321-abcd");
+    expect(p2pCall.options).toEqual(mockOptions);
+    expect(p2pCall.connection).toBe(mockConnection);
+  });
+
+  test("starting as newest peer who begins by offer, indeed do the offer", async () => {
+    const p2pCall = makeP2PCallConnection({
+      ...mockOptions,
+      isLocalPeerTheOfferingNewest: true,
+    });
+    await p2pCall.start();
+    expect(mockGetUserMedia).toBeCalled();
+    expect(mockConnection.createOffer).toBeCalled();
+  });
+
+  test("starting as oldest peer who doest not begin the interaction, dont call offer nor answer for now", async () => {
+    const p2pCall = makeP2PCallConnection({
+      ...mockOptions,
+      isLocalPeerTheOfferingNewest: false,
+    });
+    await p2pCall.start();
+    expect(mockGetUserMedia).toBeCalledTimes(1);
+    expect(mockConnection.createOffer).not.toBeCalled();
+    expect(mockConnection.createAnswer).not.toBeCalled();
+  });
+
+  test("stopping will close the connection and destroy the local media", async () => {
+    const p2pCall = makeP2PCallConnection(mockOptions);
+    await p2pCall.start();
+    p2pCall.stop();
+
+    expect(p2pCall.connection.close).toHaveBeenCalled();
+    expect(mockTracks[0].stop).toBeCalledTimes(1);
+  });
+
+  test("(STRESS) the start can be aborted", async () => {
+    (mockGetUserMedia as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve(mockStream), 300))
+    );
+
+    const p2pCall = makeP2PCallConnection(mockOptions);
+
+    p2pCall.start(); // doesnt await
+    p2pCall.stop(); // premature stop, ignored but marked for lazy run
+    expect(p2pCall.connection.close).not.toHaveBeenCalled();
+    expect(mockTracks[0].stop).not.toHaveBeenCalled();
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    // now lazily executed the command stop
+    expect(p2pCall.connection.close).toHaveBeenCalled();
+    expect(mockTracks[0].stop).toHaveBeenCalled();
+  });
+
+  test("(STRESS) the start abortion can be resumed, and not duplicating startings", async () => {
+    (mockGetUserMedia as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => setTimeout(() => resolve(mockStream), 300))
+    );
+
+    const p2pCall = makeP2PCallConnection({
+      ...mockOptions,
+      isLocalPeerTheOfferingNewest: true,
+    });
+
+    p2pCall.start(); // doesnt await
+    p2pCall.stop(); // premature stop, ignored but marked for lazy run
+    p2pCall.start(); // oh, wait, forget the canceling
+
+    await new Promise((resolve) => setTimeout(resolve, 2 * 300));
+    // did not perform the stop
+    expect(p2pCall.connection.close).not.toHaveBeenCalled();
+    expect(mockTracks[0].stop).not.toHaveBeenCalled();
+    // and finished the start, but equivalent as just 1 call, ignoring duplicated startings
+    expect(mockGetUserMedia).toBeCalledTimes(1);
+    expect(mockConnection.createOffer).toBeCalledTimes(1);
   });
 });
