@@ -1,4 +1,5 @@
 import {
+  QuerySnapshot,
   addDoc,
   collection,
   doc,

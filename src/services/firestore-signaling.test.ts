@@ -1,13 +1,16 @@
 import { createCall } from "./firestore-signaling";
 import { v4 as uuidv4 } from "uuid";
 
-import { doc, writeBatch } from "firebase/firestore";
+import { doc, writeBatch, onSnapshot } from "firebase/firestore";
+import { listenCallUsers } from "./firestore-signaling";
 
 jest.mock("firebase/firestore", () => ({
   addDoc: jest.fn(),
   collection: jest.fn(),
   doc: jest.fn(),
   writeBatch: jest.fn(),
+  onSnapshot: jest.fn(),
+  query: jest.fn(),
 }));
 
 jest.mock("uuid", () => ({
@@ -86,5 +89,55 @@ describe("createCall", () => {
     expect(secondDocCall[1]).toBe(
       "calls/first-e223-4e25-aaca-b7c0ffecd647/users/second-7390-4d50-91f3-abcdef1e0d50"
     );
+  });
+});
+
+describe("listenCallUsers", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("listenCallUsers will notify the callback on each snapshop invokation", () => {
+    (onSnapshot as jest.Mock).mockImplementation((_, onNext) =>
+      onNext({
+        forEach: Array.prototype.forEach.bind([
+          {
+            data: () => ({
+              joined: 1685587182349,
+              userDisplayName: "Rodrigo Muniz",
+              userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
+              uid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
+            }),
+          },
+          {
+            data: () => ({
+              userUid: "a1s2d3",
+              userDisplayName: "Marcell",
+              joined: 1685587305764,
+              uid: "D8LBvBhKb4ZidKKBWvvV",
+            }),
+          },
+        ]),
+      })
+    );
+
+    const mockCallUid = "mock-call-uid";
+    const mockCallback = jest.fn();
+    listenCallUsers(mockCallUid, mockCallback);
+
+    expect(mockCallback).toHaveBeenCalledWith([
+      {
+        joined: 1685587182349,
+        userDisplayName: "Rodrigo Muniz",
+        userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
+        uid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
+      },
+      {
+        userUid: "a1s2d3",
+        userDisplayName: "Marcell",
+        joined: 1685587305764,
+        uid: "D8LBvBhKb4ZidKKBWvvV",
+      },
+    ]);
   });
 });
