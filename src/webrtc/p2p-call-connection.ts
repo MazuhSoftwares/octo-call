@@ -111,6 +111,7 @@ export function makeP2PCallConnection(
 
     try {
       destroyLocalMedia(p2pCall);
+      destroyRemoteMedia(p2pCall);
     } finally {
       connection.close();
     }
