@@ -24,10 +24,9 @@ import {
 import { getThemedColor } from "../styles";
 import { logout, selectCurrentUser } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
-import CallUsersContext, {
-  CallUsersProvider,
-} from "../../contexts/CallUsersContext";
+import { CallUsersProvider } from "../../contexts/CallUsersProvider";
 import { Redirect } from "wouter";
+import { selectCallUsers } from "../../state/callUsers";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -152,7 +151,7 @@ function CallMain({ children }: { children: ReactNode }) {
 function CallFooter() {
   const dispatch = useAppDispatch();
 
-  const callUsersContext = useContext(CallUsersContext);
+  const callUsers = useAppSelector(selectCallUsers);
 
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
@@ -165,8 +164,6 @@ function CallFooter() {
   const handleToggleCamClick = () => setVideoEnabled((current) => !current);
 
   const handleLeaveClick = () => dispatch(leaveCall());
-
-  const numberOfParticipants = callUsersContext.participants.length;
 
   return (
     <Box
@@ -190,7 +187,7 @@ function CallFooter() {
           startIcon={<PeopleIcon fontSize="medium" />}
           size="large"
         >
-          {numberOfParticipants}
+          {callUsers.participants.length}
         </Button>
       </Box>
 
