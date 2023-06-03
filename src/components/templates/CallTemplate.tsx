@@ -24,10 +24,10 @@ import {
 import { getThemedColor } from "../styles";
 import { logout, selectCurrentUser } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
+import CallUsersContext, {
+  CallUsersProvider,
+} from "../../contexts/CallUsersContext";
 import { Redirect } from "wouter";
-import CallGuestsContext, {
-  CallGuestsProvider,
-} from "../../contexts/CallGuestsContext";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -41,7 +41,7 @@ export default function CallTemplate({ children }: CallTemplateProps) {
   }
 
   return (
-    <CallGuestsProvider>
+    <CallUsersProvider>
       <Box
         sx={{
           display: "flex",
@@ -56,7 +56,7 @@ export default function CallTemplate({ children }: CallTemplateProps) {
         <CallMain>{children}</CallMain>
         <CallFooter />
       </Box>
-    </CallGuestsProvider>
+    </CallUsersProvider>
   );
 }
 
@@ -152,7 +152,7 @@ function CallMain({ children }: { children: ReactNode }) {
 function CallFooter() {
   const dispatch = useAppDispatch();
 
-  const callGuestsContext = useContext(CallGuestsContext);
+  const callUsersContext = useContext(CallUsersContext);
 
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
@@ -166,7 +166,7 @@ function CallFooter() {
 
   const handleLeaveClick = () => dispatch(leaveCall());
 
-  const numberOfParticipants = callGuestsContext.participants.length;
+  const numberOfParticipants = callUsersContext.participants.length;
 
   return (
     <Box
