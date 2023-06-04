@@ -1,7 +1,7 @@
 import { addDoc, collection, doc, writeBatch } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./firestore-connection";
-import type { Call } from "../webrtc";
+import type { Call, CallP2PDescription, CallUser } from "../webrtc";
 
 const firestoreSignaling = {
   create,
@@ -26,7 +26,7 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
 
   const callUid = uuidv4();
   const docCallRef = doc(db, `calls/${callUid}`);
-  batch.set(docCallRef, { ...callData, uid: callUid });
+  batch.set(docCallRef, { ...callData, uid: callUid } as Call);
 
   const callUserUid = uuidv4();
   const docCallUserRef = doc(db, `calls/${callUid}/users/${callUserUid}`);
@@ -34,7 +34,7 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
     uid: callUserUid,
     userUid: callData.hostId,
     userDisplayName: callData.hostDisplayName,
-  });
+  } as CallUser);
 
   await batch.commit();
 
@@ -42,4 +42,28 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
     ...callData,
     uid: callUid,
   };
+}
+
+export interface CallUserIntent {
+  userUid: string;
+  callUid: string;
+}
+
+export function askToJoinCall({ userUid, callUid }: CallUserIntent): void {
+  console.warn("Not implemented `joinCall` service:", userUid, callUid);
+  // TODO: insert CallUser
+}
+
+// ref: calls/<call_uid>/p2p-descriptions
+export function listenCallP2PDescriptions(
+  { userUid, callUid }: CallUserIntent,
+  listener: (p2pDescription: CallP2PDescription) => void
+): void {
+  console.warn(
+    "Not implemented `listenCall` service:",
+    userUid,
+    callUid,
+    listener
+  );
+  // TODO: some onSnapshot magic, only call listener if the user is participating.
 }
