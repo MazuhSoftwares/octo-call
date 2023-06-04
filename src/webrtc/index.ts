@@ -33,11 +33,13 @@ export interface CallUser extends UniqueEntity {
   joined?: number;
 }
 
-export interface CallUserP2PDescription extends UniqueEntity {
-  newestParticipantUid: string;
-  newestParticipantOfferSDP: string;
-  oldestParticipantUid: string;
-  oldestParticipantAnswerSDP: string;
+export interface CallP2PDescription extends UniqueEntity {
+  newestPeerUid?: string;
+  newestPeerOffer?: RTCSessionDescriptionInit;
+  newestPeerIceCandidates?: RTCIceCandidateInit[];
+  oldestPeerUid?: string;
+  oldestPeerAnswer?: RTCSessionDescriptionInit;
+  oldestPeerIceCandidates?: RTCIceCandidateInit[];
 }
 
 export type MediaType = "audio" | "video";

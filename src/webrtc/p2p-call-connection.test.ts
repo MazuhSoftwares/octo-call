@@ -1,6 +1,6 @@
 import { makeStandardAudioConstraints } from "./media-constraints";
 import {
-  P2PCallConnection,
+  P2PCallConnectionDetailed,
   P2PCallConnectionOptions,
   P2PCallOutgoingSignaling,
   buildLocalMedia,
@@ -19,15 +19,17 @@ jest.mock("uuid", () => ({ v4: jest.fn(() => "random-123-uuid-321-abcd") }));
 
 describe("ICE trickling", () => {
   const mockIceCandidate = {
-    candidate: "candidate:1234",
-    sdpMid: "data",
-    sdpMLineIndex: 0,
+    toJSON: jest.fn(() => ({
+      candidate: "candidate:1234",
+      sdpMid: "data",
+      sdpMLineIndex: 0,
+    })),
   } as unknown as RTCIceCandidate;
 
   let mockOutgoingSignaling: P2PCallOutgoingSignaling;
   let mockOptions: P2PCallConnectionOptions;
   let mockConnection: RTCPeerConnection;
-  let mockP2PCall: P2PCallConnection;
+  let mockP2PCall: P2PCallConnectionDetailed;
 
   beforeEach(() => {
     mockOutgoingSignaling = {
@@ -51,19 +53,25 @@ describe("ICE trickling", () => {
       options: mockOptions,
       start: jest.fn(),
       stop: jest.fn(),
-      connection: mockConnection,
+      _connection: mockConnection,
       incomingSignaling: {
         handleRemoteJsepAction: jest.fn(),
         handleRemoteIceCandidate: jest.fn(),
       },
+      _localStream: null,
+      _remoteStream: null,
+      _iceCandidates: [],
     };
   });
 
   test("handleLocalIceCandidate: notifies outgoing signaling of local candidate, so it may forward such candidate to the other peer", async () => {
     await handleLocalIceCandidate(mockP2PCall, mockIceCandidate);
-    expect(mockOutgoingSignaling.onLocalIceCandidate).toHaveBeenCalledWith(
-      mockIceCandidate
-    );
+
+    expect(mockOutgoingSignaling.onLocalIceCandidate).toHaveBeenCalledWith({
+      candidate: "candidate:1234",
+      sdpMid: "data",
+      sdpMLineIndex: 0,
+    });
   });
 
   test("handleLocalIceCandidate: if nullish local candidate, then does nothing, the gathering is finished", async () => {
@@ -83,7 +91,7 @@ describe("JSEP flow", () => {
   let mockOutgoingSignaling: P2PCallOutgoingSignaling;
   let mockOptions: P2PCallConnectionOptions;
   let mockConnection: RTCPeerConnection;
-  let mockP2PCall: P2PCallConnection;
+  let mockP2PCall: P2PCallConnectionDetailed;
 
   beforeEach(() => {
     mockOutgoingSignaling = {
@@ -117,12 +125,15 @@ describe("JSEP flow", () => {
       options: mockOptions,
       start: jest.fn(),
       stop: jest.fn(),
-      connection: mockConnection,
+      _connection: mockConnection,
       incomingSignaling: {
         handleRemoteJsepAction: jest.fn(),
         handleRemoteIceCandidate: jest.fn(),
       },
-    };
+      _localStream: null,
+      _remoteStream: null,
+      _iceCandidates: [],
+    } as P2PCallConnectionDetailed;
   });
 
   test("doNewestPeerOffer: creates local offer, saves it, notifies signaling about it", async () => {
@@ -193,7 +204,7 @@ describe("JSEP flow", () => {
 describe("Media gathering for RTC connection", () => {
   let mockOptions: P2PCallConnectionOptions;
   let mockConnection: RTCPeerConnection;
-  let mockP2PCall: P2PCallConnection;
+  let mockP2PCall: P2PCallConnectionDetailed;
   let mockGetUserMedia: typeof global.navigator.mediaDevices.getUserMedia;
   let mockStream: MediaStream;
   let mockTracks: MediaStreamTrack[];
@@ -221,12 +232,15 @@ describe("Media gathering for RTC connection", () => {
       options: mockOptions,
       start: jest.fn(),
       stop: jest.fn(),
-      connection: mockConnection,
+      _connection: mockConnection,
       incomingSignaling: {
         handleRemoteJsepAction: jest.fn(),
         handleRemoteIceCandidate: jest.fn(),
       },
-    };
+      _localStream: null,
+      _remoteStream: null,
+      _iceCandidates: [],
+    } as P2PCallConnectionDetailed;
     mockP2PCall.onLocalStream = jest.fn();
     mockP2PCall.onRemoteStream = jest.fn();
 
@@ -279,7 +293,7 @@ describe("Media gathering for RTC connection", () => {
 
   test("destroyRemoteMedia: stop all tracks found on connection and invokes callback of empty stream", async () => {
     const remoteTrack = { stop: jest.fn() };
-    mockP2PCall.remoteStream = {
+    mockP2PCall._remoteStream = {
       getTracks: jest.fn(() => [remoteTrack]),
     } as unknown as MediaStream;
 
@@ -360,7 +374,9 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
 
     expect(p2pCall.uuid).toEqual("random-123-uuid-321-abcd");
     expect(p2pCall.options).toEqual(mockOptions);
-    expect(p2pCall.connection).toBe(mockConnection);
+    expect((p2pCall as P2PCallConnectionDetailed)._connection).toBe(
+      mockConnection
+    );
   });
 
   test("starting as newest peer who begins by offer, indeed do the offer", async () => {
@@ -370,7 +386,9 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     });
     await p2pCall.start();
     expect(mockGetUserMedia).toBeCalled();
-    expect(p2pCall.connection.createOffer).toBeCalled();
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.createOffer
+    ).toBeCalled();
   });
 
   test("starting as oldest peer who doest not begin the interaction, dont call offer nor answer for now", async () => {
@@ -380,8 +398,12 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     });
     await p2pCall.start();
     expect(mockGetUserMedia).toBeCalledTimes(1);
-    expect(p2pCall.connection.createOffer).not.toBeCalled();
-    expect(p2pCall.connection.createAnswer).not.toBeCalled();
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.createOffer
+    ).not.toBeCalled();
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.createAnswer
+    ).not.toBeCalled();
   });
 
   test("stopping will close the connection and destroy the local media", async () => {
@@ -389,7 +411,9 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     await p2pCall.start();
     p2pCall.stop();
 
-    expect(p2pCall.connection.close).toHaveBeenCalled();
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.close
+    ).toHaveBeenCalled();
     expect(mockTracks[0].stop).toBeCalledTimes(1);
   });
 
@@ -402,12 +426,16 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
 
     p2pCall.start(); // doesnt await
     p2pCall.stop(); // premature stop, ignored but marked for lazy run
-    expect(p2pCall.connection.close).not.toHaveBeenCalled();
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.close
+    ).not.toHaveBeenCalled();
     expect(mockTracks[0].stop).not.toHaveBeenCalled();
 
     await new Promise((resolve) => setTimeout(resolve, 300));
     // now lazily executed the command stop
-    expect(p2pCall.connection.close).toHaveBeenCalled();
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.close
+    ).toHaveBeenCalled();
     expect(mockTracks[0].stop).toHaveBeenCalled();
   });
 
@@ -427,11 +455,15 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
 
     await new Promise((resolve) => setTimeout(resolve, 2 * 300));
     // did not perform the stop
-    expect(p2pCall.connection.close).not.toHaveBeenCalled();
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.close
+    ).not.toHaveBeenCalled();
     expect(mockTracks[0].stop).not.toHaveBeenCalled();
     // and finished the start, but equivalent as just 1 call, ignoring duplicated startings
     expect(mockGetUserMedia).toBeCalledTimes(1);
-    expect(p2pCall.connection.createOffer).toBeCalledTimes(1);
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.createOffer
+    ).toBeCalledTimes(1);
   });
 
   test("has an interface handle incoming offer correctly", async () => {
@@ -445,7 +477,9 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
       sdp: "mock sdp",
     });
 
-    expect(p2pCall.connection.setRemoteDescription).toHaveBeenCalledWith({
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.setRemoteDescription
+    ).toHaveBeenCalledWith({
       type: "offer",
       sdp: "mock sdp",
     });
@@ -462,14 +496,22 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
       sdp: "mock sdp",
     });
 
-    expect(p2pCall.connection.setRemoteDescription).toHaveBeenCalledWith({
+    expect(
+      (p2pCall as P2PCallConnectionDetailed)._connection.setRemoteDescription
+    ).toHaveBeenCalledWith({
       type: "answer",
       sdp: "mock sdp",
     });
   });
 
   test("when connection finds a local ice candidates, the outgoing signaling is notified", async () => {
-    const mockCandidate = jest.fn();
+    const mockCandidate = {
+      toJSON: jest.fn(() => ({
+        candidate: "candidate:1234",
+        sdpMid: "data",
+        sdpMLineIndex: 0,
+      })),
+    };
 
     (mockConnection.addEventListener as jest.Mock).mockImplementation(
       (type, listener) => {
@@ -482,7 +524,11 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     const p2pCall = makeP2PCallConnection(mockOptions);
     expect(
       p2pCall.options.outgoingSignaling.onLocalIceCandidate
-    ).toBeCalledWith(mockCandidate);
+    ).toBeCalledWith({
+      candidate: "candidate:1234",
+      sdpMid: "data",
+      sdpMLineIndex: 0,
+    });
   });
 
   test("when connection finds a remote tracks, the p2pcall triggers a callback", async () => {
