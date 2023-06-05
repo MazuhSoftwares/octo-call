@@ -44,7 +44,6 @@ describe("createCall", () => {
       displayName: "Daily",
       hostId: "5g6h7j",
       hostDisplayName: "John Doe",
-      participantsUids: ["5g6h7j"],
     });
 
     expect(mockSet).toBeCalledTimes(2);
@@ -56,19 +55,20 @@ describe("createCall", () => {
       displayName: "Daily",
       hostId: "5g6h7j",
       hostDisplayName: "John Doe",
-      participantsUids: ["5g6h7j"],
     });
 
     expect(result.uid).toBe("first-e223-4e25-aaca-b7c0ffecd647");
   });
 
   it("should create call documents in Firebase", async () => {
+    jest.useFakeTimers().setSystemTime(new Date(2023, 5, 5, 7));
     await createCall({
       displayName: "Daily",
       hostId: "5g6h7j",
       hostDisplayName: "John Doe",
-      participantsUids: ["5g6h7j"],
     });
+
+    console.log(Date.now());
 
     const [firstCall, secondCall] = mockSet.mock.calls;
     expect(firstCall[1]).toEqual({
@@ -76,12 +76,12 @@ describe("createCall", () => {
       displayName: "Daily",
       hostId: "5g6h7j",
       hostDisplayName: "John Doe",
-      participantsUids: ["5g6h7j"],
     });
     expect(secondCall[1]).toEqual({
       uid: "second-7390-4d50-91f3-abcdef1e0d50",
       userUid: "5g6h7j",
       userDisplayName: "John Doe",
+      joined: Date.now(),
     });
 
     const [firstDocCall, secondDocCall] = (doc as jest.Mock).mock.calls;

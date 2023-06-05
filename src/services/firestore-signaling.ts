@@ -42,6 +42,7 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
     uid: callUserUid,
     userUid: callData.hostId,
     userDisplayName: callData.hostDisplayName,
+    joined: Date.now(),
   } as CallUser);
 
   await batch.commit();
