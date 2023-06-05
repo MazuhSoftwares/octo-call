@@ -1,4 +1,4 @@
-import { FormEvent, useId } from "react";
+import { ChangeEvent, FormEvent, useId, useState } from "react";
 import { Redirect } from "wouter";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -11,19 +11,25 @@ import { useAppDispatch, useAppSelector } from "../../state";
 import { createCall, selectCall } from "../../state/call";
 
 export default function CallSelectionMain() {
-  const callDisplayNameInputId = useId();
-  const call = useAppSelector(selectCall);
   const dispatch = useAppDispatch();
+
+  const callDisplayNameInputId = useId();
+
+  const call = useAppSelector(selectCall);
+
+  const [callDisplayName, setCallDisplayName] = useState<string>("");
+  const handleCallDisplayNameChange = (
+    event: ChangeEvent<HTMLInputElement>
+  ) => {
+    setCallDisplayName(event.target.value);
+  };
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const callDisplayName = (
-      (
-        (event.target as HTMLFormElement)
-          .callDisplayName as HTMLInputElement | null
-      )?.value || ""
-    ).trim();
+    if (!callDisplayName.trim()) {
+      return;
+    }
 
     dispatch(
       createCall({
@@ -56,9 +62,11 @@ export default function CallSelectionMain() {
         </Typography>
         <TextField
           id={callDisplayNameInputId}
-          name="callDisplayName"
+          value={callDisplayName}
+          onChange={handleCallDisplayNameChange}
           placeholder="What's the meeting about?"
           autoComplete="off"
+          inputProps={{ maxLength: 50 }}
           required
           fullWidth
         />
@@ -68,8 +76,8 @@ export default function CallSelectionMain() {
           color="primary"
           variant="contained"
           startIcon={<VideoCallIcon />}
-          fullWidth
           sx={{ marginTop: 3 }}
+          fullWidth
         >
           {isPending ? "Preparing it..." : "Create call"}
         </Button>
