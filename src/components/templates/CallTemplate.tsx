@@ -24,15 +24,17 @@ import {
 import { getThemedColor } from "../styles";
 import { logout, selectCurrentUser } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
-import { CallUsersProvider } from "../../contexts/CallUsersProvider";
 import { Redirect } from "wouter";
 import { selectCallUsers } from "../../state/callUsers";
+import { useCallUsersListener } from "../../hooks/useCallUsersListener";
 
 export interface CallTemplateProps {
   children: ReactNode;
 }
 
 export default function CallTemplate({ children }: CallTemplateProps) {
+  useCallUsersListener();
+
   const hasLeftCall = useAppSelector(selectHasLeftCall);
 
   if (hasLeftCall) {
@@ -40,22 +42,20 @@ export default function CallTemplate({ children }: CallTemplateProps) {
   }
 
   return (
-    <CallUsersProvider>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          boxSizing: "border-box",
-          width: "100vw",
-          height: "100vh",
-          overflow: "hidden",
-        }}
-      >
-        <CallHeader />
-        <CallMain>{children}</CallMain>
-        <CallFooter />
-      </Box>
-    </CallUsersProvider>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        boxSizing: "border-box",
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+      }}
+    >
+      <CallHeader />
+      <CallMain>{children}</CallMain>
+      <CallFooter />
+    </Box>
   );
 }
 

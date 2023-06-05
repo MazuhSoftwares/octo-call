@@ -88,6 +88,8 @@ export const leaveCall = createAsyncThunk("leave-call", async () => {
 
 export const selectCall = (state: RootState) => state.call;
 
+export const selectCallUid = (state: RootState) => state.call.uid;
+
 export const selectCallDisplayName = (state: RootState) =>
   state.call.displayName;
 
