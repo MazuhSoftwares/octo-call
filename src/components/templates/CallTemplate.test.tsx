@@ -1,3 +1,4 @@
+import "../../testing-helpers/mock-firestore-signaling";
 import { fireEvent, screen } from "@testing-library/react";
 import fullRender from "../../testing-helpers/fullRender";
 import CallTemplate from "./CallTemplate";

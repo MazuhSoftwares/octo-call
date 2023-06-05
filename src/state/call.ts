@@ -15,7 +15,6 @@ export const callInitialState: CallState = {
   displayName: "",
   hostId: "",
   hostDisplayName: "",
-  participantsUids: [],
   status: "idle",
   errorMessage: "",
 };
@@ -30,7 +29,6 @@ export const callSlice = createSlice({
       state.displayName = "";
       state.hostId = "";
       state.hostDisplayName = "";
-      state.participantsUids = [];
       state.status = "pending";
       state.errorMessage = "";
     });
@@ -42,7 +40,6 @@ export const callSlice = createSlice({
         state.displayName = action.payload.displayName;
         state.hostId = action.payload.hostId;
         state.hostDisplayName = action.payload.hostDisplayName;
-        state.participantsUids = action.payload.participantsUids;
         state.status = action.payload.uid ? "inProgress" : "idle";
         state.errorMessage = "";
       }
@@ -53,7 +50,6 @@ export const callSlice = createSlice({
       state.displayName = "";
       state.hostId = "";
       state.hostDisplayName = "";
-      state.participantsUids = [];
       state.status = "error";
       state.errorMessage = action.error.message ?? "Unknown error.";
     });
@@ -63,7 +59,6 @@ export const callSlice = createSlice({
       state.displayName = "";
       state.hostId = "";
       state.hostDisplayName = "";
-      state.participantsUids = [];
       state.status = "idle";
       state.errorMessage = "";
     });
@@ -79,7 +74,6 @@ export const createCall = createAsyncThunk(
       displayName,
       hostDisplayName: user.displayName,
       hostId: user.uid,
-      participantsUids: [user.uid],
     });
   },
   {

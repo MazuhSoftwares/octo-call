@@ -24,7 +24,9 @@ import {
 import { getThemedColor } from "../styles";
 import { logout, selectCurrentUser } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
+import { CallUsersProvider } from "../../contexts/CallUsersProvider";
 import { Redirect } from "wouter";
+import { selectCallUsers } from "../../state/callUsers";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -38,20 +40,22 @@ export default function CallTemplate({ children }: CallTemplateProps) {
   }
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        boxSizing: "border-box",
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
-      <CallHeader />
-      <CallMain>{children}</CallMain>
-      <CallFooter />
-    </Box>
+    <CallUsersProvider>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          boxSizing: "border-box",
+          width: "100vw",
+          height: "100vh",
+          overflow: "hidden",
+        }}
+      >
+        <CallHeader />
+        <CallMain>{children}</CallMain>
+        <CallFooter />
+      </Box>
+    </CallUsersProvider>
   );
 }
 
@@ -147,6 +151,8 @@ function CallMain({ children }: { children: ReactNode }) {
 function CallFooter() {
   const dispatch = useAppDispatch();
 
+  const callUsers = useAppSelector(selectCallUsers);
+
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
   const closeParticipants = () => setParticipantsOpen(false);
@@ -181,7 +187,7 @@ function CallFooter() {
           startIcon={<PeopleIcon fontSize="medium" />}
           size="large"
         >
-          3
+          {callUsers.participants.length}
         </Button>
       </Box>
 
