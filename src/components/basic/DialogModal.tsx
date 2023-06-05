@@ -25,27 +25,29 @@ export default function DialogModal({
 
   return (
     <Dialog open={isOpen} onClose={close} aria-labelledby={titleId} fullWidth>
-      <Box>
-        <DialogTitle
-          id={titleId}
-          sx={{ display: "flex", alignItems: "center" }}
-        >
-          {Boolean(icon) && (
-            <Box component="span" sx={{ display: "inline-flex", mr: 1 }}>
-              {icon}
-            </Box>
-          )}
-          <Box component="span">{title}</Box>
-        </DialogTitle>
-        <IconButton
-          aria-label="Close"
-          onClick={close}
-          sx={{ display: "flex", position: "absolute", top: 16, right: 24 }}
-        >
-          <CloseIcon fontSize="small" />
-        </IconButton>
+      <Box component="section">
+        <Box component="header">
+          <DialogTitle
+            id={titleId}
+            sx={{ display: "flex", alignItems: "center" }}
+          >
+            {Boolean(icon) && (
+              <Box component="span" sx={{ display: "inline-flex", mr: 1 }}>
+                {icon}
+              </Box>
+            )}
+            <Box component="span">{title}</Box>
+          </DialogTitle>
+          <IconButton
+            aria-label="Close"
+            onClick={close}
+            sx={{ display: "flex", position: "absolute", top: 16, right: 24 }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Box>
+        <DialogContent sx={{ pt: 0 }}>{children}</DialogContent>
       </Box>
-      <DialogContent sx={{ pt: 0 }}>{children}</DialogContent>
     </Dialog>
   );
 }
