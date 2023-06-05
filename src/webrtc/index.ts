@@ -24,7 +24,6 @@ export interface Call extends UniqueEntity {
   displayName: string;
   hostId: string;
   hostDisplayName: string;
-  participantsUids: string[];
 }
 
 export interface CallUser extends UniqueEntity {
