@@ -1,11 +1,11 @@
+import { useEffect } from "react";
+import { CssBaseline, ThemeProvider } from "@mui/material";
 import { Switch, Route, Router, Redirect } from "wouter";
 import { useAppDispatch, useAppSelector } from "./state";
 import { loadUser, selectIsAuthenticated } from "./state/user";
 import AuthMain from "./features/auth/AuthMain";
 import CallSelectionMain from "./features/call-selection/CallSelectionMain";
 import P2PCallMain from "./features/p2p-call/P2PCallMain";
-import { useEffect } from "react";
-import { CssBaseline, ThemeProvider } from "@mui/material";
 import { darkTheme } from "./components/styles";
 
 export default function App() {
