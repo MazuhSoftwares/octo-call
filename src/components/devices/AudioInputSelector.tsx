@@ -1,4 +1,4 @@
-import { SyntheticEvent, useContext, useEffect, useId, useState } from "react";
+import { SyntheticEvent, useEffect, useId, useState } from "react";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import FormControl from "@mui/material/FormControl";
@@ -16,9 +16,7 @@ import {
   selectUserAudioId,
   setUserAudioId,
 } from "../../state/devices";
-import DevicePreviewContext, {
-  DevicePreviewProvider,
-} from "../../contexts/DevicePreviewContext";
+import { useDevicePreview } from "../../hooks/useDevicePreview";
 
 export default function AudioInputSelector() {
   const selectFieldId = useId();
@@ -40,33 +38,31 @@ export default function AudioInputSelector() {
   const isLoading = audioStatus === "pending";
 
   return (
-    <DevicePreviewProvider type="audio">
-      <Container>
-        <ErrorAlert message={audioErrorMessage} />
-        {isLoading && (
-          <InfoAlert message="Checking device/browser permission... This possibly requires your manual approval." />
-        )}
-        <FormControl fullWidth>
-          <Typography variant="label" component="label" htmlFor={selectFieldId}>
-            Audio input
-          </Typography>
-          <NativeSelect
-            value={userAudioId}
-            onChange={handleDeviceChange}
-            disabled={isDisabled}
-            inputProps={{ id: selectFieldId }}
-          >
-            <option value="">Disabled microphone</option>
-            {audioInputs.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label}
-              </option>
-            ))}
-          </NativeSelect>
-        </FormControl>
-        <AudioMeter deviceId={userAudioId} />
-      </Container>
-    </DevicePreviewProvider>
+    <Container>
+      <ErrorAlert message={audioErrorMessage} />
+      {isLoading && (
+        <InfoAlert message="Checking device/browser permission... This possibly requires your manual approval." />
+      )}
+      <FormControl fullWidth>
+        <Typography variant="label" component="label" htmlFor={selectFieldId}>
+          Audio input
+        </Typography>
+        <NativeSelect
+          value={userAudioId}
+          onChange={handleDeviceChange}
+          disabled={isDisabled}
+          inputProps={{ id: selectFieldId }}
+        >
+          <option value="">Disabled microphone</option>
+          {audioInputs.map((device) => (
+            <option key={device.deviceId} value={device.deviceId}>
+              {device.label}
+            </option>
+          ))}
+        </NativeSelect>
+      </FormControl>
+      <AudioMeter deviceId={userAudioId} />
+    </Container>
   );
 }
 
@@ -75,7 +71,7 @@ interface AudioMeterProps {
 }
 
 function AudioMeter({ deviceId }: AudioMeterProps) {
-  const audioPreview = useContext(DevicePreviewContext);
+  const audioPreview = useDevicePreview("audio");
   const [percentage, setPercentage] = useState<number>(0);
 
   useEffect(() => {

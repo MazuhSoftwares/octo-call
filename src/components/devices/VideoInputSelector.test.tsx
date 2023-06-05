@@ -1,12 +1,10 @@
-import { StrictMode, useContext, useEffect } from "react";
+import { StrictMode, useEffect } from "react";
 import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import VideoInputSelector from "./VideoInputSelector";
 import fullRender from "../../testing-helpers/fullRender";
 import webrtc from "../../webrtc";
 import { devicesInitialState } from "../../state/devices";
-import DevicePreviewContext, {
-  DevicePreviewProvider,
-} from "../../contexts/DevicePreviewContext";
+import { useDevicePreview } from "../../hooks/useDevicePreview";
 
 jest.mock("../../webrtc", () => ({
   retrieveMediaInputs: jest.fn(),
@@ -233,23 +231,15 @@ describe("VideoInputSelector", () => {
     expect(mockStop).toBeCalledTimes(1);
   });
 
-  it("(STRESS) has its Context being able to protect webrtc layer from concurrent attempts to pull resources", async () => {
+  it("(STRESS) has its hook being able to protect webrtc layer from concurrent attempts to pull resources", async () => {
     // usually an issue caused by multiple and super quickly re-renderings
 
     (webrtc.startVideoPreview as jest.Mock).mockImplementation(
       () => new Promise((r) => setTimeout(r, 300))
     );
 
-    function BadSuperComponent() {
-      return (
-        <DevicePreviewProvider type="video">
-          <BadSubComponent />
-        </DevicePreviewProvider>
-      );
-    }
-
-    function BadSubComponent() {
-      const devicePreview = useContext(DevicePreviewContext);
+    function BadComponent() {
+      const devicePreview = useDevicePreview("video");
 
       useEffect(() => {
         (async () => {
@@ -262,7 +252,7 @@ describe("VideoInputSelector", () => {
       return <>Running.</>;
     }
 
-    await act(() => fullRender(<BadSuperComponent />, { wrapper: StrictMode }));
+    await act(() => fullRender(<BadComponent />, { wrapper: StrictMode }));
 
     // because it started and then resumed, it should be actually just a single call
     // to prevent leaking multiple unecessary calls for the same device.

@@ -1,4 +1,4 @@
-import { ReactNode, createContext, useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import type { PreviewCleanup } from "../webrtc/media-devices-preview";
 import webrtc, { MediaType } from "../webrtc";
 
@@ -8,15 +8,6 @@ export interface DevicePreview<T extends MediaType> {
   setResultListener: (callback: ResultListener<T>) => void;
   setStatusChangeListener: (callback: StatusListener) => void;
 }
-
-export const DevicePreviewContext = createContext<DevicePreview<MediaType>>({
-  start: () => Promise.resolve(),
-  stop: () => null,
-  setResultListener: () => null,
-  setStatusChangeListener: () => null,
-});
-
-export default DevicePreviewContext;
 
 export type DevicePreviewStatus = "idle" | "preparing" | "running" | "error";
 
@@ -32,15 +23,7 @@ export type VideoStreamListener = (stream: MediaStream | null) => void;
 
 export type StatusListener = (status: DevicePreviewStatus) => void;
 
-export interface DevicePreviewProviderProps {
-  children: ReactNode;
-  type: MediaType;
-}
-
-export function DevicePreviewProvider({
-  children,
-  type,
-}: DevicePreviewProviderProps) {
+export function useDevicePreview(type: MediaType) {
   const deviceLockRef = useRef<DeviceLock>({
     deviceId: NO_DEVICE_ID,
     cleanup: NO_CLEANUP,
@@ -198,11 +181,7 @@ export function DevicePreviewProvider({
     [start, stop, setResultListener, setStatusChangeListener]
   );
 
-  return (
-    <DevicePreviewContext.Provider value={audioPreview}>
-      {children}
-    </DevicePreviewContext.Provider>
-  );
+  return audioPreview;
 }
 
 interface DeviceLock {

@@ -1,7 +1,6 @@
 import {
   ReactNode,
   SyntheticEvent,
-  useContext,
   useEffect,
   useId,
   useRef,
@@ -24,11 +23,11 @@ import {
   selectUserVideoId,
   setUserVideoId,
 } from "../../state/devices";
-import DevicePreviewContext, {
-  DevicePreviewProvider,
-  DevicePreviewStatus,
-} from "../../contexts/DevicePreviewContext";
 import { getThemedColor } from "../styles";
+import {
+  DevicePreviewStatus,
+  useDevicePreview,
+} from "../../hooks/useDevicePreview";
 
 export default function VideoInputSelector() {
   const selectFieldId = useId();
@@ -50,33 +49,31 @@ export default function VideoInputSelector() {
   const isLoading = videoStatus === "pending";
 
   return (
-    <DevicePreviewProvider type="video">
-      <Container>
-        {isLoading && (
-          <InfoAlert message="Checking device/browser permission... This possibly requires your manual approval." />
-        )}
-        <ErrorAlert message={videoErrorMessage} />
-        <FormControl fullWidth>
-          <Typography variant="label" component="label" htmlFor={selectFieldId}>
-            Video input
-          </Typography>
-          <NativeSelect
-            value={userVideoId}
-            onChange={handleDeviceChange}
-            disabled={isDisabled}
-            inputProps={{ id: selectFieldId }}
-          >
-            <option value="">Disabled camera</option>
-            {videoInputs.map((device) => (
-              <option key={device.deviceId} value={device.deviceId}>
-                {device.label}
-              </option>
-            ))}
-          </NativeSelect>
-        </FormControl>
-        <VideoMirror deviceId={userVideoId} />
-      </Container>
-    </DevicePreviewProvider>
+    <Container>
+      {isLoading && (
+        <InfoAlert message="Checking device/browser permission... This possibly requires your manual approval." />
+      )}
+      <ErrorAlert message={videoErrorMessage} />
+      <FormControl fullWidth>
+        <Typography variant="label" component="label" htmlFor={selectFieldId}>
+          Video input
+        </Typography>
+        <NativeSelect
+          value={userVideoId}
+          onChange={handleDeviceChange}
+          disabled={isDisabled}
+          inputProps={{ id: selectFieldId }}
+        >
+          <option value="">Disabled camera</option>
+          {videoInputs.map((device) => (
+            <option key={device.deviceId} value={device.deviceId}>
+              {device.label}
+            </option>
+          ))}
+        </NativeSelect>
+      </FormControl>
+      <VideoMirror deviceId={userVideoId} />
+    </Container>
   );
 }
 
@@ -85,7 +82,7 @@ interface VideoMirrorProps {
 }
 
 function VideoMirror({ deviceId }: VideoMirrorProps) {
-  const videoPreview = useContext(DevicePreviewContext);
+  const videoPreview = useDevicePreview("video");
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const [status, setStatus] = useState<DevicePreviewStatus>("idle");
