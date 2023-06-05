@@ -96,4 +96,7 @@ export const selectCallDisplayName = (state: RootState) =>
 export const selectHasLeftCall = (state: RootState) =>
   state.call.status === "idle";
 
+export const selectHasCallInProgress = (state: RootState) =>
+  state.call.status === "inProgress";
+
 export default callSlice.reducer;

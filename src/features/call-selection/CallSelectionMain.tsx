@@ -1,5 +1,4 @@
 import { ChangeEvent, FormEvent, useId, useState } from "react";
-import { Redirect } from "wouter";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -39,10 +38,6 @@ export default function CallSelectionMain() {
   };
 
   const isPending = call.status === "pending";
-
-  if (call.status === "inProgress") {
-    return <Redirect to={`/p2p/${call.uid}`} />;
-  }
 
   return (
     <HomeTemplate subtitle="Create or join a call">

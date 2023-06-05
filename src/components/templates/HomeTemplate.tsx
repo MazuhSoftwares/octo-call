@@ -1,4 +1,5 @@
 import { ReactNode, useState } from "react";
+import { Redirect } from "wouter";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Typography from "@mui/material/Typography";
@@ -9,6 +10,7 @@ import homeBgPattern from "../../assets/home-bg-patternpad.jpg";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { logout, selectIsAuthenticated } from "../../state/user";
 import SettingsModal from "../settings/SettingsModal";
+import { selectCallUid, selectHasCallInProgress } from "../../state/call";
 
 export interface HomeTemplateProps {
   children: ReactNode;
@@ -27,6 +29,12 @@ export default function HomeTemplate({
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const openSettings = () => setSettingsOpen(true);
   const closeSettings = () => setSettingsOpen(false);
+
+  const callUid = useAppSelector(selectCallUid);
+  const isCallInProgress = useAppSelector(selectHasCallInProgress);
+  if (isCallInProgress) {
+    return <Redirect to={`/p2p/${callUid}`} />;
+  }
 
   return (
     <Box
