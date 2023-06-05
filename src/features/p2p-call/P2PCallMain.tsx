@@ -7,13 +7,22 @@ import {
   useCallback,
 } from "react";
 import once from "lodash.once";
-import Box from "@mui/material/Box";
+import Box, { BoxProps } from "@mui/material/Box";
 import CallTemplate from "../../components/templates/CallTemplate";
 import Video from "../../components/basic/Video";
 import type { CallP2PDescription, CallParticipant } from "../../webrtc";
 import useP2PCall from "../../hooks/useP2PCall";
+import useWindowSize from "../../hooks/useWindowSize";
+import {
+  EXTRA_LARGE_HEIGHT,
+  EXTRA_LARGE_WIDTH,
+  LARGE_HEIGHT,
+  MEDIUM_WIDTH,
+} from "../../components/styles";
 
 export default function P2PCallMain() {
+  const windowsSize = useWindowSize();
+
   // TODO: manage it with redux and service layers,
   // in real life it doesnt make sense for it to be just a local state.
   const [description, setDescription] = useState<CallP2PDescription>({
@@ -45,6 +54,14 @@ export default function P2PCallMain() {
       }))
   );
 
+  const [activeSlotsQtt, setActiveSlotsQtt] = useState<number>(0);
+
+  const syncActiveSlotsCounting = useCallback(() => {
+    setActiveSlotsQtt(
+      participantsSlotsRef.current.filter((it) => it.participant).length
+    );
+  }, []);
+
   const findSlot = useCallback(
     (participantUid: string): ParticipantSlot | null =>
       participantsSlotsRef.current.find(
@@ -74,9 +91,15 @@ export default function P2PCallMain() {
   const lockSlot = useCallback(
     (slot: ParticipantSlot, participant: CallParticipant): void => {
       slot.participant = participant;
+      syncActiveSlotsCounting();
     },
-    []
+    [syncActiveSlotsCounting]
   );
+
+  // const unlockSlot = useCallback((slot: ParticipantSlot): void => {
+  //   slot.participant = null;
+  //   syncActiveSlotsCounting();
+  // }, []);
 
   const lockNextFreeSlot = useCallback(
     (participant: CallParticipant): ParticipantSlot => {
@@ -90,10 +113,6 @@ export default function P2PCallMain() {
     },
     [findFreeSlot, lockSlot]
   );
-
-  // const unlockSlot = useCallback((slot: ParticipantSlot): void => {
-  //   slot.participant = null;
-  // }, []);
 
   const setupExperiental1on1Ref = useRef(
     once(() => {
@@ -129,21 +148,90 @@ export default function P2PCallMain() {
     setupExperiental1on1Ref.current();
   }, []);
 
+  const getMainStyles = useCallback((): BoxProps["sx"] => {
+    if (windowsSize.width < MEDIUM_WIDTH) {
+      return {
+        flexDirection: "column",
+      };
+    }
+
+    if (windowsSize.height < LARGE_HEIGHT) {
+      return {
+        flexDirection: "row",
+      };
+    }
+
+    return {
+      flexDirection: "row",
+      flexWrap: "wrap",
+    };
+  }, [windowsSize]);
+
+  const getSlotStyles = useCallback((): BoxProps["sx"] => {
+    return {
+      flexBasis: "45%",
+      margin: 1,
+    };
+  }, []);
+
+  const getVideoWrapperStyles = useCallback((): BoxProps["sx"] => {
+    return { margin: "auto" };
+  }, []);
+
+  const getVideoStyles = useCallback((): BoxProps["sx"] => {
+    if (windowsSize.width < MEDIUM_WIDTH) {
+      if (activeSlotsQtt === 1) {
+        return { maxHeight: "40vh" };
+      } else if (activeSlotsQtt === 2) {
+        return { maxHeight: "30vh" };
+      } else if (activeSlotsQtt === 3) {
+        return { maxHeight: "25vh" };
+      } else if (activeSlotsQtt === 4) {
+        return { maxHeight: "18vh" };
+      } else {
+        return { maxHeight: "15vh" };
+      }
+    }
+
+    if (
+      windowsSize.width < EXTRA_LARGE_WIDTH ||
+      windowsSize.height < EXTRA_LARGE_HEIGHT
+    ) {
+      return { maxHeight: "35vh" };
+    }
+
+    return { maxHeight: "37vh" };
+  }, [windowsSize, activeSlotsQtt]);
+
   return (
     <CallTemplate>
-      <Box sx={{ display: "flex" }}>
+      <Box
+        data-layoutinfo="call"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          height: "100%",
+          p: 1,
+          ...getMainStyles(),
+        }}
+      >
         {participantsSlotsRef.current.map((slot, index) => (
-          <Video
+          <Box
             key={slot.participant ? slot.participant.uid : `empty-${index}`}
-            ref={slot.videoRef}
-            displayName={
-              slot.participant ? slot.participant.userDisplayName : "Empty"
-            }
-            sx={{
-              maxWidth: "300px",
-            }}
+            data-layoutinfo="call-slot"
+            sx={getSlotStyles()}
             hidden={!slot.participant}
-          />
+          >
+            <Video
+              ref={slot.videoRef}
+              displayName={
+                slot.participant ? slot.participant.userDisplayName : "Empty"
+              }
+              wrapperBoxProps={{ sx: getVideoWrapperStyles() }}
+              sx={getVideoStyles()}
+            />
+          </Box>
         ))}
       </Box>
     </CallTemplate>
@@ -161,4 +249,4 @@ const EXPERIMENTAL_OLDEST_PERSON_UID_REMOTE = "experimental-oldest-p1-remote";
 const EXPERIMENTAL_NEWEST_PERSON_UID_LOCAL = "experimental-newest-p2-local";
 const EXPERIMENTAL_NEWEST_PERSON_UID_REMOTE = "experimental-newest-p2-remote";
 
-const MAX_PARTICIPANTS: number = 5 as const;
+const MAX_PARTICIPANTS = 5;
