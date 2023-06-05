@@ -1,6 +1,6 @@
+import Typography from "@mui/material/Typography";
 import GroupIcon from "@mui/icons-material/Group";
 import DialogModal from "../basic/DialogModal";
-import { Typography } from "@mui/material";
 import { useAppSelector } from "../../state";
 import { selectCallUsers } from "../../state/callUsers";
 
