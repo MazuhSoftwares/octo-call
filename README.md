@@ -8,7 +8,8 @@ It implements WebRTC Mesh Architecture.
 
 This Mesh topology is a peer-to-peer communication model where each
 participant in a group call communicates directly with every other participant
-in the call. It eliminates the need for a central media server.
+in the call. It eliminates the need for a central media server, although it
+still needs some signaling server for connectivity establishment protocols.
 
 That's somewhat good for privacy, latency and infrastructure costs, but it
 implies exponential complexity on client side. That said, it's a bad
@@ -93,41 +94,65 @@ In theory, the WebRTC portion could be used as a library for another UI,
 and the signaling server could be replaced too. But having Mesh topology
 is a major assumption for all the project layers.
 
-### Folders architecture
+### Code architecture
 
 Regarding user interface modules, the code is inspired by
 [Atomic Design](https://bradfrost.com/blog/post/atomic-web-design/).
 
-Under `src/`, there should be:
+Under `src/`, there should be some React-centric stuff:
 
-- `features/`: Each subfolder would be a feature domain,
-  with its local state and its private components. In Atomic Design,
-  these would be pages and organisms.
-
-- `components/`: common React components potentially used more than once,
+- `components/*/`: Common React components, potentially used more than once,
   a few of them interacting with stateful modules. In Atomic Design,
-  these would be atoms, molecules and a few templates.
+  these would be _atoms_, _molecules_ and a few _templates_ (more below).
 
-- `state/`: global state structures. Heavy business logic, but made of pure
-  functions, relying on integration with services and WebRTC layers to
-  decouple side effects.
+- `components/templates/`: Part of the components are meant to be the skeleton
+  of pages and include a automatic routing rules. They accept features as
+  their children. In Atomic Design, these would be called _templates_.
 
-- `services/`: for third-party connections and integrations. Currently
-  Firebase is the big service behind a lot of what's happening, but
-  the code desing must be prepared for it to be easily replaced later.
+- `features/*/`: Each subfolder would be, in Atomic Design, _organisms_ and
+  _pages_, the higher level of abstractions. They must be focused on the user
+  interaction, not meant to be reused, and not meant to have complex technical
+  details unless purely related to visual manipulation.
 
-- `webrtc/`: directly handles native WebRTC API for gathering devices,
-  permissions, initializing P2P connections and such, exposing generic
-  interfaces for the rest of the code. This folder must be agnositc to
-  all other layers (including React itself).
+Some middlewares, sanitizing layers between React and the world:
+
+- `state/`: The _single source of truth_ related to the application data, and
+  thus a global provider powered by Redux Toolkit. It's made of _pure_ structures.
+
+- `hooks/`: _Side effect_ providers. Deals with a lot of _mutable_ structures.
+  It might relate itself with `state/` layer to synchronize data knowledge.
+
+And the big source of side effects, isolated and agnostic to React:
+
+- `services/`: For third-party connections and integrations, like
+  authentication and WebRTC signaling. It shouldn't have any important
+  business logic, so it must act more like an anti-corruption layer.
+  Currently Firebase is the main service behind a lot of what's happening
+  here, but the code design must be prepared for it to be easily replaced
+  later.
+
+- `webrtc/`: Directly handles native WebRTC API for gathering devices,
+  user permissions, initializing P2P connections and so on. It must expose
+  generic interfaces for the rest of the code safely use these features.
+
+And auxiliary domains:
 
 - `assets/`: for multimidia like pictures and sounds.
 
-The `services/` and `webrtc/` layers must never be accessed directly by the
-UI, it should always rely on `state/` as middleware.
+All UI code should always rely on `state/` and/or `hooks/` as middleware for
+accessing `services/` and `webrtc/` layers. Only TypeScript interfaces and
+types can have some (not full) degree of freedom between all layers.
 
-A reasonable code coverage is required to keep it all together, as there's a
-fairly complex frontend code here.
+WebRTC applications can get very complex very quickly, even in a small scope
+like this. It's a chaotic combination of multiple side effects, non-linear
+behaviors, several network protocols exposed at the same time, and often
+sensible from Document race conditions to the mere location of devices.
+Hence, having this minimal level of responsibilities assigned to each layer
+is an important tool for the overall maintainability.
+
+A reasonable code coverage is required to keep it all together. Because
+there's a fairly complex client side code here, considering the
+serverless (cloud) nature of the architecture.
 
 ### Browsers support
 
@@ -144,7 +169,11 @@ And their browsers:
 
 Only up-to-date versions.
 
-## Features
+Supported resolutions:
+
+- ?
+
+## Functional requirements
 
 As a proof of concept, features are limited. But there's a try to follow
 minimal standards discussed by industry vendors:
@@ -152,6 +181,6 @@ https://www.youtube.com/watch?v=EmI4QvicZTY
 
 ## License
 
-This a project lead by
+This initiative is lead by
 [Marcell (Mazuh) G. C. da Silva](https://github.com/Mazuh)
 and it's under [MIT License](./LICENSE).
