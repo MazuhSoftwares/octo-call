@@ -10,6 +10,19 @@ export function getThemedColor(key: keyof typeof DARK_COLORS): string {
   return DARK_COLORS[key] || "none";
 }
 
+// See: https://mui.com/material-ui/customization/breakpoints/#default-breakpoints
+export const SMALL_WIDTH = 600;
+export const MEDIUM_WIDTH = 900;
+export const LARGE_WIDTH = 1200;
+export const EXTRA_LARGE_WIDTH = 1536;
+
+// From mere observation
+export const SMALL_HEIGHT = 500;
+export const MEDIUM_HEIGHT = 650;
+export const LARGE_HEIGHT = 900;
+export const EXTRA_LARGE_HEIGHT = 1200;
+
+// Custom colors by our designer Xia
 const DARK_COLORS = {
   foreground: "#161929", // not so dark
   middleground: "#08090F", // reasonable dark
