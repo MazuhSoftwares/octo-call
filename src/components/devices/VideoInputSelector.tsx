@@ -28,6 +28,7 @@ import DevicePreviewContext, {
   DevicePreviewProvider,
   DevicePreviewStatus,
 } from "../../contexts/DevicePreviewContext";
+import { getThemedColor } from "../styles";
 
 export default function VideoInputSelector() {
   const selectFieldId = useId();
@@ -147,10 +148,7 @@ function VideoMirror({ deviceId }: VideoMirrorProps) {
           borderRadius: "8px",
           overflow: "hidden",
           border: "1px solid",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          borderColor: (theme: any) =>
-            theme?.components?.MuiCard?.styleOverrides?.root?.borderColor ||
-            "none",
+          borderColor: getThemedColor("commonBorder"),
         }}
       >
         <Box

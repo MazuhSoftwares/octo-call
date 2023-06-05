@@ -1,16 +1,24 @@
 import { useEffect, forwardRef, RefObject, HTMLProps } from "react";
 import Box, { BoxProps } from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import { getThemedColor } from "../styles";
 import webrtc from "../../webrtc";
 
 export interface VideoProps extends HTMLProps<HTMLVideoElement> {
+  displayName?: string;
   wrapperBoxProps?: BoxProps;
   sx?: BoxProps["sx"];
 }
 
 export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
   (props, ref) => {
-    const { wrapperBoxProps = {}, sx = {}, ...videoProps } = props;
+    const {
+      wrapperBoxProps = {},
+      sx = {},
+      displayName = "",
+      hidden,
+      ...videoProps
+    } = props;
     const videoRef = ref as RefObject<HTMLVideoElement>;
 
     useEffect(() => {
@@ -18,7 +26,7 @@ export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
     }, [videoRef]);
 
     return (
-      <Box {...wrapperBoxProps}>
+      <Box {...wrapperBoxProps} hidden={hidden}>
         <Box
           sx={{
             position: "relative",
@@ -34,6 +42,17 @@ export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
             ref={videoRef}
             sx={{ ...sx, display: "flex", width: "100%" }}
           />
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: "24px",
+              left: "24px",
+              padding: "16px",
+              background: "rgba(22, 25, 41, 0.4)",
+            }}
+          >
+            <Typography component="span">{displayName}</Typography>
+          </Box>
         </Box>
       </Box>
     );

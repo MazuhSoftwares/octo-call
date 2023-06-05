@@ -33,6 +33,10 @@ export interface CallUser extends UniqueEntity {
   joined?: number;
 }
 
+export interface CallParticipant extends CallUser {
+  joined: number;
+}
+
 export interface CallP2PDescription extends UniqueEntity {
   newestPeerUid?: string;
   newestPeerOffer?: RTCSessionDescriptionInit;

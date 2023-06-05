@@ -213,6 +213,11 @@ export function buildRemoteMediaFromTrackEvent(
   if (p2pCall.onRemoteStream) {
     p2pCall.onRemoteStream(p2pCall._remoteStream);
   }
+
+  if (p2pCall.onLocalStream) {
+    // just friendly reminder in case v-dom got out of sync.
+    p2pCall.onLocalStream(p2pCall._localStream);
+  }
 }
 
 export async function doNewestPeerOffer(p2pCall: P2PCallConnectionDetailed) {
