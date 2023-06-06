@@ -58,8 +58,8 @@ export interface CallUserIntent {
   callUid: string;
 }
 
-export function askToJoinCall({ userUid, callUid }: CallUserIntent): void {
-  console.warn("Not implemented `joinCall` service:", userUid, callUid);
+export function ringToCall({ userUid, callUid }: CallUserIntent): void {
+  console.warn("Not implemented `ringToCall` service:", userUid, callUid);
   // TODO: insert CallUser
 }
 

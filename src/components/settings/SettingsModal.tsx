@@ -31,7 +31,7 @@ export default function SettingsModal({ isOpen, close }: SettingsModalProps) {
   return (
     <DialogModal
       title="Settings"
-      icon={<SettingsIcon />}
+      icon={<SettingsIcon fontSize="medium" />}
       isOpen={isOpen}
       close={close}
     >

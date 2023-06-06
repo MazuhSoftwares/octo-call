@@ -46,6 +46,10 @@ export const darkTheme = createTheme({
     h2: {
       fontSize: 24,
     },
+    h3: {
+      fontSize: 18,
+      fontWeight: "700",
+    },
     button: {
       textTransform: "none",
       fontWeight: "500",
