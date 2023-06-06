@@ -14,6 +14,7 @@ import type { Call, CallP2PDescription, CallUser } from "../webrtc";
 const firestoreSignaling = {
   create,
   createCall,
+  askToJoinCall,
 };
 
 export default firestoreSignaling;
@@ -55,12 +56,24 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
 
 export interface CallUserIntent {
   userUid: string;
+  userDisplayName: string;
   callUid: string;
 }
 
-export function ringToCall({ userUid, callUid }: CallUserIntent): void {
-  console.warn("Not implemented `ringToCall` service:", userUid, callUid);
-  // TODO: insert CallUser
+export async function askToJoinCall({
+  userUid,
+  userDisplayName,
+  callUid,
+}: CallUserIntent): Promise<CallUser> {
+  const docRef = await addDoc(collection(db, `calls/${callUid}/users`), {
+    userUid,
+    userDisplayName,
+  });
+  return {
+    uid: docRef.id,
+    userUid,
+    userDisplayName,
+  };
 }
 
 // ref: calls/<call_uid>/p2p-descriptions

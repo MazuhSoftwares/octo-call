@@ -27,6 +27,8 @@ import {
 import ToggleMicButton from "../../components/devices/ToggleMicButton";
 import ToggleCamButton from "../../components/devices/ToggleCamButton";
 import InfoAlert from "../../components/basic/InfoAlert";
+import { selectCurrentUser } from "../../state/user";
+import { askToJoinCall, selectCallUsers } from "../../state/callUsers";
 
 export default function CallSelectionMain() {
   const dispatch = useAppDispatch();
@@ -35,12 +37,18 @@ export default function CallSelectionMain() {
   const callUidInputId = useId();
 
   const call = useAppSelector(selectCall);
+  const callUsers = useAppSelector(selectCallUsers);
+  const currentUser = useAppSelector(selectCurrentUser);
 
   const [callDisplayName, setCallDisplayName] = useState<string>("");
+  const [callId, setCallId] = useState<string>("");
   const handleCallDisplayNameChange = (
     event: ChangeEvent<HTMLInputElement>
   ) => {
     setCallDisplayName(event.target.value);
+  };
+  const handleCallIdChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCallId(event.target.value);
   };
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -57,7 +65,24 @@ export default function CallSelectionMain() {
     );
   };
 
+  const onJoinCallSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!callId.trim()) {
+      return;
+    }
+
+    dispatch(
+      askToJoinCall({
+        userUid: currentUser.uid,
+        userDisplayName: currentUser.displayName,
+        callUid: callId,
+      })
+    );
+  };
+
   const isPending = call.status === "pending";
+  const isJoining = callUsers.status === "pending";
 
   return (
     <HomeTemplate subtitle="Create or join a call">
@@ -98,12 +123,20 @@ export default function CallSelectionMain() {
           {isPending ? "Preparing it..." : "Create call"}
         </Button>
       </Box>
-      <Box display="flex" flexDirection="column" marginTop={3}>
+      <Box
+        component="form"
+        onSubmit={onJoinCallSubmit}
+        display="flex"
+        flexDirection="column"
+        marginTop={3}
+      >
         <Typography variant="label" component="label" htmlFor={callUidInputId}>
           Join a call
         </Typography>
         <TextField
           id={callUidInputId}
+          value={callId}
+          onChange={handleCallIdChange}
           placeholder="Insert the call ID"
           autoComplete="off"
           required
@@ -117,7 +150,7 @@ export default function CallSelectionMain() {
           sx={{ marginTop: 3 }}
           fullWidth
         >
-          Join call
+          {isJoining ? "Joining" : "Join call"}
         </Button>
       </Box>
     </HomeTemplate>
