@@ -32,6 +32,7 @@ export default function CallSelectionMain() {
   const dispatch = useAppDispatch();
 
   const callDisplayNameInputId = useId();
+  const callUidInputId = useId();
 
   const call = useAppSelector(selectCall);
 
@@ -95,6 +96,28 @@ export default function CallSelectionMain() {
           fullWidth
         >
           {isPending ? "Preparing it..." : "Create call"}
+        </Button>
+      </Box>
+      <Box display="flex" flexDirection="column" marginTop={3}>
+        <Typography variant="label" component="label" htmlFor={callUidInputId}>
+          Join a call
+        </Typography>
+        <TextField
+          id={callUidInputId}
+          placeholder="Insert the call ID"
+          autoComplete="off"
+          required
+          fullWidth
+        />
+        <Button
+          type="submit"
+          color="primary"
+          variant="contained"
+          startIcon={<VideoCallIcon />}
+          sx={{ marginTop: 3 }}
+          fullWidth
+        >
+          Join call
         </Button>
       </Box>
     </HomeTemplate>
