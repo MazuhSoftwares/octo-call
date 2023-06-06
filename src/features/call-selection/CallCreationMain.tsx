@@ -123,6 +123,28 @@ export default function CallCreationMain() {
           <Groups3Icon sx={{ mr: 1 }} /> Join another existing call
         </Link>
       </Box>
+      <Box display="flex" flexDirection="column" marginTop={3}>
+        <Typography variant="label" component="label" htmlFor={callUidInputId}>
+          Join a call
+        </Typography>
+        <TextField
+          id={callUidInputId}
+          placeholder="Insert the call ID"
+          autoComplete="off"
+          required
+          fullWidth
+        />
+        <Button
+          type="submit"
+          color="primary"
+          variant="contained"
+          startIcon={<VideoCallIcon />}
+          sx={{ marginTop: 3 }}
+          fullWidth
+        >
+          Join call
+        </Button>
+      </Box>
     </HomeTemplate>
   );
 }
