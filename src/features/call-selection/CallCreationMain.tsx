@@ -123,12 +123,20 @@ export default function CallCreationMain() {
           <Groups3Icon sx={{ mr: 1 }} /> Join another existing call
         </Link>
       </Box>
-      <Box display="flex" flexDirection="column" marginTop={3}>
+      <Box
+        component="form"
+        onSubmit={onJoinCallSubmit}
+        display="flex"
+        flexDirection="column"
+        marginTop={3}
+      >
         <Typography variant="label" component="label" htmlFor={callUidInputId}>
           Join a call
         </Typography>
         <TextField
           id={callUidInputId}
+          value={callUid}
+          onChange={handleCallIdChange}
           placeholder="Insert the call ID"
           autoComplete="off"
           required
@@ -142,7 +150,7 @@ export default function CallCreationMain() {
           sx={{ marginTop: 3 }}
           fullWidth
         >
-          Join call
+          {isAskingToJoin ? "Joining" : "Join call"}
         </Button>
       </Box>
     </HomeTemplate>
