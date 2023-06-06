@@ -1,13 +1,15 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { RootState } from ".";
-import { CallUser } from "../webrtc";
+import { CallParticipant, CallUser } from "../webrtc";
 
 export interface CallUserState {
-  participants: CallUser[];
+  participants: CallParticipant[];
+  pendingUsers: CallUser[];
 }
 
 export const callUsersInitialState: CallUserState = {
   participants: [],
+  pendingUsers: [],
 };
 
 export const callUsersSlice = createSlice({
@@ -16,7 +18,14 @@ export const callUsersSlice = createSlice({
   reducers: {
     setCallUsers: (state, action: PayloadAction<CallUser[]>) => {
       const callUsers = action.payload;
-      state.participants = callUsers.filter((callUser) => callUser.joined);
+
+      state.participants = callUsers.filter(
+        (callUser) => callUser.joined
+      ) as CallParticipant[];
+
+      state.pendingUsers = callUsers.filter(
+        (callUser) => !callUser.joined
+      ) as CallUser[];
     },
   },
 });

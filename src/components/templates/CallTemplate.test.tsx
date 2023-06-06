@@ -50,7 +50,9 @@ describe("CallTemplate", () => {
       name: "Participants",
     });
     fireEvent.click(participantsButton);
-    const participantsModal = await screen.findByText(/Participants/);
+    const participantsModal = await screen.findByRole("heading", {
+      name: "Participants",
+    });
     expect(participantsModal).toBeInTheDocument();
   });
 
