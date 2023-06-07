@@ -7,7 +7,8 @@ import { userInitialState } from "../../state/user";
 
 describe("CallSelectionMain", () => {
   beforeEach(() => {
-    (firestoreSignaling.create as jest.Mock).mockClear();
+    (firestoreSignaling.createCall as jest.Mock).mockClear();
+    (firestoreSignaling.askToJoinCall as jest.Mock).mockClear();
   });
 
   it("renders", () => {
@@ -61,6 +62,6 @@ describe("CallSelectionMain", () => {
     });
     await act(() => fireEvent.click(joinCallButtonElement));
 
-    expect(firestoreSignaling.create).toHaveBeenCalledTimes(1);
+    expect(firestoreSignaling.askToJoinCall).toHaveBeenCalledTimes(1);
   });
 });
