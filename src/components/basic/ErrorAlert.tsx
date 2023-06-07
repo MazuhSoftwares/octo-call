@@ -1,12 +1,18 @@
 import { ReactNode } from "react";
-import Alert from "@mui/material/Alert";
+import Alert, { AlertProps } from "@mui/material/Alert";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 
 export interface ErrorAlertProps {
   message: string | ReactNode;
+  prefix?: string;
+  sx?: AlertProps["sx"];
 }
 
-export default function ErrorAlert({ message }: ErrorAlertProps) {
+export default function ErrorAlert({
+  message,
+  prefix = "Error!",
+  sx = {},
+}: ErrorAlertProps) {
   if (!message) {
     return null;
   }
@@ -20,8 +26,11 @@ export default function ErrorAlert({ message }: ErrorAlertProps) {
       : message;
 
   return (
-    <Alert severity="error" icon={<ErrorOutlineIcon color="secondary" />}>
-      <strong>Error!</strong> {fixedMessage}
+    <Alert
+      severity="error"
+      icon={<ErrorOutlineIcon color="secondary" sx={sx} />}
+    >
+      <strong>{prefix}</strong> {fixedMessage}
     </Alert>
   );
 }

@@ -145,6 +145,23 @@ export const retrieveAudioInputs = createAsyncThunk(
   }
 );
 
+export const setAudioToDefault = createAsyncThunk(
+  "devices/set-audio-to-default",
+  async (_, thunkAPI) => {
+    const { userAudioId, audioInputs } = (thunkAPI.getState() as RootState)
+      .devices;
+    if (userAudioId) {
+      return;
+    }
+
+    if (!audioInputs.length) {
+      return;
+    }
+
+    thunkAPI.dispatch(setUserAudioId(audioInputs[0].deviceId));
+  }
+);
+
 export const retrieveVideoInputs = createAsyncThunk(
   "devices/retrieve-video-inputs",
   async () => {
@@ -152,10 +169,26 @@ export const retrieveVideoInputs = createAsyncThunk(
   }
 );
 
+export const setVideoToDefault = createAsyncThunk(
+  "devices/set-video-to-default",
+  async (_, thunkAPI) =>
+    thunkAPI.dispatch(
+      setUserVideoId(
+        (thunkAPI.getState() as RootState).devices.videoInputs[0]?.deviceId ||
+          ""
+      )
+    )
+);
+
 // selectors
+
+export const selectDevices = (state: RootState) => state.devices;
 
 export const selectUserAudioId = (state: RootState) =>
   state.devices.userAudioId;
+
+export const selectDefaultAudioId = (state: RootState) =>
+  state.devices.audioInputs[0]?.deviceId || "";
 
 export const selectAudioDevices = (state: RootState) => ({
   audioInputs: state.devices.audioInputs,
@@ -165,6 +198,9 @@ export const selectAudioDevices = (state: RootState) => ({
 
 export const selectUserVideoId = (state: RootState) =>
   state.devices.userVideoId;
+
+export const selectDefaultVideoId = (state: RootState) =>
+  state.devices.videoInputs[0]?.deviceId || "";
 
 export const selectVideoDevices = (state: RootState) => ({
   videoInputs: state.devices.videoInputs,
