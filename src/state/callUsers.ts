@@ -38,29 +38,19 @@ export const callUsersSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(askToJoinCall.pending, (state) => {
-      state.participants = [];
-      state.pendingUsers = [];
       state.status = "pending";
       state.errorMessage = "";
     });
 
     builder.addCase(askToJoinCall.rejected, (state, action) => {
-      state.participants = [];
-      state.pendingUsers = [];
       state.status = "error";
       state.errorMessage = action.error.message ?? "Unknown error.";
     });
 
-    builder.addCase(
-      askToJoinCall.fulfilled,
-      (state, action: PayloadAction<CallUser>) => {
-        const oldPendingUsers = state.pendingUsers;
-
-        state.status = "created";
-        state.errorMessage = "";
-        state.pendingUsers = oldPendingUsers.concat(action.payload);
-      }
-    );
+    builder.addCase(askToJoinCall.fulfilled, (state) => {
+      state.status = "created";
+      state.errorMessage = "";
+    });
   },
 });
 
