@@ -130,6 +130,7 @@ export default function CallCreationMain() {
         flexDirection="column"
         marginTop={3}
       >
+        <ErrorAlert message={callUsers.errorMessage} />
         <Typography variant="label" component="label" htmlFor={callUidInputId}>
           Join a call
         </Typography>
