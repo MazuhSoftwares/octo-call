@@ -67,11 +67,7 @@ function configurePersistenceListener(configuringStore: AppStore) {
 
         current = configuringStore.getState();
 
-        if (!previous) {
-          return;
-        }
-
-        if (previous === current) {
+        if (previous == current) {
           return;
         }
 
@@ -83,7 +79,7 @@ function configurePersistenceListener(configuringStore: AppStore) {
   );
 }
 
-function loadStateFromPersistence(
+export function loadStateFromPersistence(
   preloaded: PreloadedAppState = {}
 ): PreloadedAppState {
   console.log("Loading state from persistence.");
@@ -91,6 +87,7 @@ function loadStateFromPersistence(
 
   preloading.devices = {
     ...devicesInitialState,
+    ...(preloaded.devices || {}),
     ...retrieveDevicesState(),
   };
 
@@ -98,33 +95,37 @@ function loadStateFromPersistence(
   return preloading;
 }
 
-function handleStateUpdateForPersistence(
+export function handleStateUpdateForPersistence(
   previous: RootState,
   current: RootState
-) {
-  const devicesDiff = getWorthingDiff(previous.devices, current.devices, {
-    deny: [
-      "audioStatus",
-      "audioErrorMessage",
-      "videoStatus",
-      "videoErrorMessage",
-    ],
-  });
+): void {
+  const devicesDiff = getWorthingDiff(
+    previous?.devices || {},
+    current.devices,
+    {
+      deny: [
+        "audioStatus",
+        "audioErrorMessage",
+        "videoStatus",
+        "videoErrorMessage",
+      ],
+    }
+  );
   if (isFilledDiff(devicesDiff)) {
     saveDevicesState(devicesDiff);
   }
 }
 
-function getWorthingDiff<T extends RootState[keyof RootState]>(
-  previous: T,
-  current: T,
+export function getWorthingDiff<T extends RootState[keyof RootState]>(
+  previous: T | undefined,
+  current: T | undefined,
   options: {
     allow?: (keyof T)[];
     deny?: (keyof T)[];
   } = {}
 ): Partial<T> {
   if (!previous || !current) {
-    return {};
+    return current || {};
   }
 
   const all = new Set<keyof T>([
@@ -154,7 +155,7 @@ function getWorthingDiff<T extends RootState[keyof RootState]>(
   return worthingCurrentDiff;
 }
 
-function isFilledDiff<T extends RootState[keyof RootState]>(
+export function isFilledDiff<T extends RootState[keyof RootState]>(
   diff: Partial<T>
 ): boolean {
   return Object.keys(diff).length > 0;
