@@ -4,7 +4,7 @@ import { CallParticipant, CallUser } from "../webrtc";
 import firestoreSignaling from "../services/firestore-signaling";
 import type { CallUserIntent } from "../services/firestore-signaling";
 
-type CallUserStatus = "idle" | "pending" | "created" | "error";
+type CallUserStatus = "idle" | "pending" | "done" | "error";
 
 export interface CallUserState {
   participants: CallParticipant[];
@@ -48,7 +48,7 @@ export const callUsersSlice = createSlice({
     });
 
     builder.addCase(askToJoinCall.fulfilled, (state) => {
-      state.status = "created";
+      state.status = "done";
       state.errorMessage = "";
     });
   },
@@ -57,10 +57,9 @@ export const callUsersSlice = createSlice({
 export const askToJoinCall = createAsyncThunk(
   "create-call-user",
   ({ userUid, userDisplayName, callUid }: CallUserIntent) =>
-    firestoreSignaling.askToJoinCall({
+    firestoreSignaling.create(`calls/${callUid}/users`, {
       userUid,
       userDisplayName,
-      callUid,
     }),
   {
     condition: (_arg, thunkAPI) =>
