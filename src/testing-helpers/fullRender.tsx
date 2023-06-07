@@ -1,15 +1,14 @@
 import { FC, ReactElement } from "react";
 import { Provider } from "react-redux";
 import { RenderOptions, RenderResult, render } from "@testing-library/react";
-import { RootState, AppStore, setupAppStore } from "../state";
-import { PreloadedState } from "@reduxjs/toolkit";
+import { AppStore, setupAppStore, PreloadedAppState } from "../state";
 
 interface FullRenderResult extends RenderResult {
   store: AppStore;
 }
 
 interface FullRenderOptions extends Omit<RenderOptions, "queries"> {
-  preloadedState?: PreloadedState<RootState>;
+  preloadedState?: PreloadedAppState;
 }
 
 export default function fullRender(
@@ -21,7 +20,7 @@ export default function fullRender(
     wrapper: CustomWrapper = ({ children }) => children,
     ...renderOptions
   } = options;
-  const store = setupAppStore(preloadedState);
+  const store = setupAppStore({ preloadedState });
   const Wrapper: FC = () => (
     <CustomWrapper>
       <Provider store={store}>{ui}</Provider>
