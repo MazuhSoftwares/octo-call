@@ -37,4 +37,30 @@ describe("CallSelectionMain", () => {
 
     expect(firestoreSignaling.createCall).toBeCalledTimes(1);
   });
+
+  it("asking to join a call is integrated with firebase", async () => {
+    fullRender(<CallSelectionMain />, {
+      preloadedState: {
+        user: {
+          ...userInitialState,
+          uid: "1m2kkn3",
+          displayName: "John Doe",
+          status: "authenticated",
+        },
+      },
+    });
+
+    const callUidInputElement = screen.getByLabelText("Join a call");
+
+    const joinCallButtonElement = screen.getByRole("button", {
+      name: "Join call",
+    });
+
+    fireEvent.change(callUidInputElement, {
+      target: { value: "b385c5fe-5da5-476d-b66f-a4580581be61" },
+    });
+    await act(() => fireEvent.click(joinCallButtonElement));
+
+    expect(firestoreSignaling.create).toHaveBeenCalledTimes(1);
+  });
 });
