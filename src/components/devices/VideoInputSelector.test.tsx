@@ -137,7 +137,7 @@ describe("VideoInputSelector", () => {
     await waitFor(() => expect(selectEl).toHaveValue("444d"));
   });
 
-  it("resets selected device to a default if state mod has nothing close to what webrtc mod found", async () => {
+  it("clears selected device if state mod has nothing close to what webrtc mod found", async () => {
     await act(() =>
       fullRender(<VideoInputSelector />, {
         preloadedState: {
@@ -151,7 +151,7 @@ describe("VideoInputSelector", () => {
     );
 
     const selectEl = screen.getByRole("combobox");
-    await waitFor(() => expect(selectEl).toHaveValue("333c"));
+    await waitFor(() => expect(selectEl).toHaveValue(""));
   });
 
   it("clears selected device if state mod has no options from webrtc mod", async () => {
@@ -174,7 +174,17 @@ describe("VideoInputSelector", () => {
   });
 
   it("integrates with webrtc module to preview the (initial) selected device", async () => {
-    await act(() => fullRender(<VideoInputSelector />));
+    await act(() =>
+      fullRender(<VideoInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userVideoId: "333c",
+            userVideoLabel: "Webcam A (gathered from WebRTC API)",
+          },
+        },
+      })
+    );
 
     await waitFor(() =>
       expect(webrtc.startVideoPreview).toHaveBeenCalledTimes(1)
@@ -189,7 +199,17 @@ describe("VideoInputSelector", () => {
     const stopMock = jest.fn();
     (webrtc.startVideoPreview as jest.Mock).mockResolvedValue(stopMock);
 
-    await act(() => fullRender(<VideoInputSelector />));
+    await act(() =>
+      fullRender(<VideoInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userVideoId: "333c",
+            userVideoLabel: "Webcam A (gathered from WebRTC API)",
+          },
+        },
+      })
+    );
 
     const selectEl = screen.getByRole("combobox");
     const optionEl = screen.getByRole("option", {
@@ -218,17 +238,26 @@ describe("VideoInputSelector", () => {
     );
 
     const { unmount } = await act(() =>
-      fullRender(<VideoInputSelector />, { wrapper: StrictMode })
+      fullRender(<VideoInputSelector />, {
+        wrapper: StrictMode,
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userVideoId: "333c",
+            userVideoLabel: "Webcam A (gathered from WebRTC API)",
+          },
+        },
+      })
     );
     unmount();
 
-    expect(webrtc.startVideoPreview).toBeCalledTimes(1);
+    expect(webrtc.startVideoPreview).toBeCalledTimes(1); // for the preloaded device
     expect(mockStop).not.toBeCalled();
 
     await new Promise((r) => setTimeout(r, 300));
 
-    expect(webrtc.startVideoPreview).toBeCalledTimes(1);
-    expect(mockStop).toBeCalledTimes(1);
+    expect(webrtc.startVideoPreview).toBeCalledTimes(1); // no extra start
+    expect(mockStop).toBeCalledTimes(1); // and its single stop
   });
 
   it("(STRESS) has its hook being able to protect webrtc layer from concurrent attempts to pull resources", async () => {

@@ -11,7 +11,8 @@ jest.mock("../../webrtc", () => ({
 
 describe("AudioInputSelector", () => {
   beforeEach(() => {
-    (webrtc.retrieveMediaInputs as jest.Mock).mockReset();
+    jest.clearAllMocks();
+
     (webrtc.retrieveMediaInputs as jest.Mock).mockResolvedValue([
       {
         deviceId: "111a",
@@ -25,7 +26,6 @@ describe("AudioInputSelector", () => {
       },
     ]);
 
-    (webrtc.startAudioPreview as jest.Mock).mockReset();
     (webrtc.startAudioPreview as jest.Mock).mockResolvedValue(() => null);
   });
 
@@ -135,7 +135,7 @@ describe("AudioInputSelector", () => {
     expect(selectEl).toHaveValue("222b");
   });
 
-  it("resets selected device to a default if state mod has nothing close to what webrtc mod found", async () => {
+  it("clears selected device if state mod has nothing close to what webrtc mod found", async () => {
     await act(() =>
       fullRender(<AudioInputSelector />, {
         preloadedState: {
@@ -149,7 +149,7 @@ describe("AudioInputSelector", () => {
     );
 
     const selectEl = screen.getByRole("combobox");
-    await waitFor(() => expect(selectEl).toHaveValue("111a"));
+    await waitFor(() => expect(selectEl).toHaveValue(""));
   });
 
   it("clears selected device if state mod has no options from webrtc mod", async () => {
@@ -172,7 +172,17 @@ describe("AudioInputSelector", () => {
   });
 
   it("integrates with webrtc module to preview the (initial) selected device", async () => {
-    await act(() => fullRender(<AudioInputSelector />));
+    await act(() =>
+      fullRender(<AudioInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userAudioId: "111a",
+            userAudioLabel: "Microphone 1 (gathered from WebRTC API)",
+          },
+        },
+      })
+    );
 
     await waitFor(() =>
       expect(webrtc.startAudioPreview).toHaveBeenCalledTimes(1)
@@ -187,7 +197,17 @@ describe("AudioInputSelector", () => {
     const stopMock = jest.fn();
     (webrtc.startAudioPreview as jest.Mock).mockResolvedValue(stopMock);
 
-    await act(() => fullRender(<AudioInputSelector />));
+    await act(() =>
+      fullRender(<AudioInputSelector />, {
+        preloadedState: {
+          devices: {
+            ...devicesInitialState,
+            userAudioId: "111a",
+            userAudioLabel: "Microphone 1 (gathered from WebRTC API)",
+          },
+        },
+      })
+    );
 
     const selectEl = screen.getByRole("combobox");
     const optionEl = screen.getByRole("option", {

@@ -90,12 +90,8 @@ export const devicesSlice = createSlice({
         const foundAgainByLabel = action.payload.find(
           (d) => d.label === state.userAudioLabel
         );
-        state.userAudioId = foundAgainByLabel
-          ? foundAgainByLabel.deviceId
-          : action.payload[0].deviceId;
-        state.userAudioLabel = foundAgainByLabel
-          ? foundAgainByLabel.label
-          : action.payload[0].label;
+        state.userAudioId = foundAgainByLabel ? foundAgainByLabel.deviceId : "";
+        state.userAudioLabel = foundAgainByLabel ? foundAgainByLabel.label : "";
       }
     );
     builder.addCase(retrieveAudioInputs.rejected, (state, action) => {
@@ -126,12 +122,8 @@ export const devicesSlice = createSlice({
         const foundAgainByLabel = action.payload.find(
           (d) => d.label === state.userVideoLabel
         );
-        state.userVideoId = foundAgainByLabel
-          ? foundAgainByLabel.deviceId
-          : action.payload[0].deviceId;
-        state.userVideoLabel = foundAgainByLabel
-          ? foundAgainByLabel.label
-          : action.payload[0].label;
+        state.userVideoId = foundAgainByLabel ? foundAgainByLabel.deviceId : "";
+        state.userVideoLabel = foundAgainByLabel ? foundAgainByLabel.label : "";
       }
     );
     builder.addCase(retrieveVideoInputs.rejected, (state, action) => {
@@ -164,8 +156,6 @@ export const retrieveVideoInputs = createAsyncThunk(
 
 export const selectUserAudioId = (state: RootState) =>
   state.devices.userAudioId;
-export const selectUserAudioLabel = (state: RootState) =>
-  state.devices.userAudioLabel;
 
 export const selectAudioDevices = (state: RootState) => ({
   audioInputs: state.devices.audioInputs,
@@ -175,8 +165,6 @@ export const selectAudioDevices = (state: RootState) => ({
 
 export const selectUserVideoId = (state: RootState) =>
   state.devices.userVideoId;
-export const selectUserVideoLabel = (state: RootState) =>
-  state.devices.userVideoLabel;
 
 export const selectVideoDevices = (state: RootState) => ({
   videoInputs: state.devices.videoInputs,
