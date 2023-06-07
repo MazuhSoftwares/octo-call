@@ -41,14 +41,14 @@ export default function CallSelectionMain() {
   const currentUser = useAppSelector(selectCurrentUser);
 
   const [callDisplayName, setCallDisplayName] = useState<string>("");
-  const [callId, setCallId] = useState<string>("");
+  const [callUid, setCallUid] = useState<string>("");
   const handleCallDisplayNameChange = (
     event: ChangeEvent<HTMLInputElement>
   ) => {
     setCallDisplayName(event.target.value);
   };
   const handleCallIdChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setCallId(event.target.value);
+    setCallUid(event.target.value);
   };
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -68,7 +68,7 @@ export default function CallSelectionMain() {
   const onJoinCallSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!callId.trim()) {
+    if (!callUid.trim()) {
       return;
     }
 
@@ -76,7 +76,7 @@ export default function CallSelectionMain() {
       askToJoinCall({
         userUid: currentUser.uid,
         userDisplayName: currentUser.displayName,
-        callUid: callId,
+        callUid: callUid,
       })
     );
   };
@@ -135,7 +135,7 @@ export default function CallSelectionMain() {
         </Typography>
         <TextField
           id={callUidInputId}
-          value={callId}
+          value={callUid}
           onChange={handleCallIdChange}
           placeholder="Insert the call ID"
           autoComplete="off"
