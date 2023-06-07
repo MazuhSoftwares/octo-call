@@ -20,6 +20,7 @@ import {
   retrieveAudioInputs,
   retrieveVideoInputs,
   selectDevices,
+  selectHasSomeDevice,
   setAudioToDefault,
   setUserAudioId,
   setUserVideoId,
@@ -35,6 +36,8 @@ export default function CallSelectionMain() {
 
   const callDisplayNameInputId = useId();
   const callUidInputId = useId();
+
+  const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
   const call = useAppSelector(selectCall);
   const callUsers = useAppSelector(selectCallUsers);
@@ -81,6 +84,8 @@ export default function CallSelectionMain() {
   const isPending = call.status === "pending";
   const isAskingToJoin = callUsers.status === "asking-to-join";
 
+  const isSubmitDisabled = hasSomeDevice || isPending;
+
   return (
     <HomeTemplate subtitle="Create or join a call">
       <QuickDevicesConfig />
@@ -110,7 +115,7 @@ export default function CallSelectionMain() {
         />
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isSubmitDisabled}
           color="primary"
           variant="contained"
           startIcon={<VideoCallIcon />}
