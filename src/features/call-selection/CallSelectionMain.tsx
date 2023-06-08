@@ -27,7 +27,6 @@ import {
 import ToggleMicButton from "../../components/devices/ToggleMicButton";
 import ToggleCamButton from "../../components/devices/ToggleCamButton";
 import InfoAlert from "../../components/basic/InfoAlert";
-import { selectCurrentUser } from "../../state/user";
 import { askToJoinCall, selectCallUsers } from "../../state/callUsers";
 
 export default function CallSelectionMain() {
@@ -38,7 +37,6 @@ export default function CallSelectionMain() {
 
   const call = useAppSelector(selectCall);
   const callUsers = useAppSelector(selectCallUsers);
-  const currentUser = useAppSelector(selectCurrentUser);
 
   const [callDisplayName, setCallDisplayName] = useState<string>("");
   const [callUid, setCallUid] = useState<string>("");
@@ -74,15 +72,13 @@ export default function CallSelectionMain() {
 
     dispatch(
       askToJoinCall({
-        userUid: currentUser.uid,
-        userDisplayName: currentUser.displayName,
-        callUid: callUid,
+        callUid,
       })
     );
   };
 
   const isPending = call.status === "pending";
-  const isJoining = callUsers.status === "pending";
+  const isAskingToJoin = callUsers.status === "asking-to-join";
 
   return (
     <HomeTemplate subtitle="Create or join a call">
@@ -151,7 +147,7 @@ export default function CallSelectionMain() {
           sx={{ marginTop: 3 }}
           fullWidth
         >
-          {isJoining ? "Joining" : "Join call"}
+          {isAskingToJoin ? "Asking to joining" : "Join call"}
         </Button>
       </Box>
     </HomeTemplate>
