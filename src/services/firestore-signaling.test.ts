@@ -1,8 +1,18 @@
-import { createCall } from "./firestore-signaling";
+import {
+  askToJoinCall,
+  createCall,
+  listenCallUsers,
+} from "./firestore-signaling";
 import { v4 as uuidv4 } from "uuid";
 
-import { doc, writeBatch, onSnapshot } from "firebase/firestore";
-import { listenCallUsers } from "./firestore-signaling";
+import {
+  addDoc,
+  doc,
+  writeBatch,
+  onSnapshot,
+  getDocs,
+  collection,
+} from "firebase/firestore";
 
 jest.mock("firebase/firestore", () => ({
   addDoc: jest.fn(),
@@ -11,6 +21,8 @@ jest.mock("firebase/firestore", () => ({
   writeBatch: jest.fn(),
   onSnapshot: jest.fn(),
   query: jest.fn(),
+  getDocs: jest.fn(),
+  where: jest.fn(),
 }));
 
 jest.mock("uuid", () => ({
@@ -139,5 +151,56 @@ describe("listenCallUsers", () => {
         uid: "D8LBvBhKb4ZidKKBWvvV",
       },
     ]);
+  });
+});
+
+describe("askToJoinCall", () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it("askToJoinCall should create a callUser in firebase", async () => {
+    (getDocs as jest.Mock).mockResolvedValue({
+      forEach: Array.prototype.forEach.bind([
+        {
+          data: () => ({
+            displayName: "Planing",
+            hostId: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
+            uid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
+          }),
+        },
+      ]),
+    });
+
+    await askToJoinCall({
+      callUid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
+      userDisplayName: "Michael Smith",
+      userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
+    });
+
+    const secondCollectioCall = (collection as jest.Mock).mock.calls[1];
+    const addDocCall = (addDoc as jest.Mock).mock.calls[0];
+
+    expect(secondCollectioCall[1]).toBe(
+      "calls/6db9ad2e-19f9-4a85-b383-7731e347b7d0/users"
+    );
+    expect(addDocCall[1]).toEqual({
+      userDisplayName: "Michael Smith",
+      userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
+    });
+  });
+
+  it("askToJoinCall should throw error when the call does not exist", async () => {
+    (getDocs as jest.Mock).mockResolvedValue({
+      forEach: Array.prototype.forEach.bind([]),
+    });
+
+    await expect(
+      askToJoinCall({
+        callUid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
+        userDisplayName: "Michael Smith",
+        userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
+      })
+    ).rejects.toThrow("Call not found");
   });
 });
