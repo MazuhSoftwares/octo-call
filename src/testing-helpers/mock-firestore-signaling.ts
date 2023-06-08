@@ -12,4 +12,5 @@ jest.mock("../services/firestore-signaling.ts", () => ({
     hostDisplayName: "John Doe",
   }),
   listenCallUsers: jest.fn().mockReturnValue(jest.fn()),
+  askToJoinCall: jest.fn().mockResolvedValue(undefined),
 }));

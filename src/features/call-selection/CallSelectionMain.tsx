@@ -27,19 +27,26 @@ import {
 import ToggleMicButton from "../../components/devices/ToggleMicButton";
 import ToggleCamButton from "../../components/devices/ToggleCamButton";
 import InfoAlert from "../../components/basic/InfoAlert";
+import { askToJoinCall, selectCallUsers } from "../../state/callUsers";
 
 export default function CallSelectionMain() {
   const dispatch = useAppDispatch();
 
   const callDisplayNameInputId = useId();
+  const callUidInputId = useId();
 
   const call = useAppSelector(selectCall);
+  const callUsers = useAppSelector(selectCallUsers);
 
   const [callDisplayName, setCallDisplayName] = useState<string>("");
+  const [callUid, setCallUid] = useState<string>("");
   const handleCallDisplayNameChange = (
     event: ChangeEvent<HTMLInputElement>
   ) => {
     setCallDisplayName(event.target.value);
+  };
+  const handleCallIdChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCallUid(event.target.value);
   };
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -56,7 +63,22 @@ export default function CallSelectionMain() {
     );
   };
 
+  const onJoinCallSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (!callUid.trim()) {
+      return;
+    }
+
+    dispatch(
+      askToJoinCall({
+        callUid,
+      })
+    );
+  };
+
   const isPending = call.status === "pending";
+  const isAskingToJoin = callUsers.status === "asking-to-join";
 
   return (
     <HomeTemplate subtitle="Create or join a call">
@@ -95,6 +117,37 @@ export default function CallSelectionMain() {
           fullWidth
         >
           {isPending ? "Preparing it..." : "Create call"}
+        </Button>
+      </Box>
+      <Box
+        component="form"
+        onSubmit={onJoinCallSubmit}
+        display="flex"
+        flexDirection="column"
+        marginTop={3}
+      >
+        <ErrorAlert message={callUsers.errorMessage} />
+        <Typography variant="label" component="label" htmlFor={callUidInputId}>
+          Join a call
+        </Typography>
+        <TextField
+          id={callUidInputId}
+          value={callUid}
+          onChange={handleCallIdChange}
+          placeholder="Insert the call ID"
+          autoComplete="off"
+          required
+          fullWidth
+        />
+        <Button
+          type="submit"
+          color="primary"
+          variant="contained"
+          startIcon={<VideoCallIcon />}
+          sx={{ marginTop: 3 }}
+          fullWidth
+        >
+          {isAskingToJoin ? "Asking to joining" : "Join call"}
         </Button>
       </Box>
     </HomeTemplate>

@@ -2,8 +2,10 @@ import {
   addDoc,
   collection,
   doc,
+  getDocs,
   onSnapshot,
   query,
+  where,
   writeBatch,
 } from "firebase/firestore";
 import type { DocumentData } from "firebase/firestore";
@@ -14,6 +16,7 @@ import type { Call, CallP2PDescription, CallUser } from "../webrtc";
 const firestoreSignaling = {
   create,
   createCall,
+  askToJoinCall,
 };
 
 export default firestoreSignaling;
@@ -55,12 +58,31 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
 
 export interface CallUserIntent {
   userUid: string;
+  userDisplayName: string;
   callUid: string;
 }
 
-export function ringToCall({ userUid, callUid }: CallUserIntent): void {
-  console.warn("Not implemented `ringToCall` service:", userUid, callUid);
-  // TODO: insert CallUser
+export async function askToJoinCall({
+  callUid,
+  userDisplayName,
+  userUid,
+}: CallUserIntent) {
+  const calls: Call[] = [];
+
+  const q = query(collection(db, `calls`), where("uid", "==", callUid));
+  const querySnapshot = await getDocs(q);
+  querySnapshot.forEach((doc) => {
+    calls.push(doc.data() as Call);
+  });
+
+  if (!calls.length) {
+    throw new Error("Call not found");
+  }
+
+  await addDoc(collection(db, `calls/${callUid}/users`), {
+    userDisplayName,
+    userUid,
+  });
 }
 
 // ref: calls/<call_uid>/p2p-descriptions

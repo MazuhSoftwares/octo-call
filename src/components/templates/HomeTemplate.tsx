@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../../state";
 import { logout, selectIsAuthenticated } from "../../state/user";
 import SettingsModal from "../settings/SettingsModal";
 import { selectCallUid, selectHasCallInProgress } from "../../state/call";
+import { selectIsPendingCallUser } from "../../state/callUsers";
 
 export interface HomeTemplateProps {
   children: ReactNode;
@@ -32,8 +33,14 @@ export default function HomeTemplate({
 
   const callUid = useAppSelector(selectCallUid);
   const isCallInProgress = useAppSelector(selectHasCallInProgress);
+  const isUserPending = useAppSelector(selectIsPendingCallUser);
+
   if (isCallInProgress) {
     return <Redirect to={`/p2p/${callUid}`} />;
+  }
+
+  if (isUserPending) {
+    return <p>Esperando...</p>;
   }
 
   return (
