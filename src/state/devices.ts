@@ -95,8 +95,9 @@ export const devicesSlice = createSlice({
       }
     );
     builder.addCase(retrieveAudioInputs.rejected, (state, action) => {
+      state.userAudioId = "";
       state.audioInputs = [];
-      state.audioStatus = "done";
+      state.audioStatus = "error";
       state.audioErrorMessage = action.error.message || "Unknown error.";
     });
 
@@ -127,8 +128,9 @@ export const devicesSlice = createSlice({
       }
     );
     builder.addCase(retrieveVideoInputs.rejected, (state, action) => {
+      state.userVideoId = "";
       state.videoInputs = [];
-      state.videoStatus = "done";
+      state.videoStatus = "error";
       state.videoErrorMessage = action.error.message || "Unknown error.";
     });
   },

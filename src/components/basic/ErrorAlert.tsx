@@ -28,7 +28,8 @@ export default function ErrorAlert({
   return (
     <Alert
       severity="error"
-      icon={<ErrorOutlineIcon color="secondary" sx={sx} />}
+      icon={<ErrorOutlineIcon color="secondary" />}
+      sx={sx}
     >
       <strong>{prefix}</strong> {fixedMessage}
     </Alert>

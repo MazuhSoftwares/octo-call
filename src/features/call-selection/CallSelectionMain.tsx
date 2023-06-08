@@ -4,6 +4,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useRef,
   useState,
 } from "react";
 import Box from "@mui/material/Box";
@@ -191,10 +192,18 @@ function QuickDevicesConfig() {
     });
   }, [dispatch, devices]);
 
+  const firstVideoIdRef = useRef<string>(devices.userVideoId);
+
   useEffect(() => {
     dispatch(retrieveAudioInputs()).then(() => {
       dispatch(setAudioToDefault());
     });
+
+    if (firstVideoIdRef.current) {
+      dispatch(retrieveVideoInputs()).then(() => {
+        dispatch(setVideoToDefault());
+      });
+    }
   }, [dispatch]);
 
   const isSomeDeviceLoading =
@@ -224,7 +233,11 @@ function QuickDevicesConfig() {
           {devices.userAudioLabel || "Disabled"}
         </Typography>
       </Box>
-      <ErrorAlert prefix="Audio issue." message={devices.audioErrorMessage} />
+      <ErrorAlert
+        prefix="Audio issue."
+        message={devices.audioErrorMessage}
+        sx={{ mb: 1 }}
+      />
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <ToggleCamButton
           handleToggleCamClick={handleToggleCamClick}
@@ -235,8 +248,12 @@ function QuickDevicesConfig() {
         <Typography component="span" aria-label="Selected camera">
           {devices.userVideoLabel || "Disabled"}
         </Typography>
-        <ErrorAlert prefix="Audio issue." message={devices.videoErrorMessage} />
       </Box>
+      <ErrorAlert
+        prefix="Video issue."
+        message={devices.videoErrorMessage}
+        sx={{ mb: 1, mt: 1 }}
+      />
     </Box>
   );
 }
