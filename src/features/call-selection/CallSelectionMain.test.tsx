@@ -63,5 +63,10 @@ describe("CallSelectionMain", () => {
     await act(() => fireEvent.click(joinCallButtonElement));
 
     expect(firestoreSignaling.askToJoinCall).toHaveBeenCalledTimes(1);
+    expect(firestoreSignaling.askToJoinCall).toHaveBeenCalledWith({
+      callUid: "b385c5fe-5da5-476d-b66f-a4580581be61",
+      userUid: "1m2kkn3",
+      userDisplayName: "John Doe",
+    });
   });
 });
