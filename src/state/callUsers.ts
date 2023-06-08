@@ -61,8 +61,14 @@ export const callUsersSlice = createSlice({
 
 export const askToJoinCall = createAsyncThunk(
   "create-call-user",
-  ({ userUid, userDisplayName, callUid }: CallUserIntent) =>
-    firestoreSignaling.askToJoinCall({ callUid, userUid, userDisplayName })
+  ({ callUid }: Pick<CallUserIntent, "callUid">, thunkApi) => {
+    const user = (thunkApi.getState() as RootState).user;
+    return firestoreSignaling.askToJoinCall({
+      callUid,
+      userUid: user.uid,
+      userDisplayName: user.displayName,
+    });
+  }
 );
 
 export const selectCallUsers = (state: RootState) => state.callUsers;
