@@ -4,7 +4,12 @@ import { CallParticipant, CallUser } from "../webrtc";
 import firestoreSignaling from "../services/firestore-signaling";
 import type { CallUserIntent } from "../services/firestore-signaling";
 
-type CallUserStatus = "idle" | "pending" | "awaiting" | "error";
+type CallUserStatus =
+  | "idle"
+  | "asking-to-join"
+  | "pending-user"
+  | "joined"
+  | "error";
 
 export interface CallUserState {
   participants: CallParticipant[];
@@ -38,7 +43,7 @@ export const callUsersSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(askToJoinCall.pending, (state) => {
-      state.status = "pending";
+      state.status = "asking-to-join";
       state.errorMessage = "";
     });
 
@@ -48,7 +53,7 @@ export const callUsersSlice = createSlice({
     });
 
     builder.addCase(askToJoinCall.fulfilled, (state) => {
-      state.status = "awaiting";
+      state.status = "pending-user";
       state.errorMessage = "";
     });
   },
@@ -63,7 +68,7 @@ export const askToJoinCall = createAsyncThunk(
 export const selectCallUsers = (state: RootState) => state.callUsers;
 
 export const selectIsPendingCallUser = (state: RootState) =>
-  state.callUsers.status === "awaiting";
+  state.callUsers.status === "pending-user";
 
 export const { setCallUsers } = callUsersSlice.actions;
 
