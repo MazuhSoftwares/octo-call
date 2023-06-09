@@ -17,6 +17,7 @@ const firestoreSignaling = {
   create,
   createCall,
   askToJoinCall,
+  listenCallUsers,
 };
 
 export default firestoreSignaling;
@@ -97,8 +98,6 @@ export function listenCallP2PDescriptions(
     listener
   );
 }
-
-// TODO: some onSnapshot magic, only call listener if the user is participating.
 
 export function listenCallUsers(
   callUid: string,

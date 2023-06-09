@@ -2,30 +2,37 @@ import "../../testing-helpers/mock-firestore-signaling";
 import { fireEvent, screen } from "@testing-library/react";
 import fullRender from "../../testing-helpers/fullRender";
 import CallTemplate from "./CallTemplate";
-import type { PreloadedAppState } from "../../state";
-import { userInitialState } from "../../state/user";
-import { callInitialState } from "../../state/call";
+import { UserState, userInitialState } from "../../state/user";
+import { CallState, callInitialState } from "../../state/call";
+import { createCall, createUser } from "../../testing-helpers/call-fixtures";
+import { act } from "react-dom/test-utils";
+
+jest.mock("../../hooks/useRedirectionRule", () =>
+  jest.fn().mockReturnValue("")
+);
 
 describe("CallTemplate", () => {
-  const preloadedState: PreloadedAppState = {
-    user: {
-      ...userInitialState,
-      uid: "1m2kkn3",
-      displayName: "John Doe",
-      status: "authenticated",
-    },
-    call: {
-      ...callInitialState,
-      uid: "c2a35f1f-46ea-4dab-a476-505a4b1b1c95",
+  const user: UserState = {
+    ...userInitialState,
+    ...createUser(),
+    status: "authenticated",
+  };
+  const call: CallState = {
+    ...callInitialState,
+    ...createCall({
+      hostId: user.uid,
+      hostDisplayName: user.displayName,
       displayName: "1:1 Jane Doe + John Doe",
-      hostId: "UOpsZn96IJUn8Jc2c8YFIcGRpzj1",
-      hostDisplayName: "Jane Doe",
-      status: "inProgress",
-    },
+    }),
+    status: "inProgress",
   };
 
   it("renders", async () => {
-    fullRender(<CallTemplate>Call.</CallTemplate>, { preloadedState });
+    await act(() =>
+      fullRender(<CallTemplate>Call.</CallTemplate>, {
+        preloadedState: { user, call },
+      })
+    );
 
     const participantsModal = await screen.findByText(
       "1:1 Jane Doe + John Doe"
@@ -33,18 +40,12 @@ describe("CallTemplate", () => {
     expect(participantsModal).toBeInTheDocument();
   });
 
-  it("redirects elsewhere if it is not in call", async () => {
-    fullRender(<CallTemplate>Call.</CallTemplate>, {
-      preloadedState: {
-        call: callInitialState,
-      },
-    });
-    const participantsModal = screen.queryByText("1:1 Jane Doe + John Doe");
-    expect(participantsModal).toBe(null);
-  });
-
   it("can show participants modal", async () => {
-    fullRender(<CallTemplate>Call.</CallTemplate>, { preloadedState });
+    await act(() =>
+      fullRender(<CallTemplate>Call.</CallTemplate>, {
+        preloadedState: { user, call },
+      })
+    );
 
     const participantsButton = screen.getByRole("button", {
       name: "Participants",
@@ -56,8 +57,12 @@ describe("CallTemplate", () => {
     expect(participantsModal).toBeInTheDocument();
   });
 
-  it("toggles microphone status", () => {
-    fullRender(<CallTemplate>Call.</CallTemplate>, { preloadedState });
+  it("toggles microphone status", async () => {
+    await act(() =>
+      fullRender(<CallTemplate>Call.</CallTemplate>, {
+        preloadedState: { user, call },
+      })
+    );
     const micButton = screen.getByTitle("Toggle microphone");
     expect(screen.getByText("Microphone is on.")).toBeInTheDocument();
 
@@ -68,8 +73,12 @@ describe("CallTemplate", () => {
     expect(screen.getByText("Microphone is on.")).toBeInTheDocument();
   });
 
-  it("toggles camera status", () => {
-    fullRender(<CallTemplate>Call.</CallTemplate>, { preloadedState });
+  it("toggles camera status", async () => {
+    await act(() =>
+      fullRender(<CallTemplate>Call.</CallTemplate>, {
+        preloadedState: { user, call },
+      })
+    );
     const camButton = screen.getByTitle("Toggle camera");
     expect(screen.getByText("Camera is off.")).toBeInTheDocument();
 

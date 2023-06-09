@@ -4,15 +4,14 @@ import Typography from "@mui/material/Typography";
 import GoogleIcon from "@mui/icons-material/Google";
 import HomeTemplate from "../../components/templates/HomeTemplate";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { login, selectCurrentUser } from "../../state/user";
+import { login, selectIsUserPendingAuthentication } from "../../state/user";
 
 export default function AuthMain() {
   const dispatch = useAppDispatch();
 
-  const user = useAppSelector(selectCurrentUser);
-
   const handleLoginClick = () => dispatch(login());
-  const isPending = user.status === "pending";
+
+  const isPending = useAppSelector(selectIsUserPendingAuthentication);
 
   return (
     <HomeTemplate>

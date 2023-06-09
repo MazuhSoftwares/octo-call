@@ -9,12 +9,12 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import homeBgPattern from "../../assets/home-bg-patternpad.jpg";
 import { useAppDispatch, useAppSelector } from "../../state";
 import useAgentHelper from "../../hooks/useAgentHelper";
-import { logout, selectIsAuthenticated } from "../../state/user";
+import { logout, selectIsUserAuthenticated } from "../../state/user";
 import SettingsModal from "../settings/SettingsModal";
-import { selectCallUid, selectHasCallInProgress } from "../../state/call";
 import { selectIsPendingCallUser } from "../../state/callUsers";
 import ErrorAlert from "../basic/ErrorAlert";
 import WarningAlert from "../basic/WarningAlert";
+import useRedirectionRule from "../../hooks/useRedirectionRule";
 
 export interface HomeTemplateProps {
   children: ReactNode;
@@ -26,9 +26,10 @@ export default function HomeTemplate({
   subtitle,
 }: HomeTemplateProps) {
   const dispatch = useAppDispatch();
+
   const handleLogoutClick = () => dispatch(logout());
 
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const isAuthenticated = useAppSelector(selectIsUserAuthenticated);
 
   const { canRunWebRTC, isChromeBased, isFirefoxBased } = useAgentHelper();
 
@@ -36,12 +37,12 @@ export default function HomeTemplate({
   const openSettings = () => setSettingsOpen(true);
   const closeSettings = () => setSettingsOpen(false);
 
-  const callUid = useAppSelector(selectCallUid);
-  const isCallInProgress = useAppSelector(selectHasCallInProgress);
   const isUserPending = useAppSelector(selectIsPendingCallUser);
 
-  if (isCallInProgress) {
-    return <Redirect to={`/p2p/${callUid}`} />;
+  const goTo = useRedirectionRule();
+
+  if (goTo) {
+    return <Redirect to={goTo} />;
   }
 
   if (isUserPending) {
