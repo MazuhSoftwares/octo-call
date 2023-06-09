@@ -20,6 +20,7 @@ import { useCallUsersListener } from "../../hooks/useCallUsersListener";
 import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
+import PendingUsersModal from "../participants/PendingUsersModal";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -147,8 +148,10 @@ function CallFooter() {
   const callUsers = useAppSelector(selectCallUsers);
 
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
+  const [isPendingUsersOpen, setPendingUsersOpen] = useState(true);
   const openParticipants = () => setParticipantsOpen(true);
   const closeParticipants = () => setParticipantsOpen(false);
+  const closePendingUsers = () => setPendingUsersOpen(false);
 
   const [isAudioEnabled, setAudioEnabled] = useState(true);
   const handleToggleMicClick = () => setAudioEnabled((current) => !current);
@@ -210,6 +213,10 @@ function CallFooter() {
       <ParticipantsModal
         isOpen={isParticipantsOpen}
         close={closeParticipants}
+      />
+      <PendingUsersModal
+        isOpen={isPendingUsersOpen}
+        close={closePendingUsers}
       />
     </Box>
   );
