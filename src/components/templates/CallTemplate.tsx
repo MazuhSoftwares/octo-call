@@ -10,9 +10,9 @@ import HelpIcon from "@mui/icons-material/Help";
 import PeopleIcon from "@mui/icons-material/People";
 import CallEndIcon from "@mui/icons-material/CallEnd";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { leaveCall, selectCallDisplayName } from "../../state/call";
+import { leaveCall, selectCall, selectCallDisplayName } from "../../state/call";
 import { getThemedColor } from "../styles";
-import { logout, selectUserDisplayName } from "../../state/user";
+import { logout, selectUserDisplayName, selectUserUid } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
 import { Redirect } from "wouter";
 import { selectCallUsers } from "../../state/callUsers";
@@ -58,6 +58,9 @@ function CallHeader() {
 
   const callDisplayName = useAppSelector(selectCallDisplayName);
   const userDisplayName = useAppSelector(selectUserDisplayName);
+  const currentUserUid = useAppSelector(selectUserUid);
+  const hostId = useAppSelector(selectCall).hostId;
+  const pendingUsers = useAppSelector(selectCallUsers).pendingUsers;
 
   const profileBtnId = useId();
   const profileMenuId = useId();
@@ -79,6 +82,8 @@ function CallHeader() {
   };
 
   const handleLogoutClick = () => dispatch(logout());
+
+  const isCurrentUserTheCallHost = currentUserUid === hostId;
 
   return (
     <Box
@@ -130,6 +135,10 @@ function CallHeader() {
           </MenuItem>
         </Menu>
       </Box>
+
+      {isCurrentUserTheCallHost && (
+        <PendingUsersModal isOpen={!!pendingUsers.length} />
+      )}
     </Box>
   );
 }
@@ -148,10 +157,8 @@ function CallFooter() {
   const callUsers = useAppSelector(selectCallUsers);
 
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
-  const [isPendingUsersOpen, setPendingUsersOpen] = useState(true);
   const openParticipants = () => setParticipantsOpen(true);
   const closeParticipants = () => setParticipantsOpen(false);
-  const closePendingUsers = () => setPendingUsersOpen(false);
 
   const [isAudioEnabled, setAudioEnabled] = useState(true);
   const handleToggleMicClick = () => setAudioEnabled((current) => !current);
@@ -213,10 +220,6 @@ function CallFooter() {
       <ParticipantsModal
         isOpen={isParticipantsOpen}
         close={closeParticipants}
-      />
-      <PendingUsersModal
-        isOpen={isPendingUsersOpen}
-        close={closePendingUsers}
       />
     </Box>
   );

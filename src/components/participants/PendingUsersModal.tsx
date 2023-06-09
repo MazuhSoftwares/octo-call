@@ -12,7 +12,7 @@ import { Button } from "@mui/material";
 
 export interface PendingUsersModalProps {
   isOpen: boolean;
-  close: () => void;
+  close?: () => void;
 }
 
 export default function PendingUsersModal({
