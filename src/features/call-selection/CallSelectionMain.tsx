@@ -84,7 +84,9 @@ export default function CallSelectionMain() {
   const isPending = call.status === "pending";
   const isAskingToJoin = callUsers.status === "asking-to-join";
 
-  const isSubmitDisabled = !hasSomeDevice || isPending;
+  const isCreateSubmitDisabled = !hasSomeDevice || isPending;
+  const isJoinSubmitDisabled = !hasSomeDevice || isAskingToJoin;
+
   const getSubmitLabel = (regular: string): string => {
     if (!hasSomeDevice) {
       return "Select at least one device.";
@@ -124,17 +126,25 @@ export default function CallSelectionMain() {
           required
           fullWidth
         />
-        <Button
-          type="submit"
-          disabled={isSubmitDisabled}
-          color="primary"
-          variant="contained"
-          startIcon={<VideoCallIcon />}
-          sx={{ marginTop: 3 }}
-          fullWidth
-        >
-          {getSubmitLabel("Create call")}
-        </Button>
+        {isCreateSubmitDisabled ? (
+          <ErrorAlert
+            prefix=""
+            message="At least one device is required."
+            sx={{ marginTop: 3 }}
+          />
+        ) : (
+          <Button
+            type="submit"
+            disabled={isCreateSubmitDisabled}
+            color="primary"
+            variant="contained"
+            startIcon={<VideoCallIcon />}
+            sx={{ marginTop: 3 }}
+            fullWidth
+          >
+            {getSubmitLabel("Create call")}
+          </Button>
+        )}
       </Box>
       <Box
         component="form"
@@ -158,7 +168,7 @@ export default function CallSelectionMain() {
         />
         <Button
           type="submit"
-          disabled={isSubmitDisabled}
+          disabled={isJoinSubmitDisabled}
           color="primary"
           variant="contained"
           startIcon={<VideoCallIcon />}

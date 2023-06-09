@@ -65,6 +65,33 @@ describe("CallSelectionMain", () => {
     expect(firestoreSignaling.createCall).toBeCalledTimes(1);
   });
 
+  it("can not create call if has no device", async () => {
+    await act(() =>
+      fullRender(<CallSelectionMain />, {
+        preloadedState: {
+          user: {
+            ...userInitialState,
+            uid: "1m2kkn3",
+            displayName: "John Doe",
+            status: "authenticated",
+          },
+        },
+      })
+    );
+
+    // unselect the default device found by the webrtc module
+    await act(() =>
+      fireEvent.click(screen.getByRole("button", { name: "Toggle microphone" }))
+    );
+
+    expect(
+      screen.queryByRole("button", {
+        name: "Create call",
+      })
+    ).toBe(null);
+    expect(screen.getByText("At least one device is required.")).toBeVisible();
+  });
+
   it("asking to join a call is integrated with firebase", async () => {
     await act(() =>
       fullRender(<CallSelectionMain />, {
