@@ -186,11 +186,11 @@ export const setVideoToDefault = createAsyncThunk(
 
 export const selectDevices = (state: RootState) => state.devices;
 
+export const selectHasSomeDevice = (state: RootState) =>
+  Boolean(state.devices.userAudioId || state.devices.userVideoId);
+
 export const selectUserAudioId = (state: RootState) =>
   state.devices.userAudioId;
-
-export const selectDefaultAudioId = (state: RootState) =>
-  state.devices.audioInputs[0]?.deviceId || "";
 
 export const selectAudioDevices = (state: RootState) => ({
   audioInputs: state.devices.audioInputs,
@@ -200,9 +200,6 @@ export const selectAudioDevices = (state: RootState) => ({
 
 export const selectUserVideoId = (state: RootState) =>
   state.devices.userVideoId;
-
-export const selectDefaultVideoId = (state: RootState) =>
-  state.devices.videoInputs[0]?.deviceId || "";
 
 export const selectVideoDevices = (state: RootState) => ({
   videoInputs: state.devices.videoInputs,

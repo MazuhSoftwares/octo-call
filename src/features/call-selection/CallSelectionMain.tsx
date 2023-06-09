@@ -20,6 +20,7 @@ import {
   retrieveAudioInputs,
   retrieveVideoInputs,
   selectDevices,
+  selectHasSomeDevice,
   setAudioToDefault,
   setUserAudioId,
   setUserVideoId,
@@ -35,6 +36,8 @@ export default function CallSelectionMain() {
 
   const callDisplayNameInputId = useId();
   const callUidInputId = useId();
+
+  const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
   const call = useAppSelector(selectCall);
   const callUsers = useAppSelector(selectCallUsers);
@@ -81,6 +84,21 @@ export default function CallSelectionMain() {
   const isPending = call.status === "pending";
   const isAskingToJoin = callUsers.status === "asking-to-join";
 
+  const isCreateSubmitDisabled = !hasSomeDevice || isPending;
+  const isJoinSubmitDisabled = !hasSomeDevice || isAskingToJoin;
+
+  const getSubmitLabel = (regular: string): string => {
+    if (!hasSomeDevice) {
+      return "Select at least one device.";
+    }
+
+    if (isPending || isAskingToJoin) {
+      return "Preparing it...";
+    }
+
+    return regular;
+  };
+
   return (
     <HomeTemplate subtitle="Create or join a call">
       <QuickDevicesConfig />
@@ -108,17 +126,25 @@ export default function CallSelectionMain() {
           required
           fullWidth
         />
-        <Button
-          type="submit"
-          disabled={isPending}
-          color="primary"
-          variant="contained"
-          startIcon={<VideoCallIcon />}
-          sx={{ marginTop: 3 }}
-          fullWidth
-        >
-          {isPending ? "Preparing it..." : "Create call"}
-        </Button>
+        {isCreateSubmitDisabled ? (
+          <ErrorAlert
+            prefix=""
+            message="At least one device is required."
+            sx={{ marginTop: 3 }}
+          />
+        ) : (
+          <Button
+            type="submit"
+            disabled={isCreateSubmitDisabled}
+            color="primary"
+            variant="contained"
+            startIcon={<VideoCallIcon />}
+            sx={{ marginTop: 3 }}
+            fullWidth
+          >
+            {getSubmitLabel("Create call")}
+          </Button>
+        )}
       </Box>
       <Box
         component="form"
@@ -142,13 +168,14 @@ export default function CallSelectionMain() {
         />
         <Button
           type="submit"
+          disabled={isJoinSubmitDisabled}
           color="primary"
           variant="contained"
           startIcon={<VideoCallIcon />}
           sx={{ marginTop: 3 }}
           fullWidth
         >
-          {isAskingToJoin ? "Asking to joining" : "Join call"}
+          {getSubmitLabel("Join call")}
         </Button>
       </Box>
     </HomeTemplate>
