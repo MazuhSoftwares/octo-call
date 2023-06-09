@@ -80,6 +80,15 @@ export const acceptPendingUser = createAsyncThunk(
   }
 );
 
+export const refusePendingUser = createAsyncThunk(
+  "refuse-pending-user",
+  ({ userUid }: Pick<CallUserIntent, "userUid">, thunkApi) => {
+    const call = (thunkApi.getState() as RootState).call;
+
+    return firestoreSignaling.refusePendingUser(userUid, call.uid);
+  }
+);
+
 export const selectCallUsers = (state: RootState) => state.callUsers;
 
 export const selectIsPendingCallUser = (state: RootState) =>

@@ -3,7 +3,11 @@ import Box from "@mui/material/Box";
 import GroupIcon from "@mui/icons-material/Group";
 import DialogModal from "../basic/DialogModal";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { acceptPendingUser, selectCallUsers } from "../../state/callUsers";
+import {
+  acceptPendingUser,
+  refusePendingUser,
+  selectCallUsers,
+} from "../../state/callUsers";
 import { Button } from "@mui/material";
 
 export interface PendingUsersModalProps {
@@ -20,6 +24,9 @@ export default function PendingUsersModal({
 
   const acceptUser = (userUid: string) => () =>
     dispatch(acceptPendingUser({ userUid }));
+
+  const refuseUser = (userUid: string) => () =>
+    dispatch(refusePendingUser({ userUid }));
 
   return (
     <DialogModal
@@ -50,7 +57,11 @@ export default function PendingUsersModal({
           >
             <Typography component="span">{callUser.userDisplayName}</Typography>
             <div>
-              <Button color="error" variant="contained">
+              <Button
+                color="error"
+                variant="contained"
+                onClick={refuseUser(callUser.uid)}
+              >
                 Not Allow
               </Button>
               <Button

@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
@@ -20,6 +21,7 @@ const firestoreSignaling = {
   askToJoinCall,
   listenCallUsers,
   acceptPendingUser,
+  refusePendingUser,
 };
 
 export default firestoreSignaling;
@@ -121,4 +123,8 @@ export async function acceptPendingUser(userUid: string, callUid: string) {
   await updateDoc(callUserRef, {
     joined: Date.now(),
   });
+}
+
+export async function refusePendingUser(userUid: string, callUid: string) {
+  await deleteDoc(doc(db, `calls/${callUid}/users/${userUid}`));
 }
