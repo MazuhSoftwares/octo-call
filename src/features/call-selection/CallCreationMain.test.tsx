@@ -97,16 +97,18 @@ describe("CallCreationMain", () => {
   });
 
   it("asking to join a call is integrated with firebase", async () => {
-    fullRender(<CallSelectionMain />, {
-      preloadedState: {
-        user: {
-          ...userInitialState,
-          uid: "1m2kkn3",
-          displayName: "John Doe",
-          status: "authenticated",
+    await act(() =>
+      fullRender(<CallSelectionMain />, {
+        preloadedState: {
+          user: {
+            ...userInitialState,
+            uid: "1m2kkn3",
+            displayName: "John Doe",
+            status: "authenticated",
+          },
         },
-      },
-    });
+      })
+    );
 
     const callUidInputElement = screen.getByLabelText("Join a call");
     fireEvent.change(callUidInputElement, {
