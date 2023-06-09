@@ -100,7 +100,7 @@ export default function CallCreationMain() {
           required
           fullWidth
         />
-        {isCreateSubmitDisabled ? (
+        {!hasSomeDevice ? (
           <ErrorAlert
             prefix=""
             message="At least one enabled device is required to create call."
