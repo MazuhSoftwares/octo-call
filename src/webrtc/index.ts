@@ -1,4 +1,6 @@
+import "webrtc-adapter";
 import * as domHelpers from "./dom-helpers";
+import * as agentHelpers from "./agent-helpers";
 import { retrieveMediaInputs } from "./media-devices";
 import { startAudioPreview, startVideoPreview } from "./media-devices-preview";
 import { makeP2PCallConnection } from "./p2p-call-connection";
@@ -9,6 +11,7 @@ export type * from "./p2p-call-connection";
 
 export default {
   domHelpers,
+  agentHelpers,
   retrieveMediaInputs,
   startAudioPreview,
   startVideoPreview,

@@ -8,10 +8,13 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import homeBgPattern from "../../assets/home-bg-patternpad.jpg";
 import { useAppDispatch, useAppSelector } from "../../state";
+import useAgentHelper from "../../hooks/useAgentHelper";
 import { logout, selectIsAuthenticated } from "../../state/user";
 import SettingsModal from "../settings/SettingsModal";
 import { selectCallUid, selectHasCallInProgress } from "../../state/call";
 import { selectIsPendingCallUser } from "../../state/callUsers";
+import ErrorAlert from "../basic/ErrorAlert";
+import WarningAlert from "../basic/WarningAlert";
 
 export interface HomeTemplateProps {
   children: ReactNode;
@@ -26,6 +29,8 @@ export default function HomeTemplate({
   const handleLogoutClick = () => dispatch(logout());
 
   const isAuthenticated = useAppSelector(selectIsAuthenticated);
+
+  const { canRunWebRTC, isChromeBased, isFirefoxBased } = useAgentHelper();
 
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const openSettings = () => setSettingsOpen(true);
@@ -101,6 +106,19 @@ export default function HomeTemplate({
             </IconButton>
           </Box>
         </Box>
+        {!canRunWebRTC() && (
+          <ErrorAlert
+            prefix="Hey! BIG ISSUE detected."
+            message="This browser does not fully implement WebRTC technology. This app won't work."
+            sx={{ mb: 1, mt: 1 }}
+          />
+        )}
+        {!isChromeBased() && !isFirefoxBased() && (
+          <WarningAlert
+            message="Recommended browsers are any Chrome-based or Firefox."
+            sx={{ mb: 1, mt: 1, display: { xs: "none", md: "flex" } }}
+          />
+        )}
         {children}
       </Card>
       <SettingsModal isOpen={isSettingsOpen} close={closeSettings} />
