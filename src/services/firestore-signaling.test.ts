@@ -114,6 +114,7 @@ describe("listenCallUsers", () => {
       onNext({
         forEach: Array.prototype.forEach.bind([
           {
+            id: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
             data: () => ({
               joined: 1685587182349,
               userDisplayName: "Rodrigo Muniz",
@@ -122,6 +123,7 @@ describe("listenCallUsers", () => {
             }),
           },
           {
+            id: "D8LBvBhKb4ZidKKBWvvV",
             data: () => ({
               userUid: "a1s2d3",
               userDisplayName: "Marcell",
