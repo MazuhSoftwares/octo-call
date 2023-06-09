@@ -84,7 +84,18 @@ export default function CallSelectionMain() {
   const isPending = call.status === "pending";
   const isAskingToJoin = callUsers.status === "asking-to-join";
 
-  const isSubmitDisabled = hasSomeDevice || isPending;
+  const isSubmitDisabled = !hasSomeDevice || isPending;
+  const getSubmitLabel = (regular: string): string => {
+    if (!hasSomeDevice) {
+      return "Select at least one device.";
+    }
+
+    if (isPending || isAskingToJoin) {
+      return "Preparing it...";
+    }
+
+    return regular;
+  };
 
   return (
     <HomeTemplate subtitle="Create or join a call">
@@ -122,7 +133,7 @@ export default function CallSelectionMain() {
           sx={{ marginTop: 3 }}
           fullWidth
         >
-          {isPending ? "Preparing it..." : "Create call"}
+          {getSubmitLabel("Create call")}
         </Button>
       </Box>
       <Box
@@ -147,13 +158,14 @@ export default function CallSelectionMain() {
         />
         <Button
           type="submit"
+          disabled={isSubmitDisabled}
           color="primary"
           variant="contained"
           startIcon={<VideoCallIcon />}
           sx={{ marginTop: 3 }}
           fullWidth
         >
-          {isAskingToJoin ? "Asking to joining" : "Join call"}
+          {getSubmitLabel("Join call")}
         </Button>
       </Box>
     </HomeTemplate>
