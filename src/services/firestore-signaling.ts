@@ -5,6 +5,7 @@ import {
   getDocs,
   onSnapshot,
   query,
+  updateDoc,
   where,
   writeBatch,
 } from "firebase/firestore";
@@ -18,6 +19,7 @@ const firestoreSignaling = {
   createCall,
   askToJoinCall,
   listenCallUsers,
+  acceptPendingUser,
 };
 
 export default firestoreSignaling;
@@ -107,8 +109,16 @@ export function listenCallUsers(
   return onSnapshot(q, (querySnapshot) => {
     const callUsers: CallUser[] = [];
     querySnapshot.forEach((doc: DocumentData) => {
-      callUsers.push(doc.data() as CallUser);
+      callUsers.push({ ...doc.data(), uid: doc.id } as CallUser);
     });
     callback(callUsers);
+  });
+}
+
+export async function acceptPendingUser(userUid: string, callUid: string) {
+  const callUserRef = doc(db, `calls/${callUid}/users/${userUid}`);
+
+  await updateDoc(callUserRef, {
+    joined: Date.now(),
   });
 }
