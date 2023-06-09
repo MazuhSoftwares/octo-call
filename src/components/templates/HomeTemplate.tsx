@@ -18,7 +18,7 @@ import useRedirectionRule from "../../hooks/useRedirectionRule";
 
 export interface HomeTemplateProps {
   children: ReactNode;
-  subtitle?: string;
+  subtitle?: string | ReactNode;
 }
 
 export default function HomeTemplate({

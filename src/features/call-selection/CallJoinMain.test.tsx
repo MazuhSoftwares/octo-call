@@ -53,7 +53,7 @@ describe("CallJoinMain", () => {
       })
     );
 
-    const callUidInputElement = screen.getByLabelText("Join a call");
+    const callUidInputElement = screen.getByLabelText("Call UID:");
     fireEvent.change(callUidInputElement, {
       target: { value: "b385c5fe-5da5-476d-b66f-a4580581be61" },
     });

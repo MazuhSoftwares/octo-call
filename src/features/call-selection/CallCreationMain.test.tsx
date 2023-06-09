@@ -53,7 +53,7 @@ describe("CallCreationMain", () => {
       })
     );
 
-    const callNameInputElement = screen.getByLabelText("Create a new call");
+    const callNameInputElement = screen.getByLabelText("Call public name:");
 
     const callCreationButtonElement = screen.getByRole("button", {
       name: "Create call",
@@ -89,6 +89,10 @@ describe("CallCreationMain", () => {
         name: "Create call",
       })
     ).toBe(null);
-    expect(screen.getByText("At least one device is required.")).toBeVisible();
+    expect(
+      screen.getByText(
+        "At least one enabled device is required to create call."
+      )
+    ).toBeVisible();
   });
 });

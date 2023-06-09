@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
-import AddIcCallIcon from "@mui/icons-material/AddIcCall";
+import Groups3Icon from "@mui/icons-material/Groups3";
 import HomeTemplate from "../../components/templates/HomeTemplate";
 import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
@@ -13,12 +13,14 @@ import { selectHasSomeDevice } from "../../state/devices";
 import { askToJoinCall, selectCallUsers } from "../../state/callUsers";
 import QuickDevicesConfig from "./QuickDevicesConfig";
 import Link from "../../components/basic/Link";
+import { selectUserDisplayName } from "../../state/user";
 
 export default function CallJoinMain() {
   const dispatch = useAppDispatch();
 
   const callUidInputId = useId();
 
+  const userDisplayName = useAppSelector(selectUserDisplayName);
   const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
   const call = useAppSelector(selectCall);
@@ -53,7 +55,7 @@ export default function CallJoinMain() {
 
   const getSubmitLabel = (regular: string): string => {
     if (!hasSomeDevice) {
-      return "Select at least one device.";
+      return "Select at least one device";
     }
 
     if (isPending || isAskingToJoin) {
@@ -64,7 +66,13 @@ export default function CallJoinMain() {
   };
 
   return (
-    <HomeTemplate subtitle="Create or join a call">
+    <HomeTemplate
+      subtitle={
+        <Typography component="small">
+          Hello, <code>{userDisplayName}</code>.
+        </Typography>
+      }
+    >
       <QuickDevicesConfig />
       <Box
         component="form"
@@ -75,13 +83,13 @@ export default function CallJoinMain() {
       >
         <ErrorAlert message={callUsers.errorMessage} />
         <Typography variant="label" component="label" htmlFor={callUidInputId}>
-          Join a call
+          Call UID:
         </Typography>
         <TextField
           id={callUidInputId}
           value={callUid}
           onChange={handleCallIdChange}
-          placeholder="Insert the call ID"
+          placeholder="An unique code shared with you."
           autoComplete="off"
           required
           fullWidth
@@ -91,14 +99,14 @@ export default function CallJoinMain() {
           disabled={isJoinSubmitDisabled}
           color="primary"
           variant="contained"
-          startIcon={<AddIcCallIcon />}
+          startIcon={<Groups3Icon />}
           sx={{ marginTop: 3 }}
           fullWidth
         >
           {getSubmitLabel("Join call")}
         </Button>
         <Link to="/create" sx={{ mt: 1, textAlign: "center" }}>
-          <VideoCallIcon sx={{ mr: 1 }} /> Or create a new one
+          <VideoCallIcon sx={{ mr: 1 }} /> Create a different new call
         </Link>
       </Box>
     </HomeTemplate>

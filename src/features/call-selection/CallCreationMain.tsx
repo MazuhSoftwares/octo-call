@@ -4,7 +4,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
-import AddIcCallIcon from "@mui/icons-material/AddIcCall";
+import Groups3Icon from "@mui/icons-material/Groups3";
 import HomeTemplate from "../../components/templates/HomeTemplate";
 import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
@@ -13,12 +13,14 @@ import { selectHasSomeDevice } from "../../state/devices";
 import { selectCallUsers } from "../../state/callUsers";
 import QuickDevicesConfig from "./QuickDevicesConfig";
 import Link from "../../components/basic/Link";
+import { selectUserDisplayName } from "../../state/user";
 
 export default function CallCreationMain() {
   const dispatch = useAppDispatch();
 
   const callDisplayNameInputId = useId();
 
+  const userDisplayName = useAppSelector(selectUserDisplayName);
   const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
   const call = useAppSelector(selectCall);
@@ -55,7 +57,7 @@ export default function CallCreationMain() {
 
   const getSubmitLabel = (regular: string): string => {
     if (!hasSomeDevice) {
-      return "Select at least one device.";
+      return "At least one enabled device is required to create call.";
     }
 
     if (isPending || isAskingToJoin) {
@@ -66,7 +68,13 @@ export default function CallCreationMain() {
   };
 
   return (
-    <HomeTemplate subtitle="Create or join a call">
+    <HomeTemplate
+      subtitle={
+        <Typography component="small">
+          Hello, <code>{userDisplayName}</code>.
+        </Typography>
+      }
+    >
       <QuickDevicesConfig />
       <Box
         component="form"
@@ -80,13 +88,13 @@ export default function CallCreationMain() {
           component="label"
           htmlFor={callDisplayNameInputId}
         >
-          Create a new call
+          Call public name:
         </Typography>
         <TextField
           id={callDisplayNameInputId}
           value={callDisplayName}
           onChange={handleCallDisplayNameChange}
-          placeholder="What's the meeting about?"
+          placeholder="What's this meeting about?"
           autoComplete="off"
           inputProps={{ maxLength: 50 }}
           required
@@ -95,7 +103,7 @@ export default function CallCreationMain() {
         {isCreateSubmitDisabled ? (
           <ErrorAlert
             prefix=""
-            message="At least one device is required."
+            message="At least one enabled device is required to create call."
             sx={{ marginTop: 3 }}
           />
         ) : (
@@ -112,7 +120,7 @@ export default function CallCreationMain() {
           </Button>
         )}
         <Link to="/join" sx={{ mt: 1, textAlign: "center" }}>
-          <AddIcCallIcon sx={{ mr: 1 }} /> Or join another
+          <Groups3Icon sx={{ mr: 1 }} /> Join another existing call
         </Link>
       </Box>
     </HomeTemplate>
