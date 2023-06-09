@@ -10,6 +10,8 @@ import { act } from "react-dom/test-utils";
 jest.mock("../../hooks/useRedirectionRule", () =>
   jest.fn().mockReturnValue("")
 );
+import { CallUserState, callUsersInitialState } from "../../state/callUsers";
+import firestoreSignaling from "../../services/firestore-signaling";
 
 describe("CallTemplate", () => {
   const user: UserState = {
@@ -26,6 +28,21 @@ describe("CallTemplate", () => {
     }),
     status: "inProgress",
   };
+  const callUsers: CallUserState = {
+    ...callUsersInitialState,
+    pendingUsers: [
+      {
+        userDisplayName: "Rodrigo Muniz",
+        userUid: "userUid_zJTvoYDGr9PuN1z69vheO0b4iWF2",
+        uid: "callUserId-6db9ad2e-19f9-4a85-b383-7731e347b7d0",
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    (firestoreSignaling.acceptPendingUser as jest.Mock).mockClear();
+    (firestoreSignaling.refusePendingUser as jest.Mock).mockClear();
+  });
 
   it("renders", async () => {
     await act(() =>
@@ -71,6 +88,28 @@ describe("CallTemplate", () => {
 
     fireEvent.click(micButton);
     expect(screen.getByText("Microphone is on.")).toBeInTheDocument();
+  });
+
+  it("can show pending users modal", async () => {
+    fullRender(<CallTemplate>Call.</CallTemplate>, {
+      preloadedState: {
+        user,
+        call: {
+          ...callInitialState,
+          uid: "c2a35f1f-46ea-4dab-a476-505a4b1b1c95",
+          displayName: "1:1 Jane Doe + John Doe",
+          hostId: "1m2kkn3",
+          hostDisplayName: "John Doe",
+          status: "inProgress",
+        },
+        callUsers,
+      },
+    });
+
+    const pendingUsersModal = await screen.findByRole("heading", {
+      name: "New Participants",
+    });
+    expect(pendingUsersModal).toBeInTheDocument();
   });
 
   it("toggles camera status", async () => {
