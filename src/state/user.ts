@@ -79,7 +79,12 @@ export const logout = createAsyncThunk(
   }
 );
 
-export const selectCurrentUser = (state: RootState) => state.user;
-export const selectIsAuthenticated = (state: RootState) => !!state.user.uid;
+export const selectUserDisplayName = (state: RootState) =>
+  state.user.displayName;
+
+export const selectIsUserPendingAuthentication = (state: RootState) =>
+  state.user.status === "pending";
+export const selectIsUserAuthenticated = (state: RootState) =>
+  Boolean(state.user.status === "authenticated" && state.user.uid);
 
 export default userSlice.reducer;

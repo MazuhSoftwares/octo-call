@@ -2,15 +2,15 @@ import { useEffect } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { Switch, Route, Router, Redirect } from "wouter";
-import { useAppDispatch, useAppSelector } from "./state";
-import { loadUser, selectIsAuthenticated } from "./state/user";
+import { useAppDispatch } from "./state";
+import { loadUser } from "./state/user";
 import AuthMain from "./features/auth/AuthMain";
-import CallSelectionMain from "./features/call-selection/CallSelectionMain";
 import P2PCallMain from "./features/p2p-call/P2PCallMain";
 import { darkTheme } from "./components/styles";
+import CallCreationMain from "./features/call-selection/CallCreationMain";
+import CallJoinMain from "./features/call-selection/CallJoinMain";
 
 export default function App() {
-  const isAuthenticated = useAppSelector(selectIsAuthenticated);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -22,23 +22,16 @@ export default function App() {
       <CssBaseline />
       <Router base="/octo-call">
         <Switch>
-          <Route
-            path="/"
-            component={isAuthenticated ? CallSelectionMain : AuthMain}
-          />
-          <Route
-            path="/p2p/:callUid"
-            component={isAuthenticated ? P2PCallMain : RedirectToRoot}
-          />
+          <Route path="/" component={AuthMain} />
+          <Route path="/create" component={CallCreationMain} />
+          <Route path="/join" component={CallJoinMain} />
+          <Route path="/left" component={() => <p>Left.</p>} />
+          <Route path="/p2p-call/:callUid" component={P2PCallMain} />
           <Route>
-            <RedirectToRoot />
+            <Redirect to="/" />
           </Route>
         </Switch>
       </Router>
     </ThemeProvider>
   );
-}
-
-function RedirectToRoot() {
-  return <Redirect to="/" />;
 }

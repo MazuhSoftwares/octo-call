@@ -1,14 +1,22 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { callUsersInitialState } from "../../state/callUsers";
 import {
+  createCall,
   createCallParticipant,
   createCallUser,
 } from "../../testing-helpers/call-fixtures";
 import fullRender from "../../testing-helpers/fullRender";
 import ParticipantsModal from "./ParticipantsModal";
 import { act } from "react-dom/test-utils";
+import { CallState, callInitialState } from "../../state/call";
 
 describe("ParticipantsModal", () => {
+  const call: CallState = {
+    ...callInitialState,
+    ...createCall(),
+    status: "inProgress",
+  };
+
   beforeEach(() => {
     Object.assign(navigator, {
       clipboard: {
@@ -26,18 +34,26 @@ describe("ParticipantsModal", () => {
   });
 
   it("displays the correct link text", () => {
-    fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />);
-    expect(screen.getByText(window.location.href)).toBeVisible();
+    fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
+      preloadedState: { call },
+    });
+    expect(
+      screen.getByText(
+        window.location.href + "octo-call/join?callUid=" + call.uid
+      )
+    ).toBeVisible();
   });
 
   it("copies link to clipboard and shows success Snackbar on button click", async () => {
-    fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />);
+    fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
+      preloadedState: { call },
+    });
     const copyButton = screen.getByRole("button", { name: "Copy" });
 
     await act(() => fireEvent.click(copyButton));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      window.location.href
+      window.location.href + "octo-call/join?callUid=" + call.uid
     );
 
     const successSnackbar = await waitFor(() => screen.getByRole("alert"));

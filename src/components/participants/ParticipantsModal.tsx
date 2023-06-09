@@ -13,6 +13,7 @@ import type { CallUser } from "../../webrtc";
 import { useAppSelector } from "../../state";
 import { selectCallUsers } from "../../state/callUsers";
 import DialogModal from "../basic/DialogModal";
+import { selectCallUid } from "../../state/call";
 
 export interface ParticipantsModalProps {
   isOpen: boolean;
@@ -82,7 +83,8 @@ export default function ParticipantsModal({
 }
 
 function CallLink() {
-  const link = window.location.href;
+  const callUid = useAppSelector(selectCallUid);
+  const link = `${window.location.origin}/octo-call/join?callUid=${callUid}`;
 
   const handleCopyClick = async () => {
     await navigator.clipboard.writeText(link);

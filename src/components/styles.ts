@@ -66,6 +66,9 @@ export const darkTheme = createTheme({
             fontWeight: "bold",
             paddingBottom: 16,
           },
+          "&.MuiLink-root": {
+            color: DARK_COLORS.text,
+          },
         },
       },
     },

@@ -4,18 +4,19 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import VideoCallIcon from "@mui/icons-material/VideoCall";
+import AddIcCallIcon from "@mui/icons-material/AddIcCall";
 import HomeTemplate from "../../components/templates/HomeTemplate";
 import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { createCall, selectCall } from "../../state/call";
+import { selectCall } from "../../state/call";
 import { selectHasSomeDevice } from "../../state/devices";
 import { askToJoinCall, selectCallUsers } from "../../state/callUsers";
 import QuickDevicesConfig from "./QuickDevicesConfig";
+import Link from "../../components/basic/Link";
 
-export default function CallSelectionMain() {
+export default function CallJoinMain() {
   const dispatch = useAppDispatch();
 
-  const callDisplayNameInputId = useId();
   const callUidInputId = useId();
 
   const hasSomeDevice = useAppSelector(selectHasSomeDevice);
@@ -23,29 +24,12 @@ export default function CallSelectionMain() {
   const call = useAppSelector(selectCall);
   const callUsers = useAppSelector(selectCallUsers);
 
-  const [callDisplayName, setCallDisplayName] = useState<string>("");
-  const [callUid, setCallUid] = useState<string>("");
-  const handleCallDisplayNameChange = (
-    event: ChangeEvent<HTMLInputElement>
-  ) => {
-    setCallDisplayName(event.target.value);
-  };
+  const searchParams = new URLSearchParams(window.location.search);
+  const [callUid, setCallUid] = useState<string>(
+    searchParams.get("callUid") || ""
+  );
   const handleCallIdChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCallUid(event.target.value);
-  };
-
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (!callDisplayName.trim()) {
-      return;
-    }
-
-    dispatch(
-      createCall({
-        displayName: callDisplayName,
-      })
-    );
   };
 
   const onJoinCallSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -65,7 +49,6 @@ export default function CallSelectionMain() {
   const isPending = call.status === "pending";
   const isAskingToJoin = callUsers.status === "asking-to-join";
 
-  const isCreateSubmitDisabled = !hasSomeDevice || isPending;
   const isJoinSubmitDisabled = !hasSomeDevice || isAskingToJoin;
 
   const getSubmitLabel = (regular: string): string => {
@@ -83,50 +66,6 @@ export default function CallSelectionMain() {
   return (
     <HomeTemplate subtitle="Create or join a call">
       <QuickDevicesConfig />
-      <Box
-        component="form"
-        onSubmit={onSubmit}
-        display="flex"
-        flexDirection="column"
-      >
-        <ErrorAlert message={call.errorMessage} />
-        <Typography
-          variant="label"
-          component="label"
-          htmlFor={callDisplayNameInputId}
-        >
-          Create a new call
-        </Typography>
-        <TextField
-          id={callDisplayNameInputId}
-          value={callDisplayName}
-          onChange={handleCallDisplayNameChange}
-          placeholder="What's the meeting about?"
-          autoComplete="off"
-          inputProps={{ maxLength: 50 }}
-          required
-          fullWidth
-        />
-        {isCreateSubmitDisabled ? (
-          <ErrorAlert
-            prefix=""
-            message="At least one device is required."
-            sx={{ marginTop: 3 }}
-          />
-        ) : (
-          <Button
-            type="submit"
-            disabled={isCreateSubmitDisabled}
-            color="primary"
-            variant="contained"
-            startIcon={<VideoCallIcon />}
-            sx={{ marginTop: 3 }}
-            fullWidth
-          >
-            {getSubmitLabel("Create call")}
-          </Button>
-        )}
-      </Box>
       <Box
         component="form"
         onSubmit={onJoinCallSubmit}
@@ -152,12 +91,15 @@ export default function CallSelectionMain() {
           disabled={isJoinSubmitDisabled}
           color="primary"
           variant="contained"
-          startIcon={<VideoCallIcon />}
+          startIcon={<AddIcCallIcon />}
           sx={{ marginTop: 3 }}
           fullWidth
         >
           {getSubmitLabel("Join call")}
         </Button>
+        <Link to="/create" sx={{ mt: 1, textAlign: "center" }}>
+          <VideoCallIcon sx={{ mr: 1 }} /> Or create a new one
+        </Link>
       </Box>
     </HomeTemplate>
   );
