@@ -95,12 +95,9 @@ describe("CallTemplate", () => {
       preloadedState: {
         user,
         call: {
-          ...callInitialState,
-          uid: "c2a35f1f-46ea-4dab-a476-505a4b1b1c95",
-          displayName: "1:1 Jane Doe + John Doe",
-          hostId: "1m2kkn3",
-          hostDisplayName: "John Doe",
-          status: "inProgress",
+          ...call,
+          hostId: user.uid,
+          hostDisplayName: user.displayName,
         },
         callUsers,
       },
