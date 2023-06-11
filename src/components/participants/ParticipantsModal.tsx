@@ -10,10 +10,15 @@ import ShareIcon from "@mui/icons-material/Share";
 import RingVolumeIcon from "@mui/icons-material/RingVolume";
 import WifiCalling3Icon from "@mui/icons-material/WifiCalling3";
 import type { CallUser } from "../../webrtc";
-import { useAppSelector } from "../../state";
-import { selectCallUsers } from "../../state/callUsers";
+import { useAppDispatch, useAppSelector } from "../../state";
+import {
+  acceptPendingUser,
+  refusePendingUser,
+  selectCallUsers,
+} from "../../state/callUsers";
 import DialogModal from "../basic/DialogModal";
-import { selectCallUid } from "../../state/call";
+import { selectCallHostId, selectCallUid } from "../../state/call";
+import { selectUserUid } from "../../state/user";
 
 export interface ParticipantsModalProps {
   isOpen: boolean;
@@ -27,7 +32,12 @@ export default function ParticipantsModal({
   const pendingUsersHeadingId = useId();
   const participantsHeadingId = useId();
 
+  const currentUserUid = useAppSelector(selectUserUid);
+  const hostId = useAppSelector(selectCallHostId);
+
   const { pendingUsers, participants } = useAppSelector(selectCallUsers);
+
+  const isCurrentUserTheCallHost = currentUserUid === hostId;
 
   return (
     <DialogModal
@@ -60,7 +70,11 @@ export default function ParticipantsModal({
           </Typography>
           <UsersList aria-labelledby={pendingUsersHeadingId}>
             {pendingUsers.map((pending) => (
-              <UsersListItem key={pending.uid} user={pending} />
+              <UsersListItem
+                key={pending.uid}
+                user={pending}
+                showActionButtons={isCurrentUserTheCallHost}
+              />
             ))}
           </UsersList>
         </>
@@ -157,12 +171,50 @@ function UsersList(
 
 interface UsersListItemProps {
   user: CallUser;
+  showActionButtons?: boolean;
 }
 
-function UsersListItem({ user }: UsersListItemProps) {
+function UsersListItem({
+  user,
+  showActionButtons = false,
+}: UsersListItemProps) {
+  const dispatch = useAppDispatch();
+  const acceptUser = (userUid: string) => () =>
+    dispatch(acceptPendingUser({ userUid }));
+
+  const refuseUser = (userUid: string) => () =>
+    dispatch(refusePendingUser({ userUid }));
+
   return (
-    <Box component="li" key={user.uid}>
+    <Box
+      component="li"
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      key={user.uid}
+    >
       <Typography component="span">{user.userDisplayName}</Typography>
+      {showActionButtons && (
+        <div>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={refuseUser(user.uid)}
+          >
+            Not Allow
+          </Button>
+          <Button
+            color="primary"
+            variant="contained"
+            sx={{
+              ml: 1,
+            }}
+            onClick={acceptUser(user.uid)}
+          >
+            Allow
+          </Button>
+        </div>
+      )}
     </Box>
   );
 }

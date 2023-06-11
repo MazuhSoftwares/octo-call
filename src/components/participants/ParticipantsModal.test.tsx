@@ -108,6 +108,7 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
+          call,
           callUsers: {
             ...callUsersInitialState,
             pendingUsers: [pendingUser],

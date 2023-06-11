@@ -90,6 +90,8 @@ export const selectCall = (state: RootState) => state.call;
 
 export const selectCallUid = (state: RootState) => state.call.uid;
 
+export const selectCallHostId = (state: RootState) => state.call.hostId;
+
 export const selectCallDisplayName = (state: RootState) =>
   state.call.displayName;
 
