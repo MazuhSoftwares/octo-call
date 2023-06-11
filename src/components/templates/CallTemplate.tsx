@@ -10,9 +10,9 @@ import HelpIcon from "@mui/icons-material/Help";
 import PeopleIcon from "@mui/icons-material/People";
 import CallEndIcon from "@mui/icons-material/CallEnd";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { leaveCall, selectCall, selectCallDisplayName } from "../../state/call";
+import { leaveCall, selectCallDisplayName } from "../../state/call";
 import { getThemedColor } from "../styles";
-import { logout, selectUserDisplayName, selectUserUid } from "../../state/user";
+import { logout, selectUserDisplayName } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
 import { Redirect } from "wouter";
 import { selectCallUsers } from "../../state/callUsers";
@@ -20,7 +20,6 @@ import { useCallUsersListener } from "../../hooks/useCallUsersListener";
 import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
-import PendingUsersModal from "../participants/PendingUsersModal";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -58,9 +57,6 @@ function CallHeader() {
 
   const callDisplayName = useAppSelector(selectCallDisplayName);
   const userDisplayName = useAppSelector(selectUserDisplayName);
-  const currentUserUid = useAppSelector(selectUserUid);
-  const hostId = useAppSelector(selectCall).hostId;
-  const pendingUsers = useAppSelector(selectCallUsers).pendingUsers;
 
   const profileBtnId = useId();
   const profileMenuId = useId();
@@ -82,8 +78,6 @@ function CallHeader() {
   };
 
   const handleLogoutClick = () => dispatch(logout());
-
-  const isCurrentUserTheCallHost = currentUserUid === hostId;
 
   return (
     <Box
@@ -135,10 +129,6 @@ function CallHeader() {
           </MenuItem>
         </Menu>
       </Box>
-
-      {isCurrentUserTheCallHost && (
-        <PendingUsersModal isOpen={!!pendingUsers.length} />
-      )}
     </Box>
   );
 }

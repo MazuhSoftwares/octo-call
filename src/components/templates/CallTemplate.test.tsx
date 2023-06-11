@@ -1,17 +1,16 @@
 import "../../testing-helpers/mock-firestore-signaling";
 import { fireEvent, screen } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
 import fullRender from "../../testing-helpers/fullRender";
 import CallTemplate from "./CallTemplate";
 import { UserState, userInitialState } from "../../state/user";
 import { CallState, callInitialState } from "../../state/call";
 import { createCall, createUser } from "../../testing-helpers/call-fixtures";
-import { act } from "react-dom/test-utils";
+import firestoreSignaling from "../../services/firestore-signaling";
 
 jest.mock("../../hooks/useRedirectionRule", () =>
   jest.fn().mockReturnValue("")
 );
-import { CallUserState, callUsersInitialState } from "../../state/callUsers";
-import firestoreSignaling from "../../services/firestore-signaling";
 
 describe("CallTemplate", () => {
   const user: UserState = {
@@ -27,16 +26,6 @@ describe("CallTemplate", () => {
       displayName: "1:1 Jane Doe + John Doe",
     }),
     status: "inProgress",
-  };
-  const callUsers: CallUserState = {
-    ...callUsersInitialState,
-    pendingUsers: [
-      {
-        userDisplayName: "Rodrigo Muniz",
-        userUid: "userUid_zJTvoYDGr9PuN1z69vheO0b4iWF2",
-        uid: "callUserId-6db9ad2e-19f9-4a85-b383-7731e347b7d0",
-      },
-    ],
   };
 
   beforeEach(() => {
@@ -88,25 +77,6 @@ describe("CallTemplate", () => {
 
     fireEvent.click(micButton);
     expect(screen.getByText("Microphone is on.")).toBeInTheDocument();
-  });
-
-  it("can show pending users modal", async () => {
-    fullRender(<CallTemplate>Call.</CallTemplate>, {
-      preloadedState: {
-        user,
-        call: {
-          ...call,
-          hostId: user.uid,
-          hostDisplayName: user.displayName,
-        },
-        callUsers,
-      },
-    });
-
-    const pendingUsersModal = await screen.findByRole("heading", {
-      name: "New Participants",
-    });
-    expect(pendingUsersModal).toBeInTheDocument();
   });
 
   it("toggles camera status", async () => {
