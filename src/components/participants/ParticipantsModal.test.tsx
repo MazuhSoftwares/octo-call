@@ -9,6 +9,7 @@ import fullRender from "../../testing-helpers/fullRender";
 import ParticipantsModal from "./ParticipantsModal";
 import { act } from "react-dom/test-utils";
 import { CallState, callInitialState } from "../../state/call";
+import { userInitialState } from "../../state/user";
 
 describe("ParticipantsModal", () => {
   const call: CallState = {
@@ -122,5 +123,41 @@ describe("ParticipantsModal", () => {
     });
     const items = within(list).getAllByRole("listitem");
     expect(items[0].textContent).toBe(pendingUser.userDisplayName);
+  });
+
+  it("can accept and refuse buttons be shown to the host", async () => {
+    const pendingUser = createCallUser();
+    const currentUserUid = call.hostId;
+    const currentUserDisplayName = call.hostDisplayName;
+
+    await act(() =>
+      fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
+        preloadedState: {
+          call,
+          user: {
+            ...userInitialState,
+            uid: currentUserUid,
+            displayName: currentUserDisplayName,
+          },
+          callUsers: {
+            ...callUsersInitialState,
+            pendingUsers: [pendingUser],
+          },
+        },
+      })
+    );
+
+    const list = screen.getByRole("list", {
+      name: /Pending users/i,
+    });
+    const items = within(list).getAllByRole("listitem");
+    const refuseButton = within(items[0]).getByRole("button", {
+      name: "Not Allow",
+    });
+    const acceptButton = within(items[0]).getByRole("button", {
+      name: "Allow",
+    });
+    expect(acceptButton).toBeInTheDocument();
+    expect(refuseButton).toBeInTheDocument();
   });
 });
