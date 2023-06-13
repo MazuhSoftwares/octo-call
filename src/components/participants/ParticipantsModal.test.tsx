@@ -125,7 +125,7 @@ describe("ParticipantsModal", () => {
     expect(items[0].textContent).toBe(pendingUser.userDisplayName);
   });
 
-  it("can accept and refuse buttons be shown to the host", async () => {
+  it("can accept and reject buttons be shown to the host", async () => {
     const pendingUser = createCallUser();
     const currentUserUid = call.hostId;
     const currentUserDisplayName = call.hostDisplayName;
@@ -151,13 +151,13 @@ describe("ParticipantsModal", () => {
       name: /Pending users/i,
     });
     const items = within(list).getAllByRole("listitem");
-    const refuseButton = within(items[0]).getByRole("button", {
-      name: "Not Allow",
+    const rejectButton = within(items[0]).getByRole("button", {
+      name: "Reject",
     });
     const acceptButton = within(items[0]).getByRole("button", {
-      name: "Allow",
+      name: "Accept",
     });
     expect(acceptButton).toBeInTheDocument();
-    expect(refuseButton).toBeInTheDocument();
+    expect(rejectButton).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import { HTMLProps, useId, useState } from "react";
+import { HTMLProps, ReactNode, useId, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -50,7 +50,7 @@ export default function ParticipantsModal({
         variant="h3"
         sx={{ mt: 0, mb: 1, display: "flex", alignItems: "center" }}
       >
-        <ShareIcon sx={{ mr: 1 }} /> Share link
+        <ShareIcon sx={{ mr: 1 }} /> Share call
       </Typography>
       <CallLink />
 
@@ -73,7 +73,11 @@ export default function ParticipantsModal({
               <UsersListItem
                 key={pending.uid}
                 user={pending}
-                showActionButtons={isCurrentUserTheCallHost}
+                action={
+                  isCurrentUserTheCallHost && (
+                    <PendingUserActions userUid={pending.userUid} />
+                  )
+                }
               />
             ))}
           </UsersList>
@@ -171,20 +175,10 @@ function UsersList(
 
 interface UsersListItemProps {
   user: CallUser;
-  showActionButtons?: boolean;
+  action?: ReactNode;
 }
 
-function UsersListItem({
-  user,
-  showActionButtons = false,
-}: UsersListItemProps) {
-  const dispatch = useAppDispatch();
-  const acceptUser = (userUid: string) => () =>
-    dispatch(acceptPendingUser({ userUid }));
-
-  const refuseUser = (userUid: string) => () =>
-    dispatch(rejectPendingUser({ userUid }));
-
+function UsersListItem({ user, action }: UsersListItemProps) {
   return (
     <Box
       component="li"
@@ -194,27 +188,36 @@ function UsersListItem({
       key={user.uid}
     >
       <Typography component="span">{user.userDisplayName}</Typography>
-      {showActionButtons && (
-        <div>
-          <Button
-            color="error"
-            variant="contained"
-            onClick={refuseUser(user.uid)}
-          >
-            Not Allow
-          </Button>
-          <Button
-            color="primary"
-            variant="contained"
-            sx={{
-              ml: 1,
-            }}
-            onClick={acceptUser(user.uid)}
-          >
-            Allow
-          </Button>
-        </div>
-      )}
+      {action}
+    </Box>
+  );
+}
+
+interface PendingUserActionsProps {
+  userUid: string;
+}
+
+function PendingUserActions({ userUid }: PendingUserActionsProps) {
+  const dispatch = useAppDispatch();
+
+  const handleRejectClick = () => dispatch(rejectPendingUser({ userUid }));
+  const handleAcceptClick = () => dispatch(acceptPendingUser({ userUid }));
+
+  return (
+    <Box>
+      <Button color="error" variant="contained" onClick={handleRejectClick}>
+        Reject
+      </Button>
+      <Button
+        color="primary"
+        variant="contained"
+        sx={{
+          ml: 1,
+        }}
+        onClick={handleAcceptClick}
+      >
+        Accept
+      </Button>
     </Box>
   );
 }

@@ -11,7 +11,7 @@ export interface DialogModalProps {
   title: string;
   icon: ReactNode;
   isOpen: boolean;
-  close?: () => void;
+  close: () => void;
 }
 
 export default function DialogModal({
@@ -38,15 +38,13 @@ export default function DialogModal({
             )}
             <Box component="span">{title}</Box>
           </DialogTitle>
-          {!!close && (
-            <IconButton
-              aria-label="Close"
-              onClick={close}
-              sx={{ display: "flex", position: "absolute", top: 16, right: 24 }}
-            >
-              <CloseIcon fontSize="small" />
-            </IconButton>
-          )}
+          <IconButton
+            aria-label="Close"
+            onClick={close}
+            sx={{ display: "flex", position: "absolute", top: 16, right: 24 }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
         </Box>
         <DialogContent sx={{ pt: 0 }}>{children}</DialogContent>
       </Box>
