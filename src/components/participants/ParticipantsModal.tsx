@@ -1,4 +1,4 @@
-import { HTMLProps, useId, useState } from "react";
+import { HTMLProps, ReactNode, useId, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -10,10 +10,16 @@ import ShareIcon from "@mui/icons-material/Share";
 import RingVolumeIcon from "@mui/icons-material/RingVolume";
 import WifiCalling3Icon from "@mui/icons-material/WifiCalling3";
 import type { CallUser } from "../../webrtc";
-import { useAppSelector } from "../../state";
-import { selectCallUsers } from "../../state/callUsers";
+import { useAppDispatch, useAppSelector } from "../../state";
+import {
+  acceptPendingUser,
+  rejectPendingUser,
+  selectParticipants,
+  selectPendingUsers,
+} from "../../state/call";
 import DialogModal from "../basic/DialogModal";
-import { selectCallUid } from "../../state/call";
+import { selectCallHostId, selectCallUid } from "../../state/call";
+import { selectUserUid } from "../../state/user";
 
 export interface ParticipantsModalProps {
   isOpen: boolean;
@@ -27,7 +33,13 @@ export default function ParticipantsModal({
   const pendingUsersHeadingId = useId();
   const participantsHeadingId = useId();
 
-  const { pendingUsers, participants } = useAppSelector(selectCallUsers);
+  const currentUserUid = useAppSelector(selectUserUid);
+  const hostId = useAppSelector(selectCallHostId);
+
+  const participants = useAppSelector(selectParticipants);
+  const pendingUsers = useAppSelector(selectPendingUsers);
+
+  const isCurrentUserHosting = currentUserUid === hostId;
 
   return (
     <DialogModal
@@ -40,7 +52,7 @@ export default function ParticipantsModal({
         variant="h3"
         sx={{ mt: 0, mb: 1, display: "flex", alignItems: "center" }}
       >
-        <ShareIcon sx={{ mr: 1 }} /> Share link
+        <ShareIcon sx={{ mr: 1 }} /> Share call
       </Typography>
       <CallLink />
 
@@ -60,7 +72,15 @@ export default function ParticipantsModal({
           </Typography>
           <UsersList aria-labelledby={pendingUsersHeadingId}>
             {pendingUsers.map((pending) => (
-              <UsersListItem key={pending.uid} user={pending} />
+              <UsersListItem
+                key={pending.uid}
+                user={pending}
+                action={
+                  isCurrentUserHosting && (
+                    <PendingUserActions userUid={pending.userUid} />
+                  )
+                }
+              />
             ))}
           </UsersList>
         </>
@@ -157,12 +177,49 @@ function UsersList(
 
 interface UsersListItemProps {
   user: CallUser;
+  action?: ReactNode;
 }
 
-function UsersListItem({ user }: UsersListItemProps) {
+function UsersListItem({ user, action }: UsersListItemProps) {
   return (
-    <Box component="li" key={user.uid}>
+    <Box
+      component="li"
+      display="flex"
+      alignItems="center"
+      justifyContent="space-between"
+      key={user.uid}
+    >
       <Typography component="span">{user.userDisplayName}</Typography>
+      {action}
+    </Box>
+  );
+}
+
+interface PendingUserActionsProps {
+  userUid: string;
+}
+
+function PendingUserActions({ userUid }: PendingUserActionsProps) {
+  const dispatch = useAppDispatch();
+
+  const handleRejectClick = () => dispatch(rejectPendingUser({ userUid }));
+  const handleAcceptClick = () => dispatch(acceptPendingUser({ userUid }));
+
+  return (
+    <Box>
+      <Button color="error" variant="contained" onClick={handleRejectClick}>
+        Reject
+      </Button>
+      <Button
+        color="primary"
+        variant="contained"
+        sx={{
+          ml: 1,
+        }}
+        onClick={handleAcceptClick}
+      >
+        Accept
+      </Button>
     </Box>
   );
 }

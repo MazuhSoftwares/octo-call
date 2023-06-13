@@ -1,11 +1,12 @@
 import "../../testing-helpers/mock-firestore-signaling";
 import { fireEvent, screen } from "@testing-library/react";
+import { act } from "react-dom/test-utils";
 import fullRender from "../../testing-helpers/fullRender";
 import CallTemplate from "./CallTemplate";
 import { UserState, userInitialState } from "../../state/user";
 import { CallState, callInitialState } from "../../state/call";
 import { createCall, createUser } from "../../testing-helpers/call-fixtures";
-import { act } from "react-dom/test-utils";
+import firestoreSignaling from "../../services/firestore-signaling";
 
 jest.mock("../../hooks/useRedirectionRule", () =>
   jest.fn().mockReturnValue("")
@@ -24,8 +25,13 @@ describe("CallTemplate", () => {
       hostDisplayName: user.displayName,
       displayName: "1:1 Jane Doe + John Doe",
     }),
-    status: "inProgress",
+    userStatus: "participant",
   };
+
+  beforeEach(() => {
+    (firestoreSignaling.acceptPendingUser as jest.Mock).mockClear();
+    (firestoreSignaling.rejectPendingUser as jest.Mock).mockClear();
+  });
 
   it("renders", async () => {
     await act(() =>

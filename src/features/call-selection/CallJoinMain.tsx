@@ -8,23 +8,27 @@ import Groups3Icon from "@mui/icons-material/Groups3";
 import HomeTemplate from "../../components/templates/HomeTemplate";
 import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { selectCall } from "../../state/call";
 import { selectHasSomeDevice } from "../../state/devices";
-import { askToJoinCall, selectCallUsers } from "../../state/callUsers";
 import QuickDevicesConfig from "./QuickDevicesConfig";
 import Link from "../../components/basic/Link";
 import { selectUserDisplayName } from "../../state/user";
+import {
+  askToJoinCall,
+  selectCall,
+  selectCallUserStatus,
+} from "../../state/call";
 
 export default function CallJoinMain() {
   const dispatch = useAppDispatch();
 
   const callUidInputId = useId();
 
+  const call = useAppSelector(selectCall);
+
   const userDisplayName = useAppSelector(selectUserDisplayName);
   const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
-  const call = useAppSelector(selectCall);
-  const callUsers = useAppSelector(selectCallUsers);
+  const callUserStatus = useAppSelector(selectCallUserStatus);
 
   const searchParams = new URLSearchParams(window.location.search);
   const [callUid, setCallUid] = useState<string>(
@@ -41,15 +45,10 @@ export default function CallJoinMain() {
       return;
     }
 
-    dispatch(
-      askToJoinCall({
-        callUid,
-      })
-    );
+    dispatch(askToJoinCall({ callUid }));
   };
 
-  const isPending = call.status === "pending";
-  const isAskingToJoin = callUsers.status === "asking-to-join";
+  const isAskingToJoin = callUserStatus === "asking-to-join";
 
   const isJoinSubmitDisabled = !hasSomeDevice || isAskingToJoin;
 
@@ -58,8 +57,8 @@ export default function CallJoinMain() {
       return "Select at least one device";
     }
 
-    if (isPending || isAskingToJoin) {
-      return "Preparing it...";
+    if (isAskingToJoin) {
+      return "Joining it...";
     }
 
     return regular;
@@ -81,7 +80,7 @@ export default function CallJoinMain() {
         flexDirection="column"
         marginTop={3}
       >
-        <ErrorAlert message={callUsers.errorMessage} />
+        <ErrorAlert message={call.errorMessage} />
         <Typography variant="label" component="label" htmlFor={callUidInputId}>
           Call UID:
         </Typography>

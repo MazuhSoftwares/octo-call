@@ -1,18 +1,12 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import type { CallUser } from "../webrtc";
 import firestoreSignaling from "../services/firestore-signaling";
 import { useAppDispatch, useAppSelector } from "../state";
-import { selectCallUid } from "../state/call";
-import { setCallUsers } from "../state/callUsers";
+import { selectCallUid, setCallUsers } from "../state/call";
 
-export function useCallUsersListener() {
+export default function useCallUsersListener() {
   const dispatch = useAppDispatch();
   const callUid = useAppSelector(selectCallUid);
-
-  const listenerCallback = useCallback(
-    (callUsers: CallUser[]) => dispatch(setCallUsers(callUsers)),
-    [dispatch]
-  );
 
   useEffect(() => {
     if (!callUid) {
@@ -21,9 +15,9 @@ export function useCallUsersListener() {
 
     const unsubscribe = firestoreSignaling.listenCallUsers(
       callUid,
-      listenerCallback
+      (callUsers: CallUser[]) => dispatch(setCallUsers(callUsers))
     );
 
     return () => unsubscribe();
-  }, [callUid, listenerCallback]);
+  }, [dispatch, callUid]);
 }

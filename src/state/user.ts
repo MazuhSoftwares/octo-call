@@ -82,6 +82,8 @@ export const logout = createAsyncThunk(
 export const selectUserDisplayName = (state: RootState) =>
   state.user.displayName;
 
+export const selectUserUid = (state: RootState) => state.user.uid;
+
 export const selectIsUserPendingAuthentication = (state: RootState) =>
   state.user.status === "pending";
 export const selectIsUserAuthenticated = (state: RootState) =>

@@ -10,13 +10,16 @@ import HelpIcon from "@mui/icons-material/Help";
 import PeopleIcon from "@mui/icons-material/People";
 import CallEndIcon from "@mui/icons-material/CallEnd";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { leaveCall, selectCallDisplayName } from "../../state/call";
+import {
+  leaveCall,
+  selectCallDisplayName,
+  selectParticipants,
+} from "../../state/call";
 import { getThemedColor } from "../styles";
 import { logout, selectUserDisplayName } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
 import { Redirect } from "wouter";
-import { selectCallUsers } from "../../state/callUsers";
-import { useCallUsersListener } from "../../hooks/useCallUsersListener";
+import useCallUsersListener from "../../hooks/useCallUsersListener";
 import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
@@ -144,7 +147,7 @@ function CallMain({ children }: { children: ReactNode }) {
 function CallFooter() {
   const dispatch = useAppDispatch();
 
-  const callUsers = useAppSelector(selectCallUsers);
+  const participants = useAppSelector(selectParticipants);
 
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
@@ -180,7 +183,7 @@ function CallFooter() {
           startIcon={<PeopleIcon fontSize="medium" />}
           size="large"
         >
-          {callUsers.participants.length}
+          {participants.length}
         </Button>
       </Box>
 

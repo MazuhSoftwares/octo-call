@@ -1,5 +1,4 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { callUsersInitialState } from "../../state/callUsers";
 import {
   createCall,
   createCallParticipant,
@@ -9,12 +8,13 @@ import fullRender from "../../testing-helpers/fullRender";
 import ParticipantsModal from "./ParticipantsModal";
 import { act } from "react-dom/test-utils";
 import { CallState, callInitialState } from "../../state/call";
+import { userInitialState } from "../../state/user";
 
 describe("ParticipantsModal", () => {
   const call: CallState = {
     ...callInitialState,
     ...createCall(),
-    status: "inProgress",
+    userStatus: "participant",
   };
 
   beforeEach(() => {
@@ -69,8 +69,8 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
-          callUsers: {
-            ...callUsersInitialState,
+          call: {
+            ...callInitialState,
             participants: [participant0, participant1],
           },
         },
@@ -89,8 +89,8 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
-          callUsers: {
-            ...callUsersInitialState,
+          call: {
+            ...callInitialState,
             participants: [createCallParticipant()],
           },
         },
@@ -108,8 +108,8 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
-          callUsers: {
-            ...callUsersInitialState,
+          call: {
+            ...callInitialState,
             pendingUsers: [pendingUser],
           },
         },
@@ -120,6 +120,46 @@ describe("ParticipantsModal", () => {
       name: /Pending users/i,
     });
     const items = within(list).getAllByRole("listitem");
-    expect(items[0].textContent).toBe(pendingUser.userDisplayName);
+    const firstItemWithPendingUserName = within(items[0]).getByText(
+      pendingUser.userDisplayName
+    );
+    expect(firstItemWithPendingUserName).toBeVisible();
+  });
+
+  it("can accept and reject buttons be shown to the host", async () => {
+    const pendingUser = createCallUser();
+    const currentUserUid = call.hostId;
+    const currentUserDisplayName = call.hostDisplayName;
+
+    await act(() =>
+      fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
+        preloadedState: {
+          user: {
+            ...userInitialState,
+            uid: currentUserUid,
+            displayName: currentUserDisplayName,
+          },
+          call: {
+            ...callInitialState,
+            pendingUsers: [pendingUser],
+            userStatus: "participant",
+            ...createCall({ hostId: currentUserUid }),
+          },
+        },
+      })
+    );
+
+    const list = screen.getByRole("list", {
+      name: /Pending users/i,
+    });
+    const items = within(list).getAllByRole("listitem");
+    const rejectButton = within(items[0]).getByRole("button", {
+      name: "Reject",
+    });
+    const acceptButton = within(items[0]).getByRole("button", {
+      name: "Accept",
+    });
+    expect(acceptButton).toBeInTheDocument();
+    expect(rejectButton).toBeInTheDocument();
   });
 });

@@ -74,6 +74,42 @@ describe("getRedirectionRule: /join", () => {
     const result = getRedirectionRule({ path: "/join", hasAuth: true }, {});
     expect(result).toBe("");
   });
+
+  it("when authenticated and has pending call, go to pending user page", () => {
+    const result = getRedirectionRule(
+      { path: "/join", hasAuth: true, pendingCall: "123-call-321" },
+      {}
+    );
+    expect(result).toBe("/pending");
+  });
+});
+
+describe("getRedirectionRule: /join", () => {
+  it("if has pending call, stay waiting", () => {
+    const result = getRedirectionRule(
+      { path: "/pending", hasAuth: true, pendingCall: "123-call-321" },
+      {}
+    );
+    expect(result).toBe("");
+  });
+
+  it("if has ongoing call, go for it", () => {
+    const result = getRedirectionRule(
+      { path: "/pending", hasAuth: true, ongoingCall: "123-call-321" },
+      {}
+    );
+    expect(result).toBe("/p2p-call/123-call-321");
+  });
+
+  it("if has none, reset navigation flow", () => {
+    const result = getRedirectionRule({ path: "/pending", hasAuth: true }, {});
+    expect(result).toBe("/");
+  });
+
+  it("when not authenticated, reset navigation flow", () => {
+    const result = getRedirectionRule({ path: "/pending", hasAuth: false }, {});
+    expect(result).toBe("/");
+  });
 });
 
 describe("getRedirectionRule: /p2p-call", () => {

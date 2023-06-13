@@ -10,7 +10,6 @@ import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { createCall, selectCall } from "../../state/call";
 import { selectHasSomeDevice } from "../../state/devices";
-import { selectCallUsers } from "../../state/callUsers";
 import QuickDevicesConfig from "./QuickDevicesConfig";
 import Link from "../../components/basic/Link";
 import { selectUserDisplayName } from "../../state/user";
@@ -24,7 +23,6 @@ export default function CallCreationMain() {
   const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
   const call = useAppSelector(selectCall);
-  const callUsers = useAppSelector(selectCallUsers);
 
   const searchParams = new URLSearchParams(window.location.search);
   const [callDisplayName, setCallDisplayName] = useState<string>(
@@ -50,18 +48,17 @@ export default function CallCreationMain() {
     );
   };
 
-  const isPending = call.status === "pending";
-  const isAskingToJoin = callUsers.status === "asking-to-join";
+  const isCreating = call.userStatus === "creating-and-joining";
 
-  const isCreateSubmitDisabled = !hasSomeDevice || isPending;
+  const isCreateSubmitDisabled = !hasSomeDevice || isCreating;
 
   const getSubmitLabel = (regular: string): string => {
     if (!hasSomeDevice) {
       return "At least one enabled device is required to create call.";
     }
 
-    if (isPending || isAskingToJoin) {
-      return "Preparing it...";
+    if (isCreating) {
+      return "Creating it...";
     }
 
     return regular;

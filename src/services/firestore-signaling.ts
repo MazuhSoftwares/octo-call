@@ -1,10 +1,13 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   onSnapshot,
   query,
+  setDoc,
+  updateDoc,
   where,
   writeBatch,
 } from "firebase/firestore";
@@ -18,6 +21,8 @@ const firestoreSignaling = {
   createCall,
   askToJoinCall,
   listenCallUsers,
+  acceptPendingUser,
+  rejectPendingUser,
 };
 
 export default firestoreSignaling;
@@ -40,10 +45,9 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
   const docCallRef = doc(db, `calls/${callUid}`);
   batch.set(docCallRef, { ...callData, uid: callUid } as Call);
 
-  const callUserUid = uuidv4();
-  const docCallUserRef = doc(db, `calls/${callUid}/users/${callUserUid}`);
+  const docCallUserRef = doc(db, `calls/${callUid}/users/${callData.hostId}`);
   batch.set(docCallUserRef, {
-    uid: callUserUid,
+    uid: callData.hostId,
     userUid: callData.hostId,
     userDisplayName: callData.hostDisplayName,
     joined: Date.now(),
@@ -70,20 +74,22 @@ export async function askToJoinCall({
 }: CallUserIntent) {
   const calls: Call[] = [];
 
-  const q = query(collection(db, `calls`), where("uid", "==", callUid));
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    calls.push(doc.data() as Call);
-  });
-
+  const querySnapshot = await getDocs(
+    // why getDocs in plural if only 1 is possible?
+    query(collection(db, `calls`), where("uid", "==", callUid))
+  );
+  querySnapshot.forEach((doc) => calls.push(doc.data() as Call));
   if (!calls.length) {
     throw new Error("Call not found");
   }
 
-  await addDoc(collection(db, `calls/${callUid}/users`), {
+  const ref = doc(db, `calls/${callUid}/users`, userUid);
+  const data: CallUser = {
+    uid: userUid,
     userDisplayName,
     userUid,
-  });
+  };
+  await setDoc(ref, data);
 }
 
 // ref: calls/<call_uid>/p2p-descriptions
@@ -103,12 +109,26 @@ export function listenCallUsers(
   callUid: string,
   callback: (params: CallUser[]) => void
 ) {
-  const q = query(collection(db, `calls/${callUid}/users`));
-  return onSnapshot(q, (querySnapshot) => {
-    const callUsers: CallUser[] = [];
-    querySnapshot.forEach((doc: DocumentData) => {
-      callUsers.push(doc.data() as CallUser);
-    });
-    callback(callUsers);
+  return onSnapshot(
+    query(collection(db, `calls/${callUid}/users`)),
+    (querySnapshot) => {
+      const callUsers: CallUser[] = [];
+
+      querySnapshot.forEach((doc: DocumentData) => {
+        callUsers.push({ ...doc.data(), uid: doc.id } as CallUser);
+      });
+
+      callback(callUsers);
+    }
+  );
+}
+
+export async function acceptPendingUser(userUid: string, callUid: string) {
+  await updateDoc(doc(db, `calls/${callUid}/users/${userUid}`), {
+    joined: Date.now(),
   });
+}
+
+export async function rejectPendingUser(userUid: string, callUid: string) {
+  await deleteDoc(doc(db, `calls/${callUid}/users/${userUid}`));
 }
