@@ -25,7 +25,7 @@ describe("CallTemplate", () => {
       hostDisplayName: user.displayName,
       displayName: "1:1 Jane Doe + John Doe",
     }),
-    status: "inProgress",
+    userStatus: "participant",
   };
 
   beforeEach(() => {

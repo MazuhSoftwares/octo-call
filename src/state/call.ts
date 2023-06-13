@@ -3,10 +3,16 @@ import type { Call } from "../webrtc";
 import firestoreSignaling from "../services/firestore-signaling";
 import { RootState } from ".";
 
-type CallStatus = "idle" | "pending" | "inProgress" | "error";
+type HostCallStatus = "creating-and-joining" | "failed-as-host";
+type GuestCallStatus = "asking-to-join" | "pending-user" | "failed-as-guest";
+type CommonCallStatus = "idle" | "participant";
+export type CallUserStatus =
+  | CommonCallStatus
+  | HostCallStatus
+  | GuestCallStatus;
 
 export interface CallState extends Call {
-  status: CallStatus;
+  userStatus: CallUserStatus;
   errorMessage: string;
 }
 
@@ -15,7 +21,7 @@ export const callInitialState: CallState = {
   displayName: "",
   hostId: "",
   hostDisplayName: "",
-  status: "idle",
+  userStatus: "idle",
   errorMessage: "",
 };
 
@@ -29,7 +35,7 @@ export const callSlice = createSlice({
       state.displayName = "";
       state.hostId = "";
       state.hostDisplayName = "";
-      state.status = "pending";
+      state.userStatus = "creating-and-joining";
       state.errorMessage = "";
     });
 
@@ -40,7 +46,7 @@ export const callSlice = createSlice({
         state.displayName = action.payload.displayName;
         state.hostId = action.payload.hostId;
         state.hostDisplayName = action.payload.hostDisplayName;
-        state.status = action.payload.uid ? "inProgress" : "idle";
+        state.userStatus = action.payload.uid ? "participant" : "idle";
         state.errorMessage = "";
       }
     );
@@ -50,7 +56,7 @@ export const callSlice = createSlice({
       state.displayName = "";
       state.hostId = "";
       state.hostDisplayName = "";
-      state.status = "error";
+      state.userStatus = "failed-as-host";
       state.errorMessage = action.error.message ?? "Unknown error.";
     });
 
@@ -59,7 +65,7 @@ export const callSlice = createSlice({
       state.displayName = "";
       state.hostId = "";
       state.hostDisplayName = "";
-      state.status = "idle";
+      state.userStatus = "idle";
       state.errorMessage = "";
     });
   },
@@ -95,10 +101,6 @@ export const selectCallHostId = (state: RootState) => state.call.hostId;
 export const selectCallDisplayName = (state: RootState) =>
   state.call.displayName;
 
-export const selectHasLeftCall = (state: RootState) =>
-  state.call.status === "idle";
-
-export const selectHasCallInProgress = (state: RootState) =>
-  state.call.status === "inProgress";
+export const selectCallUserStatus = (state: RootState) => state.call.userStatus;
 
 export default callSlice.reducer;

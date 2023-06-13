@@ -44,7 +44,7 @@ describe("P2PCallMain", () => {
       hostId: user.uid,
       hostDisplayName: user.displayName,
     }),
-    status: "inProgress",
+    userStatus: "participant",
   };
 
   it("renders", () => {

@@ -1,13 +1,13 @@
 import { useLocation } from "wouter";
 import { useAppSelector } from "../state";
 import { selectIsUserAuthenticated } from "../state/user";
-import { selectCallUid, selectHasCallInProgress } from "../state/call";
+import { selectCallUid, selectCallUserStatus } from "../state/call";
 
 export default function useRedirectionRule(): string {
   const isUserAuthenticated = useAppSelector(selectIsUserAuthenticated);
 
-  const callInProgress = useAppSelector(selectHasCallInProgress);
   const callUid = useAppSelector(selectCallUid);
+  const callUserStatus = useAppSelector(selectCallUserStatus);
 
   const [location] = useLocation();
 
@@ -19,7 +19,7 @@ export default function useRedirectionRule(): string {
   const context = {
     hasAuth: isUserAuthenticated,
     path: location,
-    ongoingCall: callInProgress ? callUid : "",
+    ongoingCall: callUserStatus === "participant" ? callUid : "",
   };
   const goTo = getRedirectionRule(context, search);
   // console.log("from", location, "to", goTo, "ctx", context, "search", search);

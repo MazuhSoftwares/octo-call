@@ -15,7 +15,7 @@ describe("ParticipantsModal", () => {
   const call: CallState = {
     ...callInitialState,
     ...createCall(),
-    status: "inProgress",
+    userStatus: "participant",
   };
 
   beforeEach(() => {

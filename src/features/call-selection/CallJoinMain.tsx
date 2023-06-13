@@ -8,12 +8,12 @@ import Groups3Icon from "@mui/icons-material/Groups3";
 import HomeTemplate from "../../components/templates/HomeTemplate";
 import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
-import { selectCall } from "../../state/call";
 import { selectHasSomeDevice } from "../../state/devices";
 import { askToJoinCall, selectCallUsers } from "../../state/callUsers";
 import QuickDevicesConfig from "./QuickDevicesConfig";
 import Link from "../../components/basic/Link";
 import { selectUserDisplayName } from "../../state/user";
+import { selectCallUserStatus } from "../../state/call";
 
 export default function CallJoinMain() {
   const dispatch = useAppDispatch();
@@ -23,7 +23,8 @@ export default function CallJoinMain() {
   const userDisplayName = useAppSelector(selectUserDisplayName);
   const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
-  const call = useAppSelector(selectCall);
+  const callUserStatus = useAppSelector(selectCallUserStatus);
+
   const callUsers = useAppSelector(selectCallUsers);
 
   const searchParams = new URLSearchParams(window.location.search);
@@ -48,8 +49,7 @@ export default function CallJoinMain() {
     );
   };
 
-  const isPending = call.status === "pending";
-  const isAskingToJoin = callUsers.status === "asking-to-join";
+  const isAskingToJoin = callUserStatus === "asking-to-join";
 
   const isJoinSubmitDisabled = !hasSomeDevice || isAskingToJoin;
 
@@ -58,8 +58,8 @@ export default function CallJoinMain() {
       return "Select at least one device";
     }
 
-    if (isPending || isAskingToJoin) {
-      return "Preparing it...";
+    if (isAskingToJoin) {
+      return "Joining it...";
     }
 
     return regular;
