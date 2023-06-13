@@ -1,5 +1,4 @@
 import { fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { callUsersInitialState } from "../../state/callUsers";
 import {
   createCall,
   createCallParticipant,
@@ -70,8 +69,8 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
-          callUsers: {
-            ...callUsersInitialState,
+          call: {
+            ...callInitialState,
             participants: [participant0, participant1],
           },
         },
@@ -90,8 +89,8 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
-          callUsers: {
-            ...callUsersInitialState,
+          call: {
+            ...callInitialState,
             participants: [createCallParticipant()],
           },
         },
@@ -109,9 +108,8 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
-          call,
-          callUsers: {
-            ...callUsersInitialState,
+          call: {
+            ...callInitialState,
             pendingUsers: [pendingUser],
           },
         },
@@ -122,7 +120,10 @@ describe("ParticipantsModal", () => {
       name: /Pending users/i,
     });
     const items = within(list).getAllByRole("listitem");
-    expect(items[0].textContent).toBe(pendingUser.userDisplayName);
+    const firstItemWithPendingUserName = within(items[0]).getByText(
+      pendingUser.userDisplayName
+    );
+    expect(firstItemWithPendingUserName).toBeVisible();
   });
 
   it("can accept and reject buttons be shown to the host", async () => {
@@ -133,15 +134,16 @@ describe("ParticipantsModal", () => {
     await act(() =>
       fullRender(<ParticipantsModal isOpen={true} close={jest.fn()} />, {
         preloadedState: {
-          call,
           user: {
             ...userInitialState,
             uid: currentUserUid,
             displayName: currentUserDisplayName,
           },
-          callUsers: {
-            ...callUsersInitialState,
+          call: {
+            ...callInitialState,
             pendingUsers: [pendingUser],
+            userStatus: "participant",
+            ...createCall({ hostId: currentUserUid }),
           },
         },
       })

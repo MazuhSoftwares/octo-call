@@ -4,6 +4,8 @@ import PendingUserMain from "./PendingUserMain";
 import { callInitialState } from "../../state/call";
 import { createCall } from "../../testing-helpers/call-fixtures";
 
+jest.mock("../../hooks/useCallUsersListener", () => jest.fn());
+
 describe("PendingUserMain", () => {
   it("identifies pending call and has an option available to cancel it", async () => {
     await act(() =>

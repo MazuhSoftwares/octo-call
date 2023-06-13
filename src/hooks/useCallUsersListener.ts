@@ -4,7 +4,7 @@ import firestoreSignaling from "../services/firestore-signaling";
 import { useAppDispatch, useAppSelector } from "../state";
 import { selectCallUid, setCallUsers } from "../state/call";
 
-export function useCallUsersListener() {
+export default function useCallUsersListener() {
   const dispatch = useAppDispatch();
   const callUid = useAppSelector(selectCallUid);
 

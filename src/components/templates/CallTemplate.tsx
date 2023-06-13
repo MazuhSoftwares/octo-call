@@ -19,7 +19,7 @@ import { getThemedColor } from "../styles";
 import { logout, selectUserDisplayName } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
 import { Redirect } from "wouter";
-import { useCallUsersListener } from "../../hooks/useCallUsersListener";
+import useCallUsersListener from "../../hooks/useCallUsersListener";
 import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
