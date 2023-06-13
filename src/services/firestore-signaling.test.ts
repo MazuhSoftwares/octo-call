@@ -6,12 +6,11 @@ import {
 import { v4 as uuidv4 } from "uuid";
 
 import {
-  addDoc,
   doc,
   writeBatch,
   onSnapshot,
   getDocs,
-  collection,
+  setDoc,
 } from "firebase/firestore";
 
 jest.mock("firebase/firestore", () => ({
@@ -22,6 +21,7 @@ jest.mock("firebase/firestore", () => ({
   onSnapshot: jest.fn(),
   query: jest.fn(),
   getDocs: jest.fn(),
+  setDoc: jest.fn(),
   where: jest.fn(),
 }));
 
@@ -72,15 +72,13 @@ describe("createCall", () => {
     expect(result.uid).toBe("first-e223-4e25-aaca-b7c0ffecd647");
   });
 
-  it("should create call documents in Firebase", async () => {
+  it("should create call and call user documents in Firebase", async () => {
     jest.useFakeTimers().setSystemTime(new Date(2023, 5, 5, 7));
     await createCall({
       displayName: "Daily",
       hostId: "5g6h7j",
       hostDisplayName: "John Doe",
     });
-
-    console.log(Date.now());
 
     const [firstCall, secondCall] = mockSet.mock.calls;
     expect(firstCall[1]).toEqual({
@@ -90,7 +88,7 @@ describe("createCall", () => {
       hostDisplayName: "John Doe",
     });
     expect(secondCall[1]).toEqual({
-      uid: "second-7390-4d50-91f3-abcdef1e0d50",
+      uid: "5g6h7j",
       userUid: "5g6h7j",
       userDisplayName: "John Doe",
       joined: Date.now(),
@@ -99,7 +97,7 @@ describe("createCall", () => {
     const [firstDocCall, secondDocCall] = (doc as jest.Mock).mock.calls;
     expect(firstDocCall[1]).toBe("calls/first-e223-4e25-aaca-b7c0ffecd647");
     expect(secondDocCall[1]).toBe(
-      "calls/first-e223-4e25-aaca-b7c0ffecd647/users/second-7390-4d50-91f3-abcdef1e0d50"
+      "calls/first-e223-4e25-aaca-b7c0ffecd647/users/5g6h7j" // same ending as the user uid
     );
   });
 });
@@ -174,19 +172,22 @@ describe("askToJoinCall", () => {
       ]),
     });
 
+    (doc as jest.Mock).mockImplementationOnce((_, path) => path);
+    (setDoc as jest.Mock).mockResolvedValueOnce(Promise.resolve(null));
+
     await askToJoinCall({
       callUid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
       userDisplayName: "Michael Smith",
       userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
     });
 
-    const secondCollectioCall = (collection as jest.Mock).mock.calls[1];
-    const addDocCall = (addDoc as jest.Mock).mock.calls[0];
+    const setDocCall = (setDoc as jest.Mock).mock.calls[0];
 
-    expect(secondCollectioCall[1]).toBe(
+    expect(setDocCall[0]).toBe(
       "calls/6db9ad2e-19f9-4a85-b383-7731e347b7d0/users"
     );
-    expect(addDocCall[1]).toEqual({
+    expect(setDocCall[1]).toEqual({
+      uid: "zJTvoYDGr9PuN1z69vheO0b4iWF2", // same as the user uid
       userDisplayName: "Michael Smith",
       userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
     });
