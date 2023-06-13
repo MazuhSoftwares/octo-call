@@ -21,7 +21,7 @@ const firestoreSignaling = {
   askToJoinCall,
   listenCallUsers,
   acceptPendingUser,
-  refusePendingUser,
+  rejectPendingUser,
 };
 
 export default firestoreSignaling;
@@ -128,6 +128,6 @@ export async function acceptPendingUser(userUid: string, callUid: string) {
   });
 }
 
-export async function refusePendingUser(userUid: string, callUid: string) {
+export async function rejectPendingUser(userUid: string, callUid: string) {
   await deleteDoc(doc(db, `calls/${callUid}/users/${userUid}`));
 }

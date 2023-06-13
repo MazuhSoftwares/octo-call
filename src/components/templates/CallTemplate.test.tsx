@@ -30,7 +30,7 @@ describe("CallTemplate", () => {
 
   beforeEach(() => {
     (firestoreSignaling.acceptPendingUser as jest.Mock).mockClear();
-    (firestoreSignaling.refusePendingUser as jest.Mock).mockClear();
+    (firestoreSignaling.rejectPendingUser as jest.Mock).mockClear();
   });
 
   it("renders", async () => {

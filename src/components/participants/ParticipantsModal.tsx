@@ -13,7 +13,7 @@ import type { CallUser } from "../../webrtc";
 import { useAppDispatch, useAppSelector } from "../../state";
 import {
   acceptPendingUser,
-  refusePendingUser,
+  rejectPendingUser,
   selectCallUsers,
 } from "../../state/callUsers";
 import DialogModal from "../basic/DialogModal";
@@ -183,7 +183,7 @@ function UsersListItem({
     dispatch(acceptPendingUser({ userUid }));
 
   const refuseUser = (userUid: string) => () =>
-    dispatch(refusePendingUser({ userUid }));
+    dispatch(rejectPendingUser({ userUid }));
 
   return (
     <Box

@@ -32,32 +32,7 @@ export const callUsersSlice = createSlice({
       ) as CallUser[];
     },
   },
-  extraReducers: (builder) => {
-    builder.addCase(askToJoinCall.pending, (state) => {
-      state.errorMessage = "";
-    });
-
-    builder.addCase(askToJoinCall.rejected, (state, action) => {
-      state.errorMessage = action.error.message ?? "Unknown error.";
-    });
-
-    builder.addCase(askToJoinCall.fulfilled, (state) => {
-      state.errorMessage = "";
-    });
-  },
 });
-
-export const askToJoinCall = createAsyncThunk(
-  "create-call-user",
-  ({ callUid }: Pick<CallUserIntent, "callUid">, thunkApi) => {
-    const user = (thunkApi.getState() as RootState).user;
-    return firestoreSignaling.askToJoinCall({
-      callUid,
-      userUid: user.uid,
-      userDisplayName: user.displayName,
-    });
-  }
-);
 
 export const acceptPendingUser = createAsyncThunk(
   "accept-pending-user",
@@ -68,12 +43,12 @@ export const acceptPendingUser = createAsyncThunk(
   }
 );
 
-export const refusePendingUser = createAsyncThunk(
+export const rejectPendingUser = createAsyncThunk(
   "refuse-pending-user",
   ({ userUid }: Pick<CallUserIntent, "userUid">, thunkApi) => {
     const call = (thunkApi.getState() as RootState).call;
 
-    return firestoreSignaling.refusePendingUser(userUid, call.uid);
+    return firestoreSignaling.rejectPendingUser(userUid, call.uid);
   }
 );
 

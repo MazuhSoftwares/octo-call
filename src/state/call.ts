@@ -1,6 +1,8 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { Call } from "../webrtc";
-import firestoreSignaling from "../services/firestore-signaling";
+import firestoreSignaling, {
+  CallUserIntent,
+} from "../services/firestore-signaling";
 import { RootState } from ".";
 
 type HostCallStatus = "creating-and-joining" | "failed-as-host";
@@ -68,6 +70,21 @@ export const callSlice = createSlice({
       state.userStatus = "idle";
       state.errorMessage = "";
     });
+
+    builder.addCase(askToJoinCall.pending, (state) => {
+      state.userStatus = "asking-to-join";
+      state.errorMessage = "";
+    });
+
+    builder.addCase(askToJoinCall.rejected, (state, action) => {
+      state.userStatus = "failed-as-guest";
+      state.errorMessage = action.error.message ?? "Unknown error.";
+    });
+
+    builder.addCase(askToJoinCall.fulfilled, (state) => {
+      state.userStatus = "pending-user";
+      state.errorMessage = "";
+    });
   },
 });
 
@@ -85,6 +102,19 @@ export const createCall = createAsyncThunk(
   {
     condition: (_arg, thunkAPI) =>
       (thunkAPI.getState() as RootState).user.status === "authenticated",
+  }
+);
+
+export const askToJoinCall = createAsyncThunk(
+  "ask-to-join-call",
+  ({ callUid }: Pick<CallUserIntent, "callUid">, thunkApi) => {
+    const { user } = thunkApi.getState() as RootState;
+
+    return firestoreSignaling.askToJoinCall({
+      callUid,
+      userUid: user.uid,
+      userDisplayName: user.displayName,
+    });
   }
 );
 
