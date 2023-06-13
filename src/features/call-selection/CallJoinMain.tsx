@@ -9,23 +9,26 @@ import HomeTemplate from "../../components/templates/HomeTemplate";
 import ErrorAlert from "../../components/basic/ErrorAlert";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { selectHasSomeDevice } from "../../state/devices";
-import { selectCallUsers } from "../../state/callUsers";
 import QuickDevicesConfig from "./QuickDevicesConfig";
 import Link from "../../components/basic/Link";
 import { selectUserDisplayName } from "../../state/user";
-import { askToJoinCall, selectCallUserStatus } from "../../state/call";
+import {
+  askToJoinCall,
+  selectCall,
+  selectCallUserStatus,
+} from "../../state/call";
 
 export default function CallJoinMain() {
   const dispatch = useAppDispatch();
 
   const callUidInputId = useId();
 
+  const call = useAppSelector(selectCall);
+
   const userDisplayName = useAppSelector(selectUserDisplayName);
   const hasSomeDevice = useAppSelector(selectHasSomeDevice);
 
   const callUserStatus = useAppSelector(selectCallUserStatus);
-
-  const callUsers = useAppSelector(selectCallUsers);
 
   const searchParams = new URLSearchParams(window.location.search);
   const [callUid, setCallUid] = useState<string>(
@@ -77,7 +80,7 @@ export default function CallJoinMain() {
         flexDirection="column"
         marginTop={3}
       >
-        <ErrorAlert message={callUsers.errorMessage} />
+        <ErrorAlert message={call.errorMessage} />
         <Typography variant="label" component="label" htmlFor={callUidInputId}>
           Call UID:
         </Typography>

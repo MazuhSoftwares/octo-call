@@ -1,5 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { Call } from "../webrtc";
+import type { Call, CallParticipant, CallUser } from "../webrtc";
 import firestoreSignaling, {
   CallUserIntent,
 } from "../services/firestore-signaling";
@@ -15,6 +15,8 @@ export type CallUserStatus =
 
 export interface CallState extends Call {
   userStatus: CallUserStatus;
+  participants: CallParticipant[];
+  pendingUsers: CallUser[];
   errorMessage: string;
 }
 
@@ -24,6 +26,8 @@ export const callInitialState: CallState = {
   hostId: "",
   hostDisplayName: "",
   userStatus: "idle",
+  participants: [],
+  pendingUsers: [],
   errorMessage: "",
 };
 
@@ -93,6 +97,37 @@ export const callSlice = createSlice({
       state.userStatus = "idle";
       state.errorMessage = "";
     });
+
+    builder.addCase(
+      setCallUsers.fulfilled,
+      (
+        state,
+        action: PayloadAction<{ callUsers: CallUser[]; currentUserUid: string }>
+      ) => {
+        const { callUsers, currentUserUid } = action.payload;
+
+        state.participants = callUsers.filter(
+          (callUser) => callUser.joined
+        ) as CallParticipant[];
+        state.pendingUsers = callUsers.filter(
+          (callUser) => !callUser.joined
+        ) as CallUser[];
+
+        const isAmongParticipants = state.participants.some(
+          (p) => p.uid === currentUserUid
+        );
+
+        if (state.userStatus === "pending-user" && isAmongParticipants) {
+          state.userStatus = "participant";
+          return;
+        }
+
+        if (state.userStatus === "participant" && !isAmongParticipants) {
+          state.userStatus = "idle"; // left?
+          return;
+        }
+      }
+    );
   },
 });
 
@@ -126,15 +161,43 @@ export const leaveCall = createAsyncThunk("leave-call", async () => {
   return true; // TODO
 });
 
-export const selectCall = (state: RootState) => state.call;
+export const setCallUsers = createAsyncThunk(
+  "set-call-users",
+  (callUsers: CallUser[], thunkApi) => {
+    const { user } = thunkApi.getState() as RootState;
+    return { callUsers, currentUserUid: user.uid };
+  }
+);
 
-export const selectCallUid = (state: RootState) => state.call.uid;
+export const acceptPendingUser = createAsyncThunk(
+  "accept-pending-user",
+  ({ userUid }: Pick<CallUserIntent, "userUid">, thunkApi) => {
+    const { call } = thunkApi.getState() as RootState;
+
+    return firestoreSignaling.acceptPendingUser(userUid, call.uid);
+  }
+);
+
+export const rejectPendingUser = createAsyncThunk(
+  "refuse-pending-user",
+  ({ userUid }: Pick<CallUserIntent, "userUid">, thunkApi) => {
+    const { call } = thunkApi.getState() as RootState;
+
+    return firestoreSignaling.rejectPendingUser(userUid, call.uid);
+  }
+);
+
+export const selectCall = (state: RootState) => state.call;
 
 export const selectCallHostId = (state: RootState) => state.call.hostId;
 
+export const selectCallUid = (state: RootState) => state.call.uid;
 export const selectCallDisplayName = (state: RootState) =>
   state.call.displayName;
 
 export const selectCallUserStatus = (state: RootState) => state.call.userStatus;
+
+export const selectParticipants = (state: RootState) => state.call.participants;
+export const selectPendingUsers = (state: RootState) => state.call.pendingUsers;
 
 export default callSlice.reducer;

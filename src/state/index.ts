@@ -14,13 +14,11 @@ import {
 import user from "./user";
 import devices, { devicesInitialState } from "./devices";
 import call from "./call";
-import callUsers from "./callUsers";
 
 const rootReducer = combineReducers({
   user,
   devices,
   call,
-  callUsers,
 });
 
 export type PreloadedAppState = PreloadedState<RootState>;

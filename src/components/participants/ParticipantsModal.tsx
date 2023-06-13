@@ -14,8 +14,9 @@ import { useAppDispatch, useAppSelector } from "../../state";
 import {
   acceptPendingUser,
   rejectPendingUser,
-  selectCallUsers,
-} from "../../state/callUsers";
+  selectParticipants,
+  selectPendingUsers,
+} from "../../state/call";
 import DialogModal from "../basic/DialogModal";
 import { selectCallHostId, selectCallUid } from "../../state/call";
 import { selectUserUid } from "../../state/user";
@@ -35,9 +36,10 @@ export default function ParticipantsModal({
   const currentUserUid = useAppSelector(selectUserUid);
   const hostId = useAppSelector(selectCallHostId);
 
-  const { pendingUsers, participants } = useAppSelector(selectCallUsers);
+  const participants = useAppSelector(selectParticipants);
+  const pendingUsers = useAppSelector(selectPendingUsers);
 
-  const isCurrentUserTheCallHost = currentUserUid === hostId;
+  const isCurrentUserHosting = currentUserUid === hostId;
 
   return (
     <DialogModal
@@ -74,7 +76,7 @@ export default function ParticipantsModal({
                 key={pending.uid}
                 user={pending}
                 action={
-                  isCurrentUserTheCallHost && (
+                  isCurrentUserHosting && (
                     <PendingUserActions userUid={pending.userUid} />
                   )
                 }

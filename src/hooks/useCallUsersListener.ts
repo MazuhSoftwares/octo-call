@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import type { CallUser } from "../webrtc";
 import firestoreSignaling from "../services/firestore-signaling";
 import { useAppDispatch, useAppSelector } from "../state";
-import { selectCallUid } from "../state/call";
-import { setCallUsers } from "../state/callUsers";
+import { selectCallUid, setCallUsers } from "../state/call";
 
 export function useCallUsersListener() {
   const dispatch = useAppDispatch();

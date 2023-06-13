@@ -5,8 +5,11 @@ import QuickDevicesConfig from "./QuickDevicesConfig";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { selectUserDisplayName } from "../../state/user";
 import { leaveCall, selectCallUid } from "../../state/call";
+import { useCallUsersListener } from "../../hooks/useCallUsersListener";
 
 export default function PendingUserMain() {
+  useCallUsersListener();
+
   const dispatch = useAppDispatch();
 
   const userDisplayName = useAppSelector(selectUserDisplayName);
