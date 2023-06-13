@@ -11,7 +11,6 @@ import { useAppDispatch, useAppSelector } from "../../state";
 import useAgentHelper from "../../hooks/useAgentHelper";
 import { logout, selectIsUserAuthenticated } from "../../state/user";
 import SettingsModal from "../settings/SettingsModal";
-import { selectIsPendingCallUser } from "../../state/callUsers";
 import ErrorAlert from "../basic/ErrorAlert";
 import WarningAlert from "../basic/WarningAlert";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
@@ -37,16 +36,10 @@ export default function HomeTemplate({
   const openSettings = () => setSettingsOpen(true);
   const closeSettings = () => setSettingsOpen(false);
 
-  const isUserPending = useAppSelector(selectIsPendingCallUser);
-
   const goTo = useRedirectionRule();
 
   if (goTo) {
     return <Redirect to={goTo} />;
-  }
-
-  if (isUserPending) {
-    return <p>Esperando...</p>;
   }
 
   return (

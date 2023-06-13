@@ -74,11 +74,10 @@ export async function askToJoinCall({
 }: CallUserIntent) {
   const calls: Call[] = [];
 
-  const q = query(collection(db, `calls`), where("uid", "==", callUid));
-  const querySnapshot = await getDocs(q);
-  querySnapshot.forEach((doc) => {
-    calls.push(doc.data() as Call);
-  });
+  const querySnapshot = await getDocs(
+    query(collection(db, `calls`), where("uid", "==", callUid))
+  );
+  querySnapshot.forEach((doc) => calls.push(doc.data() as Call));
 
   if (!calls.length) {
     throw new Error("Call not found");
@@ -107,14 +106,18 @@ export function listenCallUsers(
   callUid: string,
   callback: (params: CallUser[]) => void
 ) {
-  const q = query(collection(db, `calls/${callUid}/users`));
-  return onSnapshot(q, (querySnapshot) => {
-    const callUsers: CallUser[] = [];
-    querySnapshot.forEach((doc: DocumentData) => {
-      callUsers.push({ ...doc.data(), uid: doc.id } as CallUser);
-    });
-    callback(callUsers);
-  });
+  return onSnapshot(
+    query(collection(db, `calls/${callUid}/users`)),
+    (querySnapshot) => {
+      const callUsers: CallUser[] = [];
+
+      querySnapshot.forEach((doc: DocumentData) => {
+        callUsers.push({ ...doc.data(), uid: doc.id } as CallUser);
+      });
+
+      callback(callUsers);
+    }
+  );
 }
 
 export async function acceptPendingUser(userUid: string, callUid: string) {
