@@ -32,9 +32,9 @@ export const callSlice = createSlice({
   initialState: callInitialState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(createCall.pending, (state) => {
+    builder.addCase(createCall.pending, (state, action) => {
       state.uid = "";
-      state.displayName = "";
+      state.displayName = action.meta.arg.displayName;
       state.hostId = "";
       state.hostDisplayName = "";
       state.userStatus = "creating-and-joining";
@@ -62,27 +62,35 @@ export const callSlice = createSlice({
       state.errorMessage = action.error.message ?? "Unknown error.";
     });
 
+    builder.addCase(askToJoinCall.pending, (state, action) => {
+      state.uid = action.meta.arg.callUid;
+      state.displayName = "";
+      state.hostId = "";
+      state.hostDisplayName = "";
+      state.userStatus = "asking-to-join";
+      state.errorMessage = "";
+    });
+
+    builder.addCase(askToJoinCall.fulfilled, (state) => {
+      state.userStatus = "pending-user";
+      state.errorMessage = "";
+    });
+
+    builder.addCase(askToJoinCall.rejected, (state, action) => {
+      state.uid = "";
+      state.displayName = "";
+      state.hostId = "";
+      state.hostDisplayName = "";
+      state.userStatus = "failed-as-guest";
+      state.errorMessage = action.error.message ?? "Unknown error.";
+    });
+
     builder.addCase(leaveCall.fulfilled, (state) => {
       state.uid = "";
       state.displayName = "";
       state.hostId = "";
       state.hostDisplayName = "";
       state.userStatus = "idle";
-      state.errorMessage = "";
-    });
-
-    builder.addCase(askToJoinCall.pending, (state) => {
-      state.userStatus = "asking-to-join";
-      state.errorMessage = "";
-    });
-
-    builder.addCase(askToJoinCall.rejected, (state, action) => {
-      state.userStatus = "failed-as-guest";
-      state.errorMessage = action.error.message ?? "Unknown error.";
-    });
-
-    builder.addCase(askToJoinCall.fulfilled, (state) => {
-      state.userStatus = "pending-user";
       state.errorMessage = "";
     });
   },
@@ -98,10 +106,6 @@ export const createCall = createAsyncThunk(
       hostDisplayName: user.displayName,
       hostId: user.uid,
     });
-  },
-  {
-    condition: (_arg, thunkAPI) =>
-      (thunkAPI.getState() as RootState).user.status === "authenticated",
   }
 );
 

@@ -6,8 +6,8 @@ import { selectCallUid, selectCallUserStatus } from "../state/call";
 export default function useRedirectionRule(): string {
   const isUserAuthenticated = useAppSelector(selectIsUserAuthenticated);
 
-  const callUid = useAppSelector(selectCallUid);
   const callUserStatus = useAppSelector(selectCallUserStatus);
+  const callUid = useAppSelector(selectCallUid);
 
   const [location] = useLocation();
 
@@ -16,22 +16,26 @@ export default function useRedirectionRule(): string {
     searchParams.entries()
   ).reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
 
-  const context = {
+  const context: RedirectionContext = {
     hasAuth: isUserAuthenticated,
     path: location,
+    pendingCall: callUserStatus === "pending-user" ? callUid : "",
     ongoingCall: callUserStatus === "participant" ? callUid : "",
   };
   const goTo = getRedirectionRule(context, search);
-  // console.log("from", location, "to", goTo, "ctx", context, "search", search);
+
   return goTo;
 }
 
+export interface RedirectionContext {
+  path: string;
+  hasAuth: boolean;
+  pendingCall?: string;
+  ongoingCall?: string;
+}
+
 export function getRedirectionRule(
-  {
-    path,
-    hasAuth,
-    ongoingCall,
-  }: { path: string; hasAuth: boolean; ongoingCall?: string },
+  { path, hasAuth, pendingCall, ongoingCall }: RedirectionContext,
   search: Record<string, string>
 ): string {
   if (path === "/") {
@@ -59,6 +63,10 @@ export function getRedirectionRule(
   }
 
   if (path === "/join") {
+    if (pendingCall && hasAuth) {
+      return "/pending";
+    }
+
     if (search.callUid && hasAuth) {
       return "";
     }
@@ -70,6 +78,18 @@ export function getRedirectionRule(
     if (!hasAuth) {
       return "/";
     }
+  }
+
+  if (path === "/pending") {
+    if (pendingCall) {
+      return "";
+    }
+
+    if (ongoingCall) {
+      return `/p2p-call/${ongoingCall}`;
+    }
+
+    return "/";
   }
 
   if (path.startsWith("/p2p-call")) {
