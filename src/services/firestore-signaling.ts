@@ -23,6 +23,7 @@ const firestoreSignaling = {
   listenCallUsers,
   acceptPendingUser,
   rejectPendingUser,
+  leaveCall,
 };
 
 export default firestoreSignaling;
@@ -61,7 +62,7 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
   };
 }
 
-export interface CallUserIntent {
+export interface CallUserJoinIntent {
   userUid: string;
   userDisplayName: string;
   callUid: string;
@@ -71,7 +72,7 @@ export async function askToJoinCall({
   callUid,
   userDisplayName,
   userUid,
-}: CallUserIntent) {
+}: CallUserJoinIntent) {
   const calls: Call[] = [];
 
   const querySnapshot = await getDocs(
@@ -94,7 +95,7 @@ export async function askToJoinCall({
 
 // ref: calls/<call_uid>/p2p-descriptions
 export function listenCallP2PDescriptions(
-  { userUid, callUid }: CallUserIntent,
+  { userUid, callUid }: CallUserJoinIntent,
   listener: (p2pDescription: CallP2PDescription) => void
 ): void {
   console.warn(
@@ -129,6 +130,18 @@ export async function acceptPendingUser(userUid: string, callUid: string) {
   });
 }
 
-export async function rejectPendingUser(userUid: string, callUid: string) {
+export interface CallUserExitIntent {
+  userUid: string;
+  callUid: string;
+}
+
+export async function rejectPendingUser({
+  callUid,
+  userUid,
+}: CallUserExitIntent) {
+  await deleteDoc(doc(db, `calls/${callUid}/users/${userUid}`));
+}
+
+export async function leaveCall({ callUid, userUid }: CallUserExitIntent) {
   await deleteDoc(doc(db, `calls/${callUid}/users/${userUid}`));
 }
