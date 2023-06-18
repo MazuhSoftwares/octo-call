@@ -12,6 +12,10 @@ jest.mock("../../hooks/useRedirectionRule", () =>
   jest.fn().mockReturnValue("")
 );
 
+jest.mock("../../services/firestore-signaling", () => ({
+  leaveCall: jest.fn(),
+}));
+
 describe("CallTemplate", () => {
   const user: UserState = {
     ...userInitialState,
@@ -93,5 +97,33 @@ describe("CallTemplate", () => {
 
     fireEvent.click(camButton);
     expect(screen.getByText("Camera is off.")).toBeInTheDocument();
+  });
+
+  it("leaves call", async () => {
+    firestoreSignaling.leaveCall = jest.fn().mockResolvedValueOnce(null);
+    const { store } = await act(() =>
+      fullRender(<CallTemplate>Call.</CallTemplate>, {
+        preloadedState: { user, call },
+      })
+    );
+
+    const leaveBtn = screen.getByRole("button", { name: "Leave this call" });
+    await act(() => fireEvent.click(leaveBtn));
+    expect(store.getState().call.uid).toBe("");
+  });
+
+  it("leaves call even if signaling throws error", async () => {
+    firestoreSignaling.leaveCall = jest.fn().mockImplementationOnce(() => {
+      throw new Error();
+    });
+    const { store } = await act(() =>
+      fullRender(<CallTemplate>Call.</CallTemplate>, {
+        preloadedState: { user, call },
+      })
+    );
+
+    const leaveBtn = screen.getByRole("button", { name: "Leave this call" });
+    await act(() => fireEvent.click(leaveBtn));
+    expect(store.getState().call.uid).toBe("");
   });
 });

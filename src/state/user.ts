@@ -3,6 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from ".";
 import type { User } from "../webrtc";
 import firestoreAuth from "../services/firestore-auth";
+import { leaveCall } from "./call";
 
 type UserStatus = "idle" | "pending" | "authenticated" | "error";
 
@@ -72,7 +73,10 @@ export const login = createAsyncThunk(
 
 export const logout = createAsyncThunk(
   "user/logout",
-  () => firestoreAuth.logout(),
+  (_, thunkApi) => {
+    firestoreAuth.logout();
+    thunkApi.dispatch(leaveCall());
+  },
   {
     condition: (_arg, thunkAPI) =>
       (thunkAPI.getState() as RootState).user.status === "authenticated",

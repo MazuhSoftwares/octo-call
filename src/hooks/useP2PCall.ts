@@ -33,7 +33,7 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
       console.log("Creating call.");
       callRef.current = webrtc.makeP2PCallConnection({
         audio,
-        video: video || true, // TODO: fix bug, currently you need to open settings before starting call, an undesired behavior
+        video,
         isLocalPeerTheOfferingNewest, // TODO: check with Redux by comparing
         outgoingSignaling: {
           onLocalJsepAction: async (localJsep) => {

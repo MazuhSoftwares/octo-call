@@ -1,7 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { Call, CallParticipant, CallUser } from "../webrtc";
 import firestoreSignaling, {
-  CallUserIntent,
+  CallUserJoinIntent,
 } from "../services/firestore-signaling";
 import { RootState } from ".";
 
@@ -42,6 +42,8 @@ export const callSlice = createSlice({
       state.hostId = "";
       state.hostDisplayName = "";
       state.userStatus = "creating-and-joining";
+      state.pendingUsers = [];
+      state.participants = [];
       state.errorMessage = "";
     });
 
@@ -72,6 +74,8 @@ export const callSlice = createSlice({
       state.hostId = "";
       state.hostDisplayName = "";
       state.userStatus = "asking-to-join";
+      state.pendingUsers = [];
+      state.participants = [];
       state.errorMessage = "";
     });
 
@@ -86,6 +90,8 @@ export const callSlice = createSlice({
       state.hostId = "";
       state.hostDisplayName = "";
       state.userStatus = "failed-as-guest";
+      state.pendingUsers = [];
+      state.participants = [];
       state.errorMessage = action.error.message ?? "Unknown error.";
     });
 
@@ -95,6 +101,8 @@ export const callSlice = createSlice({
       state.hostId = "";
       state.hostDisplayName = "";
       state.userStatus = "idle";
+      state.pendingUsers = [];
+      state.participants = [];
       state.errorMessage = "";
     });
 
@@ -146,7 +154,7 @@ export const createCall = createAsyncThunk(
 
 export const askToJoinCall = createAsyncThunk(
   "ask-to-join-call",
-  ({ callUid }: Pick<CallUserIntent, "callUid">, thunkApi) => {
+  ({ callUid }: Pick<CallUserJoinIntent, "callUid">, thunkApi) => {
     const { user } = thunkApi.getState() as RootState;
 
     return firestoreSignaling.askToJoinCall({
@@ -157,8 +165,17 @@ export const askToJoinCall = createAsyncThunk(
   }
 );
 
-export const leaveCall = createAsyncThunk("leave-call", async () => {
-  return true; // TODO
+export const leaveCall = createAsyncThunk("leave-call", async (_, thunkApi) => {
+  const { user, call } = thunkApi.getState() as RootState;
+
+  try {
+    await firestoreSignaling.leaveCall({
+      userUid: user.uid,
+      callUid: call.uid,
+    });
+  } catch (error) {
+    console.error("Failed to send leaving thru signaling.", error);
+  }
 });
 
 export const setCallUsers = createAsyncThunk(
@@ -171,7 +188,7 @@ export const setCallUsers = createAsyncThunk(
 
 export const acceptPendingUser = createAsyncThunk(
   "accept-pending-user",
-  ({ userUid }: Pick<CallUserIntent, "userUid">, thunkApi) => {
+  ({ userUid }: Pick<CallUserJoinIntent, "userUid">, thunkApi) => {
     const { call } = thunkApi.getState() as RootState;
 
     return firestoreSignaling.acceptPendingUser(userUid, call.uid);
@@ -180,10 +197,10 @@ export const acceptPendingUser = createAsyncThunk(
 
 export const rejectPendingUser = createAsyncThunk(
   "refuse-pending-user",
-  ({ userUid }: Pick<CallUserIntent, "userUid">, thunkApi) => {
+  ({ userUid }: Pick<CallUserJoinIntent, "userUid">, thunkApi) => {
     const { call } = thunkApi.getState() as RootState;
 
-    return firestoreSignaling.rejectPendingUser(userUid, call.uid);
+    return firestoreSignaling.rejectPendingUser({ userUid, callUid: call.uid });
   }
 );
 
