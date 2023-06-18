@@ -168,7 +168,14 @@ export const askToJoinCall = createAsyncThunk(
 export const leaveCall = createAsyncThunk("leave-call", async (_, thunkApi) => {
   const { user, call } = thunkApi.getState() as RootState;
 
-  await firestoreSignaling.leaveCall({ userUid: user.uid, callUid: call.uid });
+  try {
+    await firestoreSignaling.leaveCall({
+      userUid: user.uid,
+      callUid: call.uid,
+    });
+  } catch (error) {
+    console.error("Failed to send leaving thru signaling.", error);
+  }
 });
 
 export const setCallUsers = createAsyncThunk(
