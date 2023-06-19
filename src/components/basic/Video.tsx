@@ -1,7 +1,7 @@
 import { useEffect, forwardRef, RefObject, HTMLProps } from "react";
 import Box, { BoxProps } from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import { getThemedColor } from "../styles";
+import { getThemedColor } from "../app/mui-styles";
 import webrtc from "../../webrtc";
 
 export interface VideoProps extends HTMLProps<HTMLVideoElement> {

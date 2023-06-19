@@ -18,7 +18,7 @@ import {
   EXTRA_LARGE_WIDTH,
   LARGE_HEIGHT,
   MEDIUM_WIDTH,
-} from "../../components/styles";
+} from "../../components/app/mui-styles";
 
 export default function P2PCallMain() {
   const windowsSize = useWindowSize();

@@ -23,7 +23,7 @@ import {
   selectUserVideoId,
   setUserVideoId,
 } from "../../state/devices";
-import { getThemedColor } from "../styles";
+import { getThemedColor } from "../app/mui-styles";
 import {
   DevicePreviewStatus,
   useDevicePreview,

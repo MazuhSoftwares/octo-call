@@ -1,9 +1,11 @@
 import { ReactNode, useId, useState } from "react";
+import { Redirect } from "wouter";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import PersonIcon from "@mui/icons-material/Person";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import LogoutIcon from "@mui/icons-material/Logout";
 import HelpIcon from "@mui/icons-material/Help";
@@ -15,10 +17,9 @@ import {
   selectCallDisplayName,
   selectParticipants,
 } from "../../state/call";
-import { getThemedColor } from "../styles";
+import { getThemedColor } from "../app/mui-styles";
 import { logout, selectUserDisplayName } from "../../state/user";
 import ParticipantsModal from "../participants/ParticipantsModal";
-import { Redirect } from "wouter";
 import useCallUsersListener from "../../hooks/useCallUsersListener";
 import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
@@ -98,7 +99,18 @@ function CallHeader() {
       <Box>
         <Typography variant="h1">Octo Call</Typography>
         <Typography variant="h2">
-          <code>{callDisplayName}</code>
+          <Box
+            component="code"
+            sx={{
+              display: "inline-block",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: { xs: "200px", sm: "300px", md: "500px", lg: "unset" },
+            }}
+          >
+            {callDisplayName}
+          </Box>
         </Typography>
       </Box>
       <Box>
@@ -113,7 +125,13 @@ function CallHeader() {
           endIcon={<MoreVertIcon fontSize="large" />}
           onClick={handleClick}
         >
-          {userDisplayName}
+          <Box
+            component="span"
+            className="visually-hidden--xs visually-hidden--sm"
+          >
+            {userDisplayName}
+          </Box>
+          <PersonIcon sx={{ display: { xs: "inline-block", md: "none" } }} />
         </Button>
         <Menu
           id={profileMenuId}
@@ -202,11 +220,23 @@ function CallFooter() {
       <Box sx={{ display: "flex" }}>
         <Button
           onClick={handleLeaveClick}
-          startIcon={<CallEndIcon fontSize="medium" />}
           size="large"
           color="error"
+          sx={{ display: { xs: "inline-block", sm: "inline-flex" } }}
+          startIcon={
+            <CallEndIcon
+              fontSize="medium"
+              sx={{ display: { xs: "none", sm: "inherit" } }}
+            />
+          }
         >
-          Leave this call
+          <CallEndIcon
+            fontSize="medium"
+            sx={{ display: { xs: "inherit", sm: "none" } }}
+          />
+          <Box component="span" className="visually-hidden--xs">
+            Leave this call
+          </Box>
         </Button>
       </Box>
 

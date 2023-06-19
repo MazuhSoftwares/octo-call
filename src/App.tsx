@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
 import { Switch, Route, Router, Redirect } from "wouter";
-import { darkTheme } from "./components/styles";
+import { darkTheme } from "./components/app/mui-styles";
 import { useAppDispatch } from "./state";
 import { loadUser } from "./state/user";
 import AuthMain from "./features/auth/AuthMain";
