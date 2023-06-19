@@ -11,16 +11,22 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import type { DocumentData } from "firebase/firestore";
+import type { DocumentData, Unsubscribe } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./firestore-connection";
-import type { Call, CallP2PDescription, CallUser } from "../webrtc";
+import type {
+  Call,
+  CallP2PDescription,
+  CallParticipant,
+  CallUser,
+} from "../webrtc";
 
 const firestoreSignaling = {
   create,
   createCall,
   askToJoinCall,
   listenCallUsers,
+  joinAsNewestParticipation,
   acceptPendingUser,
   rejectPendingUser,
   leaveCall,
@@ -93,23 +99,62 @@ export async function askToJoinCall({
   await setDoc(ref, data);
 }
 
-// ref: calls/<call_uid>/p2p-descriptions
-export function listenCallP2PDescriptions(
-  { userUid, callUid }: CallUserJoinIntent,
-  listener: (p2pDescription: CallP2PDescription) => void
-): void {
-  console.warn(
-    "Not implemented `listenCall` service:",
-    userUid,
-    callUid,
-    listener
+export interface ParticipantIntent extends CallUserJoinIntent {
+  participantsUids: string[];
+}
+
+export async function joinAsNewestParticipation({
+  userUid,
+  callUid,
+  participantsUids,
+}: ParticipantIntent): Promise<void> {
+  const batch = writeBatch(db);
+
+  participantsUids.forEach((participantsUid) => {
+    const ref = doc(db, `calls/${callUid}/p2p-descriptions`);
+    const data: Omit<CallP2PDescription, "uid"> = {
+      newestPeerUid: userUid,
+      oldestPeerUid: participantsUid,
+    };
+    batch.set(ref, data);
+  });
+
+  await batch.commit();
+}
+
+export function listenParticipations(
+  { userUid, callUid, participantsUids }: ParticipantIntent,
+  listener: (p2pDescriptions: CallP2PDescription[]) => void
+): Unsubscribe {
+  return onSnapshot(
+    query(collection(db, `calls/${callUid}/p2p-descriptions`)),
+    (querySnapshot) => {
+      const allP2pDescriptions: CallP2PDescription[] = [];
+      querySnapshot.forEach((doc: DocumentData) =>
+        allP2pDescriptions.push({
+          ...doc.data(),
+          uid: doc.id,
+        } as CallP2PDescription)
+      );
+
+      const subscribedP2pDescriptions = allP2pDescriptions.filter(
+        (it) =>
+          it.newestPeerUid &&
+          participantsUids.includes(it.newestPeerUid) &&
+          it.oldestPeerUid &&
+          participantsUids.includes(it.oldestPeerUid) &&
+          (it.newestPeerUid === userUid || it.oldestPeerUid === userUid)
+      );
+
+      listener(subscribedP2pDescriptions);
+    }
   );
 }
 
 export function listenCallUsers(
   callUid: string,
   callback: (params: CallUser[]) => void
-) {
+): Unsubscribe {
   return onSnapshot(
     query(collection(db, `calls/${callUid}/users`)),
     (querySnapshot) => {
