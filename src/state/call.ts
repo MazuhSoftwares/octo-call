@@ -121,17 +121,41 @@ export const callSlice = createSlice({
           (callUser) => !callUser.joined
         ) as CallUser[];
 
+        // joined?
         const isAmongParticipants = state.participants.some(
           (p) => p.uid === currentUserUid
         );
-
         if (state.userStatus === "pending-user" && isAmongParticipants) {
           state.userStatus = "participant";
           return;
         }
 
+        // left?
         if (state.userStatus === "participant" && !isAmongParticipants) {
-          state.userStatus = "idle"; // left?
+          state.uid = "";
+          state.displayName = "";
+          state.hostId = "";
+          state.hostDisplayName = "";
+          state.userStatus = "idle"; // ?
+          state.pendingUsers = [];
+          state.participants = [];
+          state.errorMessage = "";
+          return;
+        }
+
+        // kicked?
+        const isAmongPendingUsers = state.pendingUsers.some(
+          (u) => u.uid === currentUserUid
+        );
+        if (state.userStatus === "pending-user" && !isAmongPendingUsers) {
+          state.uid = "";
+          state.displayName = "";
+          state.hostId = "";
+          state.hostDisplayName = "";
+          state.userStatus = "idle"; // ?
+          state.pendingUsers = [];
+          state.participants = [];
+          state.errorMessage = "";
           return;
         }
       }
