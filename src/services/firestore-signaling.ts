@@ -27,6 +27,7 @@ const firestoreSignaling = {
   createCall,
   askToJoinCall,
   listenCallUsers,
+  updateParticipation,
   listenParticipations,
   joinAsNewestParticipation,
   acceptPendingUser,
@@ -127,12 +128,23 @@ export async function joinAsNewestParticipation({
   await batch.commit();
 }
 
-export function updateParticipation(p2pDescription: CallP2PDescription) {
+export async function updateParticipation({
+  callUid,
+  p2pDescription,
+}: {
+  callUid: string;
+  p2pDescription: Partial<CallP2PDescription>;
+}) {
   if (!p2pDescription.oldestPeerUid || !p2pDescription.newestPeerUid) {
     throw new Error("Malformed description, not enough uids.");
   }
 
-  // TODO
+  await updateDoc(
+    doc(db, `calls/${callUid}/p2p-descriptions/${p2pDescription.uid}`),
+    {
+      ...p2pDescription,
+    }
+  );
 }
 
 export function listenParticipations(

@@ -8,7 +8,7 @@ import firestoreSignaling from "../services/firestore-signaling";
 export interface P2PCallHookOptions {
   isLocalPeerTheOfferingNewest: boolean;
   description: CallP2PDescription;
-  setDescription: React.Dispatch<React.SetStateAction<CallP2PDescription>>;
+  setDescription: (description: Partial<CallP2PDescription>) => void;
   remoteVideo: () => HTMLVideoElement | null;
   localVideo?: () => HTMLVideoElement | null;
 }
@@ -41,29 +41,25 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
           onLocalJsepAction: async (localJsep) => {
             // TODO: call redux action or service to update the CallP2PDescription
             if (isLocalPeerTheOfferingNewest) {
-              setDescription((description) => ({
-                ...description,
+              setDescription({
                 newestPeerOffer: localJsep,
-              }));
+              });
             } else {
-              setDescription((description) => ({
-                ...description,
+              setDescription({
                 oldestPeerAnswer: localJsep,
-              }));
+              });
             }
           },
           onCompletedLocalIceCandidates(localCandidates) {
             // TODO: call redux action or service to update the CallP2PDescription
             if (isLocalPeerTheOfferingNewest) {
-              setDescription((description) => ({
-                ...description,
+              setDescription({
                 newestPeerIceCandidates: localCandidates,
-              }));
+              });
             } else {
-              setDescription((description) => ({
-                ...description,
+              setDescription({
                 oldestPeerIceCandidates: localCandidates,
-              }));
+              });
             }
           },
         },

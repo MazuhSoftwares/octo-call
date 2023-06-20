@@ -1,4 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import get from "lodash.get";
 import type {
   Call,
   CallP2PDescription,
@@ -235,12 +236,19 @@ export const selectCallUserStatus = (state: RootState) => state.call.userStatus;
 export const selectParticipants = (state: RootState) => state.call.participants;
 export const selectPendingUsers = (state: RootState) => state.call.pendingUsers;
 
-export const selectSlotDescriptionFn =
-  (localUid: string, remoteUid: string) => (state: RootState) =>
+export const selectUserParticipationOrder = (state: RootState): number =>
+  get(
+    state.call.participants.find((it) => it.uid === state.user.uid),
+    "joined",
+    -1
+  );
+
+export const selectP2PDescriptionFn =
+  (remoteUid: string) => (state: RootState) =>
     state.call.p2pDescriptions.find(
       (it) =>
-        localUid === it.newestPeerUid ||
-        localUid === it.oldestPeerUid ||
+        state.user.uid === it.newestPeerUid ||
+        state.user.uid === it.oldestPeerUid ||
         remoteUid === it.newestPeerUid ||
         remoteUid === it.oldestPeerUid
     );
