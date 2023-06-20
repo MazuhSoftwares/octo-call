@@ -143,7 +143,7 @@ export const callSlice = createSlice({
           return;
         }
 
-        // kicked?
+        // rejected?
         const isAmongPendingUsers = state.pendingUsers.some(
           (u) => u.uid === currentUserUid
         );
@@ -220,7 +220,7 @@ export const acceptPendingUser = createAsyncThunk(
 );
 
 export const rejectPendingUser = createAsyncThunk(
-  "refuse-pending-user",
+  "reject-pending-user",
   ({ userUid }: Pick<CallUserJoinIntent, "userUid">, thunkApi) => {
     const { call } = thunkApi.getState() as RootState;
 
