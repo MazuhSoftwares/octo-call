@@ -1,23 +1,43 @@
 import { useEffect } from "react";
-import type { CallUser } from "../webrtc";
 import firestoreSignaling from "../services/firestore-signaling";
 import { useAppDispatch, useAppSelector } from "../state";
-import { selectCallUid, setCallUsers } from "../state/call";
+import {
+  selectCallUid,
+  selectCallUserStatus,
+  selectParticipants,
+  setCallUsers,
+  setP2PDescriptions,
+} from "../state/call";
+import { selectUserUid } from "../state/user";
 
 export default function useCallUsersListener() {
   const dispatch = useAppDispatch();
+
+  const userUid = useAppSelector(selectUserUid);
+
   const callUid = useAppSelector(selectCallUid);
+  const callUserStatus = useAppSelector(selectCallUserStatus);
+  const participants = useAppSelector(selectParticipants);
+  const participantsUids = participants.map((p) => p.uid);
 
   useEffect(() => {
     if (!callUid) {
       return () => null;
     }
 
-    const unsubscribe = firestoreSignaling.listenCallUsers(
-      callUid,
-      (callUsers: CallUser[]) => dispatch(setCallUsers(callUsers))
+    return firestoreSignaling.listenCallUsers(callUid, (callUsersResult) =>
+      dispatch(setCallUsers(callUsersResult))
     );
-
-    return () => unsubscribe();
   }, [dispatch, callUid]);
+
+  useEffect(() => {
+    if (callUserStatus !== "participant") {
+      return () => null;
+    }
+
+    return firestoreSignaling.listenParticipations(
+      { callUid, userUid, participantsUids },
+      (p2pDescriptions) => dispatch(setP2PDescriptions(p2pDescriptions))
+    );
+  }, [dispatch, userUid, callUid, callUserStatus, participantsUids]);
 }

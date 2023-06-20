@@ -25,25 +25,9 @@ export default function P2PCallMain() {
 
   // TODO: manage it with redux and service layers,
   // in real life it doesnt make sense for it to be just a local state.
-  const [description, setDescription] = useState<CallP2PDescription>({
-    uid: EXPERIMENTAL_DESCRIPTION_UID,
-  });
-
-  useP2PCall({
-    isLocalPeerTheOfferingNewest: false,
-    description,
-    setDescription,
-    localVideo: () => findVideoSlot(EXPERIMENTAL_OLDEST_PERSON_UID_LOCAL),
-    remoteVideo: () => findVideoSlot(EXPERIMENTAL_OLDEST_PERSON_UID_REMOTE),
-  });
-
-  useP2PCall({
-    isLocalPeerTheOfferingNewest: true,
-    description,
-    setDescription,
-    localVideo: () => findVideoSlot(EXPERIMENTAL_NEWEST_PERSON_UID_LOCAL),
-    remoteVideo: () => findVideoSlot(EXPERIMENTAL_NEWEST_PERSON_UID_REMOTE),
-  });
+  // const [description, setDescription] = useState<CallP2PDescription>({
+  //   uid: EXPERIMENTAL_DESCRIPTION_UID,
+  // });
 
   const participantsSlotsRef = useRef<ParticipantSlot[]>(
     Array(MAX_PARTICIPANTS)
@@ -96,10 +80,10 @@ export default function P2PCallMain() {
     [syncActiveSlotsCounting]
   );
 
-  // const unlockSlot = useCallback((slot: ParticipantSlot): void => {
-  //   slot.participant = null;
-  //   syncActiveSlotsCounting();
-  // }, []);
+  const unlockSlot = useCallback((slot: ParticipantSlot): void => {
+    slot.participant = null;
+    syncActiveSlotsCounting();
+  }, []);
 
   const lockNextFreeSlot = useCallback(
     (participant: CallParticipant): ParticipantSlot => {
@@ -113,40 +97,6 @@ export default function P2PCallMain() {
     },
     [findFreeSlot, lockSlot]
   );
-
-  const setupExperiental1on1Ref = useRef(
-    once(() => {
-      console.warn("Setting up experimental 1:1 elements.");
-      lockNextFreeSlot({
-        uid: "uuid-1",
-        userUid: EXPERIMENTAL_OLDEST_PERSON_UID_LOCAL,
-        userDisplayName: "Oldest (Local)",
-        joined: 1,
-      });
-      lockNextFreeSlot({
-        uid: "uuid-2",
-        userUid: EXPERIMENTAL_OLDEST_PERSON_UID_REMOTE,
-        userDisplayName: "Oldest (Remote)",
-        joined: 2,
-      });
-      lockNextFreeSlot({
-        uid: "uuid-3",
-        userUid: EXPERIMENTAL_NEWEST_PERSON_UID_LOCAL,
-        userDisplayName: "Newest (Local)",
-        joined: 3,
-      });
-      lockNextFreeSlot({
-        uid: "uuid-4",
-        userUid: EXPERIMENTAL_NEWEST_PERSON_UID_REMOTE,
-        userDisplayName: "Newest (Remote)",
-        joined: 4,
-      });
-    })
-  );
-
-  useEffect(() => {
-    setupExperiental1on1Ref.current();
-  }, []);
 
   const getMainStyles = useCallback((): BoxProps["sx"] => {
     if (windowsSize.width < MEDIUM_WIDTH) {
@@ -243,10 +193,16 @@ interface ParticipantSlot {
   videoRef: RefObject<HTMLVideoElement | null>;
 }
 
-const EXPERIMENTAL_DESCRIPTION_UID = "experimental-call-42";
-const EXPERIMENTAL_OLDEST_PERSON_UID_LOCAL = "experimental-oldest-p1-local";
-const EXPERIMENTAL_OLDEST_PERSON_UID_REMOTE = "experimental-oldest-p1-remote";
-const EXPERIMENTAL_NEWEST_PERSON_UID_LOCAL = "experimental-newest-p2-local";
-const EXPERIMENTAL_NEWEST_PERSON_UID_REMOTE = "experimental-newest-p2-remote";
-
 const MAX_PARTICIPANTS = 5;
+
+// function P2PCallSlot() {
+//   useP2PCall({
+//     isLocalPeerTheOfferingNewest: false,
+//     description,
+//     setDescription,
+//     localVideo: () => null,
+//     remoteVideo: () => null,
+//   });
+
+//   return <p>Quadradinho.</p>;
+// }

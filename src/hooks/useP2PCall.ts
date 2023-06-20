@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import webrtc, { CallP2PDescription, P2PCallConnection } from "../webrtc";
 import { useAppSelector } from "../state";
 import { selectUserAudioId, selectUserVideoId } from "../state/devices";
+import { selectCallUserStatus } from "../state/call";
+import firestoreSignaling from "../services/firestore-signaling";
 
 export interface P2PCallHookOptions {
   isLocalPeerTheOfferingNewest: boolean;
@@ -123,9 +125,11 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
     const cachedKeys = Object.keys(
       cachedDescription
     ) as (keyof CallP2PDescription)[];
+
     const newKeys = (
       Object.keys(description) as (keyof CallP2PDescription)[]
     ).filter((k) => !cachedKeys.includes(k));
+
     const diff = newKeys.reduce(
       (acc, k) => ({ ...acc, [k]: description[k] }),
       {}

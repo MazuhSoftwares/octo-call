@@ -18,6 +18,7 @@ import type {
   Call,
   CallP2PDescription,
   CallParticipant,
+  CallPendingUser,
   CallUser,
 } from "../webrtc";
 
@@ -26,6 +27,7 @@ const firestoreSignaling = {
   createCall,
   askToJoinCall,
   listenCallUsers,
+  listenParticipations,
   joinAsNewestParticipation,
   acceptPendingUser,
   rejectPendingUser,
@@ -99,7 +101,9 @@ export async function askToJoinCall({
   await setDoc(ref, data);
 }
 
-export interface ParticipantIntent extends CallUserJoinIntent {
+export interface ParticipantIntent {
+  userUid: string;
+  callUid: string;
   participantsUids: string[];
 }
 
@@ -151,9 +155,14 @@ export function listenParticipations(
   );
 }
 
+export interface CallUsersResult {
+  participants: CallParticipant[];
+  pendingUsers: CallPendingUser[];
+}
+
 export function listenCallUsers(
   callUid: string,
-  callback: (params: CallUser[]) => void
+  callback: (result: CallUsersResult) => void
 ): Unsubscribe {
   return onSnapshot(
     query(collection(db, `calls/${callUid}/users`)),
@@ -164,7 +173,15 @@ export function listenCallUsers(
         callUsers.push({ ...doc.data(), uid: doc.id } as CallUser);
       });
 
-      callback(callUsers);
+      const participants = callUsers.filter(
+        (callUser) => callUser.joined
+      ) as CallParticipant[];
+
+      const pendingUsers = callUsers.filter(
+        (callUser) => !callUser.joined
+      ) as CallPendingUser[];
+
+      callback({ participants, pendingUsers });
     }
   );
 }
