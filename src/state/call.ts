@@ -167,6 +167,7 @@ export const leaveCall = createAsyncThunk("leave-call", async (_, thunkApi) => {
 
   try {
     await firestoreSignaling.leaveCall({
+      // TODO: dont await?
       userUid: user.uid,
       callUid: call.uid,
     });
@@ -177,7 +178,7 @@ export const leaveCall = createAsyncThunk("leave-call", async (_, thunkApi) => {
 
 export const setCallUsers = createAsyncThunk(
   "set-call-users",
-  (callUsersResult: CallUsersResult, thunkApi) => {
+  async (callUsersResult: CallUsersResult, thunkApi) => {
     const { user, call } = thunkApi.getState() as RootState;
 
     const isAmongParticipants = callUsersResult.participants.some(
@@ -187,6 +188,11 @@ export const setCallUsers = createAsyncThunk(
       (u) => u.uid === user.uid
     );
     if (call.userStatus === "pending-user" && isAmongParticipants) {
+      await firestoreSignaling.joinAsNewestParticipation({
+        callUid: call.uid,
+        userUid: user.uid,
+        participantsUids: call.participants.map((p) => p.uid),
+      });
       thunkApi.dispatch(callSlice.actions.setUserAsParticipant()); // joined
     } else if (call.userStatus === "participant" && !isAmongParticipants) {
       thunkApi.dispatch(leaveCall()); // left

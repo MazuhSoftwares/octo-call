@@ -115,7 +115,8 @@ export async function joinAsNewestParticipation({
   const batch = writeBatch(db);
 
   participantsUids.forEach((participantsUid) => {
-    const ref = doc(db, `calls/${callUid}/p2p-descriptions`);
+    const uuid = uuidv4();
+    const ref = doc(db, `calls/${callUid}/p2p-descriptions/${uuid}`);
     const data: Omit<CallP2PDescription, "uid"> = {
       newestPeerUid: userUid,
       oldestPeerUid: participantsUid,
@@ -124,6 +125,14 @@ export async function joinAsNewestParticipation({
   });
 
   await batch.commit();
+}
+
+export function updateParticipation(p2pDescription: CallP2PDescription) {
+  if (!p2pDescription.oldestPeerUid || !p2pDescription.newestPeerUid) {
+    throw new Error("Malformed description, not enough uids.");
+  }
+
+  // TODO
 }
 
 export function listenParticipations(
