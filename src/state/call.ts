@@ -47,12 +47,12 @@ export const callSlice = createSlice({
     setUserAsParticipant: (state) => {
       state.userStatus = "participant";
     },
-    setP2PDescriptions: (
-      state,
-      action: PayloadAction<CallP2PDescription[]>
-    ) => {
-      state.p2pDescriptions = action.payload;
-    },
+    // setP2PDescriptions: (
+    //   state,
+    //   action: PayloadAction<CallP2PDescription[]>
+    // ) => {
+    //   state.p2pDescriptions = action.payload;
+    // },
   },
   extraReducers: (builder) => {
     builder.addCase(createCall.pending, (state, action) => {
@@ -132,10 +132,24 @@ export const callSlice = createSlice({
         state.pendingUsers = action.payload.pendingUsers;
       }
     );
+
+    builder.addCase(
+      setP2PDescriptions.fulfilled,
+      (state, action: PayloadAction<CallP2PDescription[]>) => {
+        state.p2pDescriptions = action.payload;
+      }
+    );
   },
 });
 
-export const { setP2PDescriptions } = callSlice.actions;
+export const setP2PDescriptions = createAsyncThunk(
+  "set-p2p-descriptions",
+  async (descriptions: CallP2PDescription[], thunkAPI) => {
+    const currentDescriptions = (thunkAPI.getState() as RootState).call
+      .p2pDescriptions;
+    return descriptions;
+  }
+);
 
 export const createCall = createAsyncThunk(
   "create-call",

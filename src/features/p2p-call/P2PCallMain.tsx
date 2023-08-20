@@ -1,17 +1,17 @@
 import {
   createRef,
-  useEffect,
   useRef,
   useState,
   RefObject,
   useCallback,
   useId,
+  useEffect,
 } from "react";
-import once from "lodash.once";
 import Box, { BoxProps } from "@mui/material/Box";
 import CallTemplate from "../../components/templates/CallTemplate";
 import Video from "../../components/basic/Video";
 import type { CallP2PDescription, CallParticipant } from "../../webrtc";
+import webrtc from "../../webrtc";
 import useP2PCall from "../../hooks/useP2PCall";
 import useWindowSize from "../../hooks/useWindowSize";
 import {
@@ -24,18 +24,16 @@ import { useAppSelector } from "../../state";
 import {
   selectCallUid,
   selectP2PDescriptionFn,
+  selectParticipants,
   selectUserParticipationOrder,
 } from "../../state/call";
+import { selectUserDisplayName, selectUserUid } from "../../state/user";
+import { useDevicePreview } from "../../hooks/useDevicePreview";
+import { selectUserVideoId } from "../../state/devices";
 import firestoreSignaling from "../../services/firestore-signaling";
 
 export default function P2PCallMain() {
   const windowsSize = useWindowSize();
-
-  // TODO: manage it with redux and service layers,
-  // in real life it doesnt make sense for it to be just a local state.
-  // const [description, setDescription] = useState<CallP2PDescription>({
-  //   uid: EXPERIMENTAL_DESCRIPTION_UID,
-  // });
 
   const participantsSlotsRef = useRef<ParticipantSlot[]>(
     Array(MAX_PARTICIPANTS)
@@ -46,11 +44,10 @@ export default function P2PCallMain() {
       }))
   );
 
-  const [activeSlotsQtt, setActiveSlotsQtt] = useState<number>(0);
-
+  const [activeSlotsQtt, setActiveSlotsQtt] = useState<number>(0); // to be used only for layout
   const syncActiveSlotsCounting = useCallback(() => {
     setActiveSlotsQtt(
-      participantsSlotsRef.current.filter((it) => it.participant).length
+      participantsSlotsRef.current.filter((it) => it.participant).length + 1 // plus user themself
     );
   }, []);
 
@@ -88,10 +85,10 @@ export default function P2PCallMain() {
     [syncActiveSlotsCounting]
   );
 
-  const unlockSlot = useCallback((slot: ParticipantSlot): void => {
-    slot.participant = null;
-    syncActiveSlotsCounting();
-  }, []);
+  // const unlockSlot = useCallback((slot: ParticipantSlot): void => {
+  //   slot.participant = null;
+  //   syncActiveSlotsCounting();
+  // }, []);
 
   const lockNextFreeSlot = useCallback(
     (participant: CallParticipant): ParticipantSlot => {
@@ -161,6 +158,23 @@ export default function P2PCallMain() {
     return { maxHeight: "37vh" };
   }, [windowsSize, activeSlotsQtt]);
 
+  const userUid = useAppSelector(selectUserUid);
+  const participants = useAppSelector(selectParticipants);
+
+  useEffect(() => {
+    participants
+      .filter((p) => p.uid !== userUid)
+      .forEach((participant) => {
+        const participantSlot = findSlot(participant.uid);
+        if (participantSlot) {
+          return;
+        }
+
+        console.log("Locking", participant.userDisplayName);
+        lockNextFreeSlot(participant);
+      });
+  }, [userUid, participants, findSlot, lockNextFreeSlot]);
+
   return (
     <CallTemplate>
       <Box
@@ -174,10 +188,19 @@ export default function P2PCallMain() {
           ...getMainStyles(),
         }}
       >
+        <P2PMirrorCallSlot
+          slotStyles={getSlotStyles()}
+          videoWrapperStyles={getVideoWrapperStyles()}
+          videoStyles={getVideoStyles()}
+        />
         {participantsSlotsRef.current.map((slot, index) => (
           <P2PCallSlot
-            key={slot.participant ? slot.participant.uid : `empty-${index}`}
-            participantUid={slot.participant?.uid}
+            key={`slot-guard-${index}`}
+            slot={slot}
+            findVideoSlot={findVideoSlot}
+            slotStyles={getSlotStyles()}
+            videoWrapperStyles={getVideoWrapperStyles()}
+            videoStyles={getVideoStyles()}
           />
         ))}
       </Box>
@@ -190,49 +213,129 @@ interface ParticipantSlot {
   videoRef: RefObject<HTMLVideoElement | null>;
 }
 
-const MAX_PARTICIPANTS = 5;
-
 interface P2PCallSlotProps {
-  participant: CallParticipant | null;
+  slot: ParticipantSlot;
+  findVideoSlot: (participantUid: string) => HTMLVideoElement | null;
+  slotStyles?: BoxProps["sx"];
+  videoWrapperStyles?: BoxProps["sx"];
+  videoStyles?: BoxProps["sx"];
 }
 
-function P2PCallSlot({ participant }: P2PCallSlotProps) {
+function P2PCallSlot(props: P2PCallSlotProps) {
+  const p2pDescription = useAppSelector(
+    selectP2PDescriptionFn(props.slot.participant?.uid || "")
+  );
+
+  if (!props.slot.participant || !p2pDescription) {
+    return <Box data-layoutinfo="call-slot" hidden></Box>;
+  }
+
+  return (
+    <P2PCallSlotConnection
+      participant={props.slot.participant}
+      findVideoSlot={props.findVideoSlot}
+      p2pDescription={p2pDescription}
+      slotStyles={props.slotStyles}
+      videoWrapperStyles={props.videoWrapperStyles}
+      videoStyles={props.videoStyles}
+    />
+  );
+}
+
+interface P2PCallSlotConnectionProps {
+  participant: CallParticipant;
+  p2pDescription: CallP2PDescription;
+  // videoRef: RefObject<HTMLVideoElement | null>;
+  findVideoSlot: (participantUid: string) => HTMLVideoElement | null;
+  slotStyles?: BoxProps["sx"];
+  videoWrapperStyles?: BoxProps["sx"];
+  videoStyles?: BoxProps["sx"];
+}
+
+function P2PCallSlotConnection({
+  participant,
+  p2pDescription,
+  slotStyles = {},
+  videoWrapperStyles = {},
+  videoStyles = {},
+}: P2PCallSlotConnectionProps) {
   const callUid = useAppSelector(selectCallUid);
+
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const descriptionInitialId = useId();
   const userParticipation = useAppSelector(selectUserParticipationOrder);
 
-  const p2pDescription = useAppSelector(
-    selectP2PDescriptionFn(participant?.uid || "")
-  ) || {
-    uid: descriptionInitialId,
-  };
-
   useP2PCall({
     isLocalPeerTheOfferingNewest:
-      userParticipation > (participant?.joined || -1),
+      userParticipation > (participant.joined || -1),
     description: p2pDescription,
-    setDescription: (p2pDescription) =>
-      firestoreSignaling.updateParticipation({ callUid, p2pDescription }),
-    localVideo: () => null,
-    remoteVideo: () => null,
+    setDescription: (patchingP2pDescription) => {
+      const patchingParticipation = {
+        callUid,
+        p2pDescription: {
+          ...p2pDescription,
+          ...patchingP2pDescription,
+        },
+      };
+      console.warn("setting patchingParticipation", patchingParticipation);
+      firestoreSignaling.updateParticipation(patchingParticipation); // no middle layer ?
+    },
+    remoteVideo: () => videoRef.current,
   });
 
   return (
     <Box
-      key={slot?.participant ? slot.participant.uid : `empty-${index}`}
       data-layoutinfo="call-slot"
-      sx={getSlotStyles()}
-      hidden={!slot.participant}
+      id={descriptionInitialId}
+      sx={slotStyles}
+      hidden={!participant}
     >
       <Video
-        ref={slot.videoRef}
-        displayName={
-          slot.participant ? slot.participant.userDisplayName : "Empty"
-        }
-        wrapperBoxProps={{ sx: getVideoWrapperStyles() }}
-        sx={getVideoStyles()}
+        ref={videoRef}
+        displayName={participant.userDisplayName}
+        wrapperBoxProps={{ sx: videoWrapperStyles }}
+        sx={videoStyles}
       />
     </Box>
   );
 }
+
+type P2PMirrorCallSlotProps = Omit<P2PCallSlotProps, "slot" | "findVideoSlot">;
+
+function P2PMirrorCallSlot({
+  slotStyles = {},
+  videoWrapperStyles = {},
+  videoStyles = {},
+}: P2PMirrorCallSlotProps) {
+  const displayName = useAppSelector(selectUserDisplayName);
+
+  const videoId = useAppSelector(selectUserVideoId);
+  const videoPreview = useDevicePreview("video");
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    videoPreview.setResultListener((stream: MediaStream | null) => {
+      webrtc.domHelpers.attachLocalStream(
+        videoRef.current as HTMLVideoElement,
+        stream
+      );
+    });
+
+    videoPreview.start(videoId);
+    return () => videoPreview.stop();
+  }, [videoPreview, videoId]);
+
+  return (
+    <Box data-layoutinfo="call-slot" sx={slotStyles}>
+      <Video
+        ref={videoRef}
+        displayName={`${displayName} (Me)`}
+        wrapperBoxProps={{ sx: videoWrapperStyles }}
+        sx={videoStyles}
+      />
+    </Box>
+  );
+}
+
+const MAX_PARTICIPANTS = 2;

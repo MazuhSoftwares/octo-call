@@ -2,8 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import webrtc, { CallP2PDescription, P2PCallConnection } from "../webrtc";
 import { useAppSelector } from "../state";
 import { selectUserAudioId, selectUserVideoId } from "../state/devices";
-import { selectCallUserStatus } from "../state/call";
-import firestoreSignaling from "../services/firestore-signaling";
 
 export interface P2PCallHookOptions {
   isLocalPeerTheOfferingNewest: boolean;
@@ -14,9 +12,6 @@ export interface P2PCallHookOptions {
 }
 
 export default function useP2PCall(options: P2PCallHookOptions): void {
-  // most of these values are now "hardcoded" from options, just for testing,
-  // but they should be injected here via useAppSelector and useAppDispatch,
-  // as Redux is the single source of truth for data.
   const { description } = options;
   const {
     isLocalPeerTheOfferingNewest,
@@ -36,10 +31,10 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
       callRef.current = webrtc.makeP2PCallConnection({
         audio,
         video,
-        isLocalPeerTheOfferingNewest, // TODO: check with Redux by comparing
+        isLocalPeerTheOfferingNewest,
         outgoingSignaling: {
           onLocalJsepAction: async (localJsep) => {
-            // TODO: call redux action or service to update the CallP2PDescription
+            // call signaling here instead of calling in component itself?
             if (isLocalPeerTheOfferingNewest) {
               setDescription({
                 newestPeerOffer: localJsep,
@@ -51,7 +46,7 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
             }
           },
           onCompletedLocalIceCandidates(localCandidates) {
-            // TODO: call redux action or service to update the CallP2PDescription
+            // call signaling here instead of calling in component itself?
             if (isLocalPeerTheOfferingNewest) {
               setDescription({
                 newestPeerIceCandidates: localCandidates,
@@ -117,7 +112,6 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
 
     const call = callRef.current;
 
-    // let's pretend we magically received this updated `description` from redux and service layers and not a local dumb state hook simulating an 1:1 call
     const cachedKeys = Object.keys(
       cachedDescription
     ) as (keyof CallP2PDescription)[];

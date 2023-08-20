@@ -139,11 +139,21 @@ export async function updateParticipation({
     throw new Error("Malformed description, not enough uids.");
   }
 
+  const p2pDescriptionDTO = {
+    ...p2pDescription,
+  };
+  if (p2pDescriptionDTO.newestPeerOffer instanceof RTCSessionDescription) {
+    p2pDescriptionDTO.newestPeerOffer =
+      p2pDescriptionDTO.newestPeerOffer.toJSON();
+  }
+  if (p2pDescriptionDTO.oldestPeerAnswer instanceof RTCSessionDescription) {
+    p2pDescriptionDTO.oldestPeerAnswer =
+      p2pDescriptionDTO.oldestPeerAnswer.toJSON();
+  }
+
   await updateDoc(
     doc(db, `calls/${callUid}/p2p-descriptions/${p2pDescription.uid}`),
-    {
-      ...p2pDescription,
-    }
+    p2pDescriptionDTO
   );
 }
 
