@@ -1,12 +1,4 @@
-import {
-  createRef,
-  useRef,
-  useState,
-  RefObject,
-  useCallback,
-  useId,
-  useEffect,
-} from "react";
+import { useRef, useState, useCallback, useId, useEffect } from "react";
 import Box, { BoxProps } from "@mui/material/Box";
 import CallTemplate from "../../components/templates/CallTemplate";
 import Video from "../../components/basic/Video";
@@ -38,10 +30,7 @@ export default function P2PCallMain() {
   const participantsSlotsRef = useRef<ParticipantSlot[]>(
     Array(MAX_PARTICIPANTS)
       .fill(null)
-      .map(() => ({
-        participant: null,
-        videoRef: createRef<HTMLVideoElement | null>(),
-      }))
+      .map(() => ({ participant: null }))
   );
 
   const [activeSlotsQtt, setActiveSlotsQtt] = useState<number>(0); // to be used only for layout
@@ -65,18 +54,6 @@ export default function P2PCallMain() {
     []
   );
 
-  const findVideoSlot = useCallback(
-    (participantUid: string): HTMLVideoElement | null => {
-      const slot = findSlot(participantUid);
-      if (!slot) {
-        return null;
-      }
-
-      return slot.videoRef.current || null;
-    },
-    [findSlot]
-  );
-
   const lockSlot = useCallback(
     (slot: ParticipantSlot, participant: CallParticipant): void => {
       slot.participant = participant;
@@ -84,11 +61,6 @@ export default function P2PCallMain() {
     },
     [syncActiveSlotsCounting]
   );
-
-  // const unlockSlot = useCallback((slot: ParticipantSlot): void => {
-  //   slot.participant = null;
-  //   syncActiveSlotsCounting();
-  // }, []);
 
   const lockNextFreeSlot = useCallback(
     (participant: CallParticipant): ParticipantSlot => {
@@ -197,7 +169,6 @@ export default function P2PCallMain() {
           <P2PCallSlot
             key={`slot-guard-${index}`}
             slot={slot}
-            findVideoSlot={findVideoSlot}
             slotStyles={getSlotStyles()}
             videoWrapperStyles={getVideoWrapperStyles()}
             videoStyles={getVideoStyles()}
@@ -210,12 +181,10 @@ export default function P2PCallMain() {
 
 interface ParticipantSlot {
   participant: CallParticipant | null;
-  videoRef: RefObject<HTMLVideoElement | null>;
 }
 
 interface P2PCallSlotProps {
   slot: ParticipantSlot;
-  findVideoSlot: (participantUid: string) => HTMLVideoElement | null;
   slotStyles?: BoxProps["sx"];
   videoWrapperStyles?: BoxProps["sx"];
   videoStyles?: BoxProps["sx"];
@@ -233,7 +202,6 @@ function P2PCallSlot(props: P2PCallSlotProps) {
   return (
     <P2PCallSlotConnection
       participant={props.slot.participant}
-      findVideoSlot={props.findVideoSlot}
       p2pDescription={p2pDescription}
       slotStyles={props.slotStyles}
       videoWrapperStyles={props.videoWrapperStyles}
@@ -245,8 +213,6 @@ function P2PCallSlot(props: P2PCallSlotProps) {
 interface P2PCallSlotConnectionProps {
   participant: CallParticipant;
   p2pDescription: CallP2PDescription;
-  // videoRef: RefObject<HTMLVideoElement | null>;
-  findVideoSlot: (participantUid: string) => HTMLVideoElement | null;
   slotStyles?: BoxProps["sx"];
   videoWrapperStyles?: BoxProps["sx"];
   videoStyles?: BoxProps["sx"];
@@ -301,7 +267,7 @@ function P2PCallSlotConnection({
   );
 }
 
-type P2PMirrorCallSlotProps = Omit<P2PCallSlotProps, "slot" | "findVideoSlot">;
+type P2PMirrorCallSlotProps = Omit<P2PCallSlotProps, "slot">;
 
 function P2PMirrorCallSlot({
   slotStyles = {},

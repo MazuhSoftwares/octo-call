@@ -27,7 +27,6 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
 
   useEffect(() => {
     if (!callRef.current) {
-      console.log("Creating call.");
       callRef.current = webrtc.makeP2PCallConnection({
         audio,
         video,
