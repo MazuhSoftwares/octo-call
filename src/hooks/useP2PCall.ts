@@ -1,27 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import webrtc, { CallP2PDescription, P2PCallConnection } from "../webrtc";
-import { useAppSelector } from "../state";
+import { useAppDispatch, useAppSelector } from "../state";
 import { selectUserAudioId, selectUserVideoId } from "../state/devices";
-import { selectP2PDescriptionByUidFn } from "../state/call";
+import {
+  patchP2PDescription,
+  selectP2PDescriptionByUidFn,
+} from "../state/call";
 
 export interface P2PCallHookOptions {
   isLocalPeerTheOfferingNewest: boolean;
   p2pDescriptionUid: CallP2PDescription["uid"];
-  setDescription: (description: Partial<CallP2PDescription>) => void;
   remoteVideo: () => HTMLVideoElement | null;
   localVideo?: () => HTMLVideoElement | null;
 }
 
 export default function useP2PCall(options: P2PCallHookOptions): void {
+  const dispatch = useAppDispatch();
+
+  const { p2pDescriptionUid } = options;
   const description = useAppSelector(
     selectP2PDescriptionByUidFn(options.p2pDescriptionUid)
   );
-  const {
-    isLocalPeerTheOfferingNewest,
-    setDescription,
-    localVideo,
-    remoteVideo,
-  } = useRef(options).current; // only consider initial values
+
+  if (!description) {
+    throw new Error(
+      "Description not found for useP2PCall hook: " + p2pDescriptionUid
+    );
+  }
+
+  const { isLocalPeerTheOfferingNewest, localVideo, remoteVideo } =
+    useRef(options).current; // only consider initial values
 
   const audio = useAppSelector(selectUserAudioId);
   const video = useAppSelector(selectUserVideoId);
@@ -36,27 +44,37 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
         isLocalPeerTheOfferingNewest,
         outgoingSignaling: {
           onLocalJsepAction: async (localJsep) => {
-            // call signaling here instead of calling in component itself?
             if (isLocalPeerTheOfferingNewest) {
-              setDescription({
-                newestPeerOffer: localJsep,
-              });
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  newestPeerOffer: localJsep,
+                })
+              );
             } else {
-              setDescription({
-                oldestPeerAnswer: localJsep,
-              });
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  oldestPeerAnswer: localJsep,
+                })
+              );
             }
           },
           onCompletedLocalIceCandidates(localCandidates) {
-            // call signaling here instead of calling in component itself?
             if (isLocalPeerTheOfferingNewest) {
-              setDescription({
-                newestPeerIceCandidates: localCandidates,
-              });
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  newestPeerIceCandidates: localCandidates,
+                })
+              );
             } else {
-              setDescription({
-                oldestPeerIceCandidates: localCandidates,
-              });
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  oldestPeerIceCandidates: localCandidates,
+                })
+              );
             }
           },
         },
@@ -91,10 +109,11 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
       callRef.current?.stop();
     };
   }, [
+    dispatch,
+    p2pDescriptionUid,
     audio,
     video,
     isLocalPeerTheOfferingNewest,
-    setDescription,
     localVideo,
     remoteVideo,
   ]);

@@ -12,9 +12,8 @@ import {
   LARGE_HEIGHT,
   MEDIUM_WIDTH,
 } from "../../components/app/mui-styles";
-import { useAppDispatch, useAppSelector } from "../../state";
+import { useAppSelector } from "../../state";
 import {
-  patchP2PDescription,
   selectP2PDescriptionUidByRemoteUidFn,
   selectParticipants,
   selectUserParticipationOrder,
@@ -223,8 +222,6 @@ function P2PCallSlotConnection({
   videoWrapperStyles = {},
   videoStyles = {},
 }: P2PCallSlotConnectionProps) {
-  const dispatch = useAppDispatch();
-
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const descriptionInitialId = useId();
@@ -234,14 +231,6 @@ function P2PCallSlotConnection({
     p2pDescriptionUid,
     isLocalPeerTheOfferingNewest:
       userParticipation > (participant.joined || -1),
-    setDescription: (patchingP2pDescription) => {
-      dispatch(
-        patchP2PDescription({
-          ...patchingP2pDescription,
-          uid: p2pDescriptionUid,
-        })
-      );
-    },
     remoteVideo: () => videoRef.current,
   });
 
