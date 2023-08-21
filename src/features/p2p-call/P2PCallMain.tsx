@@ -12,17 +12,16 @@ import {
   LARGE_HEIGHT,
   MEDIUM_WIDTH,
 } from "../../components/app/mui-styles";
-import { useAppSelector } from "../../state";
+import { useAppDispatch, useAppSelector } from "../../state";
 import {
-  selectCallUid,
-  selectP2PDescriptionFn,
+  patchP2PDescription,
+  selectP2PDescriptionUidByRemoteUidFn,
   selectParticipants,
   selectUserParticipationOrder,
 } from "../../state/call";
 import { selectUserDisplayName, selectUserUid } from "../../state/user";
 import { useDevicePreview } from "../../hooks/useDevicePreview";
 import { selectUserVideoId } from "../../state/devices";
-import firestoreSignaling from "../../services/firestore-signaling";
 
 export default function P2PCallMain() {
   const windowsSize = useWindowSize();
@@ -142,7 +141,6 @@ export default function P2PCallMain() {
           return;
         }
 
-        console.log("Locking", participant.userDisplayName);
         lockNextFreeSlot(participant);
       });
   }, [userUid, participants, findSlot, lockNextFreeSlot]);
@@ -191,18 +189,18 @@ interface P2PCallSlotProps {
 }
 
 function P2PCallSlot(props: P2PCallSlotProps) {
-  const p2pDescription = useAppSelector(
-    selectP2PDescriptionFn(props.slot.participant?.uid || "")
+  const p2pDescriptionUid = useAppSelector(
+    selectP2PDescriptionUidByRemoteUidFn(props.slot.participant?.uid || "")
   );
 
-  if (!props.slot.participant || !p2pDescription) {
+  if (!props.slot.participant || !p2pDescriptionUid) {
     return <Box data-layoutinfo="call-slot" hidden></Box>;
   }
 
   return (
     <P2PCallSlotConnection
       participant={props.slot.participant}
-      p2pDescription={p2pDescription}
+      p2pDescriptionUid={p2pDescriptionUid}
       slotStyles={props.slotStyles}
       videoWrapperStyles={props.videoWrapperStyles}
       videoStyles={props.videoStyles}
@@ -212,7 +210,7 @@ function P2PCallSlot(props: P2PCallSlotProps) {
 
 interface P2PCallSlotConnectionProps {
   participant: CallParticipant;
-  p2pDescription: CallP2PDescription;
+  p2pDescriptionUid: CallP2PDescription["uid"];
   slotStyles?: BoxProps["sx"];
   videoWrapperStyles?: BoxProps["sx"];
   videoStyles?: BoxProps["sx"];
@@ -220,12 +218,12 @@ interface P2PCallSlotConnectionProps {
 
 function P2PCallSlotConnection({
   participant,
-  p2pDescription,
+  p2pDescriptionUid,
   slotStyles = {},
   videoWrapperStyles = {},
   videoStyles = {},
 }: P2PCallSlotConnectionProps) {
-  const callUid = useAppSelector(selectCallUid);
+  const dispatch = useAppDispatch();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -233,19 +231,16 @@ function P2PCallSlotConnection({
   const userParticipation = useAppSelector(selectUserParticipationOrder);
 
   useP2PCall({
+    p2pDescriptionUid,
     isLocalPeerTheOfferingNewest:
       userParticipation > (participant.joined || -1),
-    description: p2pDescription,
     setDescription: (patchingP2pDescription) => {
-      const patchingParticipation = {
-        callUid,
-        p2pDescription: {
-          ...p2pDescription,
+      dispatch(
+        patchP2PDescription({
           ...patchingP2pDescription,
-        },
-      };
-      console.warn("setting patchingParticipation", patchingParticipation);
-      firestoreSignaling.updateParticipation(patchingParticipation); // no middle layer ?
+          uid: p2pDescriptionUid,
+        })
+      );
     },
     remoteVideo: () => videoRef.current,
   });

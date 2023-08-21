@@ -2,17 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import webrtc, { CallP2PDescription, P2PCallConnection } from "../webrtc";
 import { useAppSelector } from "../state";
 import { selectUserAudioId, selectUserVideoId } from "../state/devices";
+import { selectP2PDescriptionByUidFn } from "../state/call";
 
 export interface P2PCallHookOptions {
   isLocalPeerTheOfferingNewest: boolean;
-  description: CallP2PDescription;
+  p2pDescriptionUid: CallP2PDescription["uid"];
   setDescription: (description: Partial<CallP2PDescription>) => void;
   remoteVideo: () => HTMLVideoElement | null;
   localVideo?: () => HTMLVideoElement | null;
 }
 
 export default function useP2PCall(options: P2PCallHookOptions): void {
-  const { description } = options;
+  const description = useAppSelector(
+    selectP2PDescriptionByUidFn(options.p2pDescriptionUid)
+  );
   const {
     isLocalPeerTheOfferingNewest,
     setDescription,

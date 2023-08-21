@@ -47,12 +47,12 @@ export const callSlice = createSlice({
     setUserAsParticipant: (state) => {
       state.userStatus = "participant";
     },
-    // setP2PDescriptions: (
-    //   state,
-    //   action: PayloadAction<CallP2PDescription[]>
-    // ) => {
-    //   state.p2pDescriptions = action.payload;
-    // },
+    setP2PDescriptions: (
+      state,
+      action: PayloadAction<CallP2PDescription[]>
+    ) => {
+      state.p2pDescriptions = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(createCall.pending, (state, action) => {
@@ -132,22 +132,33 @@ export const callSlice = createSlice({
         state.pendingUsers = action.payload.pendingUsers;
       }
     );
-
-    builder.addCase(
-      setP2PDescriptions.fulfilled,
-      (state, action: PayloadAction<CallP2PDescription[]>) => {
-        state.p2pDescriptions = action.payload;
-      }
-    );
   },
 });
 
-export const setP2PDescriptions = createAsyncThunk(
-  "set-p2p-descriptions",
-  async (descriptions: CallP2PDescription[], thunkAPI) => {
-    const currentDescriptions = (thunkAPI.getState() as RootState).call
-      .p2pDescriptions;
-    return descriptions;
+export const { setP2PDescriptions } = callSlice.actions;
+
+export interface PatchingDescription extends Partial<CallP2PDescription> {
+  uid: CallP2PDescription["uid"];
+}
+
+export const patchP2PDescription = createAsyncThunk(
+  "patch-p2p-descriptions",
+  async (patchingDescription: PatchingDescription, thunkApi) => {
+    const { call } = thunkApi.getState() as RootState;
+
+    const peersFoundDescription = call.p2pDescriptions.find(
+      (d) => d.uid === patchingDescription.uid
+    );
+
+    const patchingParticipation = {
+      callUid: call.uid,
+      p2pDescription: {
+        ...peersFoundDescription,
+        ...patchingDescription,
+      },
+    };
+
+    firestoreSignaling.updateParticipation(patchingParticipation);
   }
 );
 
@@ -266,5 +277,19 @@ export const selectP2PDescriptionFn =
         remoteUid === it.newestPeerUid ||
         remoteUid === it.oldestPeerUid
     );
+
+export const selectP2PDescriptionUidByRemoteUidFn =
+  (remoteUid: string) => (state: RootState) =>
+    state.call.p2pDescriptions.find(
+      (it) =>
+        state.user.uid === it.newestPeerUid ||
+        state.user.uid === it.oldestPeerUid ||
+        remoteUid === it.newestPeerUid ||
+        remoteUid === it.oldestPeerUid
+    )?.uid;
+
+export const selectP2PDescriptionByUidFn =
+  (descriptionUid: string) => (state: RootState) =>
+    state.call.p2pDescriptions.find((it) => it.uid === descriptionUid);
 
 export default callSlice.reducer;
