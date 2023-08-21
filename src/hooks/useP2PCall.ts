@@ -79,7 +79,11 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
           },
         },
         onLocalStream: (stream) => {
-          const element = localVideo ? localVideo() : null;
+          if (!localVideo) {
+            return;
+          }
+
+          const element = localVideo();
           if (element && stream) {
             webrtc.domHelpers.attachLocalStream(element, stream);
           } else if (stream) {

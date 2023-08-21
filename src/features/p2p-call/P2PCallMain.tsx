@@ -193,7 +193,7 @@ function P2PCallSlot(props: P2PCallSlotProps) {
   );
 
   if (!props.slot.participant || !p2pDescriptionUid) {
-    return <Box data-layoutinfo="call-slot" hidden></Box>;
+    return <Box data-layoutinfo="call-slot-empty" hidden></Box>;
   }
 
   return (
@@ -224,20 +224,18 @@ function P2PCallSlotConnection({
 }: P2PCallSlotConnectionProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
-  const descriptionInitialId = useId();
   const userParticipation = useAppSelector(selectUserParticipationOrder);
 
   useP2PCall({
     p2pDescriptionUid,
-    isLocalPeerTheOfferingNewest:
-      userParticipation > (participant.joined || -1),
+    isLocalPeerTheOfferingNewest: userParticipation > participant.joined,
     remoteVideo: () => videoRef.current,
   });
 
   return (
     <Box
-      data-layoutinfo="call-slot"
-      id={descriptionInitialId}
+      data-layoutinfo="call-slot-connection"
+      data-participantuid={participant.uid}
       sx={slotStyles}
       hidden={!participant}
     >
@@ -277,7 +275,7 @@ function P2PMirrorCallSlot({
   }, [videoPreview, videoId]);
 
   return (
-    <Box data-layoutinfo="call-slot" sx={slotStyles}>
+    <Box data-layoutinfo="call-slot-mirror" sx={slotStyles}>
       <Video
         ref={videoRef}
         displayName={`${displayName} (Me)`}
