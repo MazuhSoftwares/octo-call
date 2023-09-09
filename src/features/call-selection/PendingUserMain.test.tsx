@@ -72,7 +72,9 @@ describe("PendingUserMain", () => {
       })
     );
 
-    await act(() => store.dispatch(setCallUsers([])));
+    await act(() =>
+      store.dispatch(setCallUsers({ participants: [], pendingUsers: [] }))
+    );
 
     expect(store.getState().call.uid).toBe("");
     expect(store.getState().call.userStatus).toBe("idle");
