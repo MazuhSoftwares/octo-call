@@ -35,6 +35,7 @@ describe("ICE trickling", () => {
     mockOutgoingSignaling = {
       onLocalJsepAction: jest.fn(),
       onLocalIceCandidate: jest.fn(),
+      onCompletedLocalIceCandidates: jest.fn(),
     };
 
     mockOptions = {
@@ -74,9 +75,33 @@ describe("ICE trickling", () => {
     });
   });
 
-  test("handleLocalIceCandidate: if nullish local candidate, then does nothing, the gathering is finished", async () => {
+  test("handleLocalIceCandidate: if nullish local candidate, then dont invoke individual callback, the gathering is finished", async () => {
     await handleLocalIceCandidate(mockP2PCall, null);
     expect(mockOutgoingSignaling.onLocalIceCandidate).not.toHaveBeenCalled();
+  });
+
+  test("handleLocalIceCandidate: if nullish local candidate, then invoke a single callback for non-tricke use cases, the gathering is finished", async () => {
+    mockP2PCall._iceCandidates = [
+      {
+        toJSON: jest.fn(() => ({ previousCandidate: "a" })),
+      } as unknown as RTCIceCandidate,
+      {
+        toJSON: jest.fn(() => ({ previousCandidate: "b" })),
+      } as unknown as RTCIceCandidate,
+      {
+        toJSON: jest.fn(() => ({ previousCandidate: "c" })),
+      } as unknown as RTCIceCandidate,
+    ];
+
+    await handleLocalIceCandidate(mockP2PCall, null);
+
+    expect(
+      mockOutgoingSignaling.onCompletedLocalIceCandidates
+    ).toHaveBeenCalledWith([
+      { previousCandidate: "a" },
+      { previousCandidate: "b" },
+      { previousCandidate: "c" },
+    ]);
   });
 
   test("handleRemoteIceCandidate: adds candidate to connection", async () => {
