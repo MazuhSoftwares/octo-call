@@ -3,11 +3,11 @@ import { Provider } from "react-redux";
 import { RenderOptions, RenderResult, render } from "@testing-library/react";
 import { AppStore, setupAppStore, PreloadedAppState } from "../state";
 
-interface FullRenderResult extends RenderResult {
+export interface FullRenderResult extends RenderResult {
   store: AppStore;
 }
 
-interface FullRenderOptions extends Omit<RenderOptions, "queries"> {
+export interface FullRenderOptions extends Omit<RenderOptions, "queries"> {
   preloadedState?: PreloadedAppState;
 }
 
