@@ -11,16 +11,25 @@ import {
   where,
   writeBatch,
 } from "firebase/firestore";
-import type { DocumentData } from "firebase/firestore";
+import type { DocumentData, Unsubscribe } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./firestore-connection";
-import type { Call, CallP2PDescription, CallUser } from "../webrtc";
+import type {
+  Call,
+  CallP2PDescription,
+  CallParticipant,
+  CallPendingUser,
+  CallUser,
+} from "../webrtc";
 
 const firestoreSignaling = {
   create,
   createCall,
   askToJoinCall,
   listenCallUsers,
+  updateParticipation,
+  listenParticipations,
+  joinAsNewestParticipation,
   acceptPendingUser,
   rejectPendingUser,
   leaveCall,
@@ -93,23 +102,99 @@ export async function askToJoinCall({
   await setDoc(ref, data);
 }
 
-// ref: calls/<call_uid>/p2p-descriptions
-export function listenCallP2PDescriptions(
-  { userUid, callUid }: CallUserJoinIntent,
-  listener: (p2pDescription: CallP2PDescription) => void
-): void {
-  console.warn(
-    "Not implemented `listenCall` service:",
-    userUid,
-    callUid,
-    listener
+export interface ParticipantIntent {
+  userUid: string;
+  callUid: string;
+  participantsUids: string[];
+}
+
+export async function joinAsNewestParticipation({
+  userUid,
+  callUid,
+  participantsUids,
+}: ParticipantIntent): Promise<void> {
+  const batch = writeBatch(db);
+
+  participantsUids.forEach((participantsUid) => {
+    const uuid = uuidv4();
+    const ref = doc(db, `calls/${callUid}/p2p-descriptions/${uuid}`);
+    const data: Omit<CallP2PDescription, "uid"> = {
+      newestPeerUid: userUid,
+      oldestPeerUid: participantsUid,
+    };
+    batch.set(ref, data);
+  });
+
+  await batch.commit();
+}
+
+export async function updateParticipation({
+  callUid,
+  p2pDescription,
+}: {
+  callUid: string;
+  p2pDescription: Partial<CallP2PDescription>;
+}) {
+  if (!p2pDescription.oldestPeerUid || !p2pDescription.newestPeerUid) {
+    throw new Error("Malformed description, not enough uids.");
+  }
+
+  const p2pDescriptionDTO = {
+    ...p2pDescription,
+  };
+  if (p2pDescriptionDTO.newestPeerOffer instanceof RTCSessionDescription) {
+    p2pDescriptionDTO.newestPeerOffer =
+      p2pDescriptionDTO.newestPeerOffer.toJSON();
+  }
+  if (p2pDescriptionDTO.oldestPeerAnswer instanceof RTCSessionDescription) {
+    p2pDescriptionDTO.oldestPeerAnswer =
+      p2pDescriptionDTO.oldestPeerAnswer.toJSON();
+  }
+
+  await updateDoc(
+    doc(db, `calls/${callUid}/p2p-descriptions/${p2pDescription.uid}`),
+    p2pDescriptionDTO
   );
+}
+
+export function listenParticipations(
+  { userUid, callUid, participantsUids }: ParticipantIntent,
+  listener: (p2pDescriptions: CallP2PDescription[]) => void
+): Unsubscribe {
+  return onSnapshot(
+    query(collection(db, `calls/${callUid}/p2p-descriptions`)),
+    (querySnapshot) => {
+      const allP2pDescriptions: CallP2PDescription[] = [];
+      querySnapshot.forEach((doc: DocumentData) =>
+        allP2pDescriptions.push({
+          ...doc.data(),
+          uid: doc.id,
+        } as CallP2PDescription)
+      );
+
+      const subscribedP2pDescriptions = allP2pDescriptions.filter(
+        (it) =>
+          it.newestPeerUid &&
+          participantsUids.includes(it.newestPeerUid) &&
+          it.oldestPeerUid &&
+          participantsUids.includes(it.oldestPeerUid) &&
+          (it.newestPeerUid === userUid || it.oldestPeerUid === userUid)
+      );
+
+      listener(subscribedP2pDescriptions);
+    }
+  );
+}
+
+export interface CallUsersResult {
+  participants: CallParticipant[];
+  pendingUsers: CallPendingUser[];
 }
 
 export function listenCallUsers(
   callUid: string,
-  callback: (params: CallUser[]) => void
-) {
+  callback: (result: CallUsersResult) => void
+): Unsubscribe {
   return onSnapshot(
     query(collection(db, `calls/${callUid}/users`)),
     (querySnapshot) => {
@@ -119,7 +204,15 @@ export function listenCallUsers(
         callUsers.push({ ...doc.data(), uid: doc.id } as CallUser);
       });
 
-      callback(callUsers);
+      const participants = callUsers.filter(
+        (callUser) => callUser.joined
+      ) as CallParticipant[];
+
+      const pendingUsers = callUsers.filter(
+        (callUser) => !callUser.joined
+      ) as CallPendingUser[];
+
+      callback({ participants, pendingUsers });
     }
   );
 }

@@ -51,4 +51,12 @@ describe("DOM helpers", () => {
     expect(video.srcObject).toBe(mockStream);
     expect(video.muted).toBe(false);
   });
+
+  it("ignores attachment of local null, not creating runtime errors", () => {
+    attachLocalStream(null as unknown as HTMLVideoElement, mockStream);
+  });
+
+  it("ignores attachment of remote null, not creating runtime errors", () => {
+    attachRemoteStream(null as unknown as HTMLVideoElement, mockStream);
+  });
 });

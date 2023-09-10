@@ -12,6 +12,8 @@ jest.mock("../../hooks/useRedirectionRule", () =>
   jest.fn().mockReturnValue("")
 );
 
+jest.mock("../../hooks/useCallUsersListener", () => jest.fn());
+
 jest.mock("../../services/firestore-signaling", () => ({
   leaveCall: jest.fn(),
 }));

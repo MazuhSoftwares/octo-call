@@ -1,27 +1,35 @@
 import { useEffect, useRef, useState } from "react";
 import webrtc, { CallP2PDescription, P2PCallConnection } from "../webrtc";
-import { useAppSelector } from "../state";
+import { useAppDispatch, useAppSelector } from "../state";
 import { selectUserAudioId, selectUserVideoId } from "../state/devices";
+import {
+  patchP2PDescription,
+  selectP2PDescriptionByUidFn,
+} from "../state/call";
 
 export interface P2PCallHookOptions {
   isLocalPeerTheOfferingNewest: boolean;
-  description: CallP2PDescription;
-  setDescription: React.Dispatch<React.SetStateAction<CallP2PDescription>>;
+  p2pDescriptionUid: CallP2PDescription["uid"];
   remoteVideo: () => HTMLVideoElement | null;
   localVideo?: () => HTMLVideoElement | null;
 }
 
 export default function useP2PCall(options: P2PCallHookOptions): void {
-  // most of these values are now "hardcoded" from options, just for testing,
-  // but they should be injected here via useAppSelector and useAppDispatch,
-  // as Redux is the single source of truth for data.
-  const { description } = options;
-  const {
-    isLocalPeerTheOfferingNewest,
-    setDescription,
-    localVideo,
-    remoteVideo,
-  } = useRef(options).current; // only consider initial values
+  const dispatch = useAppDispatch();
+
+  const { p2pDescriptionUid } = options;
+  const description = useAppSelector(
+    selectP2PDescriptionByUidFn(options.p2pDescriptionUid)
+  );
+
+  if (!description) {
+    throw new Error(
+      "Description not found for useP2PCall hook: " + p2pDescriptionUid
+    );
+  }
+
+  const { isLocalPeerTheOfferingNewest, localVideo, remoteVideo } =
+    useRef(options).current; // only consider initial values
 
   const audio = useAppSelector(selectUserAudioId);
   const video = useAppSelector(selectUserVideoId);
@@ -30,43 +38,52 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
 
   useEffect(() => {
     if (!callRef.current) {
-      console.log("Creating call.");
       callRef.current = webrtc.makeP2PCallConnection({
         audio,
         video,
-        isLocalPeerTheOfferingNewest, // TODO: check with Redux by comparing
+        isLocalPeerTheOfferingNewest,
         outgoingSignaling: {
           onLocalJsepAction: async (localJsep) => {
-            // TODO: call redux action or service to update the CallP2PDescription
             if (isLocalPeerTheOfferingNewest) {
-              setDescription((description) => ({
-                ...description,
-                newestPeerOffer: localJsep,
-              }));
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  newestPeerOffer: localJsep,
+                })
+              );
             } else {
-              setDescription((description) => ({
-                ...description,
-                oldestPeerAnswer: localJsep,
-              }));
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  oldestPeerAnswer: localJsep,
+                })
+              );
             }
           },
           onCompletedLocalIceCandidates(localCandidates) {
-            // TODO: call redux action or service to update the CallP2PDescription
             if (isLocalPeerTheOfferingNewest) {
-              setDescription((description) => ({
-                ...description,
-                newestPeerIceCandidates: localCandidates,
-              }));
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  newestPeerIceCandidates: localCandidates,
+                })
+              );
             } else {
-              setDescription((description) => ({
-                ...description,
-                oldestPeerIceCandidates: localCandidates,
-              }));
+              dispatch(
+                patchP2PDescription({
+                  uid: p2pDescriptionUid,
+                  oldestPeerIceCandidates: localCandidates,
+                })
+              );
             }
           },
         },
         onLocalStream: (stream) => {
-          const element = localVideo ? localVideo() : null;
+          if (!localVideo) {
+            return;
+          }
+
+          const element = localVideo();
           if (element && stream) {
             webrtc.domHelpers.attachLocalStream(element, stream);
           } else if (stream) {
@@ -96,10 +113,11 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
       callRef.current?.stop();
     };
   }, [
+    dispatch,
+    p2pDescriptionUid,
     audio,
     video,
     isLocalPeerTheOfferingNewest,
-    setDescription,
     localVideo,
     remoteVideo,
   ]);
@@ -119,13 +137,14 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
 
     const call = callRef.current;
 
-    // let's pretend we magically received this updated `description` from redux and service layers and not a local dumb state hook simulating an 1:1 call
     const cachedKeys = Object.keys(
       cachedDescription
     ) as (keyof CallP2PDescription)[];
+
     const newKeys = (
       Object.keys(description) as (keyof CallP2PDescription)[]
     ).filter((k) => !cachedKeys.includes(k));
+
     const diff = newKeys.reduce(
       (acc, k) => ({ ...acc, [k]: description[k] }),
       {}

@@ -1,7 +1,14 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import type { Call, CallParticipant, CallUser } from "../webrtc";
+import get from "lodash.get";
+import type {
+  Call,
+  CallP2PDescription,
+  CallParticipant,
+  CallUser,
+} from "../webrtc";
 import firestoreSignaling, {
   CallUserJoinIntent,
+  CallUsersResult,
 } from "../services/firestore-signaling";
 import { RootState } from ".";
 
@@ -17,6 +24,7 @@ export interface CallState extends Call {
   userStatus: CallUserStatus;
   participants: CallParticipant[];
   pendingUsers: CallUser[];
+  p2pDescriptions: CallP2PDescription[];
   errorMessage: string;
 }
 
@@ -28,13 +36,24 @@ export const callInitialState: CallState = {
   userStatus: "idle",
   participants: [],
   pendingUsers: [],
+  p2pDescriptions: [],
   errorMessage: "",
 };
 
 export const callSlice = createSlice({
   name: "call",
   initialState: callInitialState,
-  reducers: {},
+  reducers: {
+    setUserAsParticipant: (state) => {
+      state.userStatus = "participant";
+    },
+    setP2PDescriptions: (
+      state,
+      action: PayloadAction<CallP2PDescription[]>
+    ) => {
+      state.p2pDescriptions = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(createCall.pending, (state, action) => {
       state.uid = "";
@@ -108,60 +127,40 @@ export const callSlice = createSlice({
 
     builder.addCase(
       setCallUsers.fulfilled,
-      (
-        state,
-        action: PayloadAction<{ callUsers: CallUser[]; currentUserUid: string }>
-      ) => {
-        const { callUsers, currentUserUid } = action.payload;
-
-        state.participants = callUsers.filter(
-          (callUser) => callUser.joined
-        ) as CallParticipant[];
-        state.pendingUsers = callUsers.filter(
-          (callUser) => !callUser.joined
-        ) as CallUser[];
-
-        // joined?
-        const isAmongParticipants = state.participants.some(
-          (p) => p.uid === currentUserUid
-        );
-        if (state.userStatus === "pending-user" && isAmongParticipants) {
-          state.userStatus = "participant";
-          return;
-        }
-
-        // left?
-        if (state.userStatus === "participant" && !isAmongParticipants) {
-          state.uid = "";
-          state.displayName = "";
-          state.hostId = "";
-          state.hostDisplayName = "";
-          state.userStatus = "idle"; // ?
-          state.pendingUsers = [];
-          state.participants = [];
-          state.errorMessage = "";
-          return;
-        }
-
-        // kicked?
-        const isAmongPendingUsers = state.pendingUsers.some(
-          (u) => u.uid === currentUserUid
-        );
-        if (state.userStatus === "pending-user" && !isAmongPendingUsers) {
-          state.uid = "";
-          state.displayName = "";
-          state.hostId = "";
-          state.hostDisplayName = "";
-          state.userStatus = "idle"; // ?
-          state.pendingUsers = [];
-          state.participants = [];
-          state.errorMessage = "";
-          return;
-        }
+      (state, action: PayloadAction<CallUsersResult>) => {
+        state.participants = action.payload.participants;
+        state.pendingUsers = action.payload.pendingUsers;
       }
     );
   },
 });
+
+export const { setP2PDescriptions } = callSlice.actions;
+
+export interface PatchingDescription extends Partial<CallP2PDescription> {
+  uid: CallP2PDescription["uid"];
+}
+
+export const patchP2PDescription = createAsyncThunk(
+  "patch-p2p-descriptions",
+  async (patchingDescription: PatchingDescription, thunkApi) => {
+    const { call } = thunkApi.getState() as RootState;
+
+    const peersFoundDescription = call.p2pDescriptions.find(
+      (d) => d.uid === patchingDescription.uid
+    );
+
+    const patchingParticipation = {
+      callUid: call.uid,
+      p2pDescription: {
+        ...peersFoundDescription,
+        ...patchingDescription,
+      },
+    };
+
+    firestoreSignaling.updateParticipation(patchingParticipation);
+  }
+);
 
 export const createCall = createAsyncThunk(
   "create-call",
@@ -194,6 +193,7 @@ export const leaveCall = createAsyncThunk("leave-call", async (_, thunkApi) => {
 
   try {
     await firestoreSignaling.leaveCall({
+      // TODO: dont await?
       userUid: user.uid,
       callUid: call.uid,
     });
@@ -204,9 +204,29 @@ export const leaveCall = createAsyncThunk("leave-call", async (_, thunkApi) => {
 
 export const setCallUsers = createAsyncThunk(
   "set-call-users",
-  (callUsers: CallUser[], thunkApi) => {
-    const { user } = thunkApi.getState() as RootState;
-    return { callUsers, currentUserUid: user.uid };
+  async (callUsersResult: CallUsersResult, thunkApi) => {
+    const { user, call } = thunkApi.getState() as RootState;
+
+    const isAmongParticipants = callUsersResult.participants.some(
+      (p) => p.uid === user.uid
+    );
+    const isAmongPendingUsers = callUsersResult.pendingUsers.some(
+      (u) => u.uid === user.uid
+    );
+    if (call.userStatus === "pending-user" && isAmongParticipants) {
+      await firestoreSignaling.joinAsNewestParticipation({
+        callUid: call.uid,
+        userUid: user.uid,
+        participantsUids: call.participants.map((p) => p.uid),
+      });
+      thunkApi.dispatch(callSlice.actions.setUserAsParticipant()); // joined
+    } else if (call.userStatus === "participant" && !isAmongParticipants) {
+      thunkApi.dispatch(leaveCall()); // left
+    } else if (call.userStatus === "pending-user" && !isAmongPendingUsers) {
+      thunkApi.dispatch(leaveCall()); // rejected
+    }
+
+    return callUsersResult;
   }
 );
 
@@ -220,7 +240,7 @@ export const acceptPendingUser = createAsyncThunk(
 );
 
 export const rejectPendingUser = createAsyncThunk(
-  "refuse-pending-user",
+  "reject-pending-user",
   ({ userUid }: Pick<CallUserJoinIntent, "userUid">, thunkApi) => {
     const { call } = thunkApi.getState() as RootState;
 
@@ -240,5 +260,36 @@ export const selectCallUserStatus = (state: RootState) => state.call.userStatus;
 
 export const selectParticipants = (state: RootState) => state.call.participants;
 export const selectPendingUsers = (state: RootState) => state.call.pendingUsers;
+
+export const selectUserParticipationOrder = (state: RootState): number =>
+  get(
+    state.call.participants.find((it) => it.uid === state.user.uid),
+    "joined",
+    -1
+  );
+
+export const selectP2PDescriptionFn =
+  (remoteUid: string) => (state: RootState) =>
+    state.call.p2pDescriptions.find(
+      (it) =>
+        state.user.uid === it.newestPeerUid ||
+        state.user.uid === it.oldestPeerUid ||
+        remoteUid === it.newestPeerUid ||
+        remoteUid === it.oldestPeerUid
+    );
+
+export const selectP2PDescriptionUidByRemoteUidFn =
+  (remoteUid: string) => (state: RootState) =>
+    state.call.p2pDescriptions.find(
+      (it) =>
+        state.user.uid === it.newestPeerUid ||
+        state.user.uid === it.oldestPeerUid ||
+        remoteUid === it.newestPeerUid ||
+        remoteUid === it.oldestPeerUid
+    )?.uid;
+
+export const selectP2PDescriptionByUidFn =
+  (descriptionUid: string) => (state: RootState) =>
+    state.call.p2pDescriptions.find((it) => it.uid === descriptionUid);
 
 export default callSlice.reducer;

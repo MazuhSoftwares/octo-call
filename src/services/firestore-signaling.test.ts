@@ -137,20 +137,23 @@ describe("listenCallUsers", () => {
     const mockCallback = jest.fn();
     listenCallUsers(mockCallUid, mockCallback);
 
-    expect(mockCallback).toHaveBeenCalledWith([
-      {
-        joined: 1685587182349,
-        userDisplayName: "Rodrigo Muniz",
-        userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
-        uid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
-      },
-      {
-        userUid: "a1s2d3",
-        userDisplayName: "Marcell",
-        joined: 1685587305764,
-        uid: "D8LBvBhKb4ZidKKBWvvV",
-      },
-    ]);
+    expect(mockCallback).toHaveBeenCalledWith({
+      participants: [
+        {
+          joined: 1685587182349,
+          uid: "6db9ad2e-19f9-4a85-b383-7731e347b7d0",
+          userDisplayName: "Rodrigo Muniz",
+          userUid: "zJTvoYDGr9PuN1z69vheO0b4iWF2",
+        },
+        {
+          joined: 1685587305764,
+          uid: "D8LBvBhKb4ZidKKBWvvV",
+          userDisplayName: "Marcell",
+          userUid: "a1s2d3",
+        },
+      ],
+      pendingUsers: [],
+    });
   });
 });
 
