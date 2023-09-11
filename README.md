@@ -81,6 +81,10 @@ Happy coding!
 
 ## Setting up for deployment
 
+The [official repository](https://github.com/MazuhSoftwares/octo-call/) should already
+have a working pipeline of continuous integration and delivery. But here are a few
+summarized instructions for custom deployments.
+
 It'll need Blaze plan active for the Firebase project. Just for testing,
 its free limit should be enough even being a billable plan.
 
