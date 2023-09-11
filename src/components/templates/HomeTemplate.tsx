@@ -7,6 +7,9 @@ import IconButton from "@mui/material/IconButton";
 import SettingsIcon from "@mui/icons-material/Settings";
 import LogoutIcon from "@mui/icons-material/Logout";
 import homeBgPattern from "../../assets/home-bg-patternpad.jpg";
+import mainCharBlueOutlineImg from "../../assets/main-char-blue-outline.png";
+import mainCharWhiteOutlineImg from "../../assets/main-char-white-outline.png";
+import mainCharPinkOutlineImg from "../../assets/main-char-pink-outline.png";
 import { useAppDispatch, useAppSelector } from "../../state";
 import useAgentHelper from "../../hooks/useAgentHelper";
 import { logout, selectIsUserAuthenticated } from "../../state/user";
@@ -46,8 +49,8 @@ export default function HomeTemplate({
     <Box
       component="main"
       sx={{
-        width: "100vw",
-        height: "100vh",
+        width: "calc(100vw - 3px)",
+        height: "calc(100vh - 3px)",
         overflow: "hidden",
         display: "flex",
         alignItems: "center",
@@ -58,7 +61,15 @@ export default function HomeTemplate({
         backgroundRepeat: "repeat",
       }}
     >
-      <Card variant="outlined" sx={{ width: 700 }}>
+      <Card
+        variant="outlined"
+        sx={{
+          width: 700,
+          position: "relative",
+          overflow: "unset",
+        }}
+      >
+        <OurCuteMainChar />
         <Box
           component="header"
           sx={{
@@ -67,6 +78,7 @@ export default function HomeTemplate({
             alignItems: { xs: subtitle ? "start" : "center", sm: "center" },
             justifyContent: "space-between",
             mb: 1,
+            position: "inherit",
           }}
         >
           <Box sx={{ pb: 1 }}>
@@ -113,9 +125,45 @@ export default function HomeTemplate({
             sx={{ mb: 1, mt: 1, display: { xs: "none", md: "flex" } }}
           />
         )}
-        {children}
+        <Box sx={{ position: "inherit" }}>{children}</Box>
       </Card>
       <SettingsModal isOpen={isSettingsOpen} close={closeSettings} />
     </Box>
+  );
+}
+
+const mainCharImgs: string[] = [
+  mainCharBlueOutlineImg,
+  mainCharPinkOutlineImg,
+  mainCharWhiteOutlineImg,
+];
+const randomMainCharImg: string =
+  mainCharImgs[Math.floor(Math.random() * mainCharImgs.length)];
+
+function OurCuteMainChar() {
+  return (
+    <Box
+      component="img"
+      src={randomMainCharImg}
+      width="100%"
+      title="😉"
+      alt="Pixel art.
+      It's a young woman staring at the user and winking.
+      She's with headphones and ready to make a call.
+      She is black, curly hair, thin, wearing a white sleeveless shirt, shorts with a coat tied around her waist.
+      Its drawing strokes changes color randomly on each page visit."
+      sx={{
+        userSelect: "none",
+        WebkitTouchCallout: "none",
+        position: "absolute",
+        left: { xs: "0px", sm: "0px", md: "-200px", xl: "-275px" },
+        top: { xs: "-125px", sm: "-150px", md: "auto", xl: "auto" },
+        bottom: { xs: "auto", sm: "auto", md: "0", xl: "0" },
+        width: { xs: "125px", sm: "150px", md: "300px", xl: "400px" },
+      }}
+      draggable="false"
+      onClick={() => console.log("Hello there! 😉")}
+      onContextMenu={(e) => e.preventDefault()}
+    />
   );
 }
