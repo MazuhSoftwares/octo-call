@@ -6,11 +6,11 @@ import {
   buildLocalMedia,
   destroyLocalMedia,
   destroyRemoteMedia,
-  doNewestPeerOffer,
-  doOldestPeerAnswer,
+  doNewerPeerOffer,
+  doOlderPeerAnswer,
   handleLocalIceCandidate,
-  handleNewestPeerOffer,
-  handleOldestPeerAnswer,
+  handleNewerPeerOffer,
+  handleOlderPeerAnswer,
   handleRemoteIceCandidate,
   makeP2PCallConnection,
 } from "./p2p-call-connection";
@@ -41,7 +41,7 @@ describe("ICE trickling", () => {
     mockOptions = {
       audio: true,
       video: true,
-      isLocalPeerTheOfferingNewest: false,
+      isLocalPeerTheOfferingNewer: false,
       outgoingSignaling: mockOutgoingSignaling,
     };
 
@@ -127,7 +127,7 @@ describe("JSEP flow", () => {
     mockOptions = {
       audio: true,
       video: true,
-      isLocalPeerTheOfferingNewest: false,
+      isLocalPeerTheOfferingNewer: false,
       outgoingSignaling: mockOutgoingSignaling,
     };
 
@@ -161,8 +161,8 @@ describe("JSEP flow", () => {
     } as P2PCallConnectionDetailed;
   });
 
-  test("doNewestPeerOffer: creates local offer, saves it, notifies signaling about it", async () => {
-    await doNewestPeerOffer(mockP2PCall);
+  test("doNewerPeerOffer: creates local offer, saves it, notifies signaling about it", async () => {
+    await doNewerPeerOffer(mockP2PCall);
 
     // creates local offer
     expect(mockConnection.createOffer).toHaveBeenCalled();
@@ -178,8 +178,8 @@ describe("JSEP flow", () => {
     });
   });
 
-  test("handleNewestPeerOffer: receives remote offer, saves it, proceed to mount local answer", async () => {
-    await handleNewestPeerOffer(mockP2PCall, {
+  test("handleNewerPeerOffer: receives remote offer, saves it, proceed to mount local answer", async () => {
+    await handleNewerPeerOffer(mockP2PCall, {
       type: "offer",
       sdp: "mock SDP",
     });
@@ -190,14 +190,14 @@ describe("JSEP flow", () => {
       sdp: "mock SDP",
     });
 
-    // evidences of mounting local answer -- doOldestPeerAnswer
+    // evidences of mounting local answer -- doOlderPeerAnswer
     expect(mockConnection.createAnswer).toHaveBeenCalledTimes(1);
     expect(mockConnection.setLocalDescription).toHaveBeenCalledTimes(1);
     expect(mockOutgoingSignaling.onLocalJsepAction).toHaveBeenCalledTimes(1);
   });
 
-  test("doOldestPeerAnswer: creates local answer, saves it, notifies signaling about it", async () => {
-    await doOldestPeerAnswer(mockP2PCall);
+  test("doOlderPeerAnswer: creates local answer, saves it, notifies signaling about it", async () => {
+    await doOlderPeerAnswer(mockP2PCall);
 
     // creates local answer
     expect(mockConnection.createAnswer).toHaveBeenCalled();
@@ -213,8 +213,8 @@ describe("JSEP flow", () => {
     });
   });
 
-  test("handleOldestPeerAnswer: receives the remote answer, saves it, and that's the final jsep step", async () => {
-    await handleOldestPeerAnswer(mockP2PCall, {
+  test("handleOlderPeerAnswer: receives the remote answer, saves it, and that's the final jsep step", async () => {
+    await handleOlderPeerAnswer(mockP2PCall, {
       type: "answer",
       sdp: "mock SDP",
     });
@@ -238,7 +238,7 @@ describe("Media gathering for RTC connection", () => {
     mockOptions = {
       audio: true,
       video: true,
-      isLocalPeerTheOfferingNewest: false,
+      isLocalPeerTheOfferingNewer: false,
       outgoingSignaling: {
         onLocalJsepAction: jest.fn(),
         onLocalIceCandidate: jest.fn(),
@@ -340,7 +340,7 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     mockOptions = {
       audio: true,
       video: true,
-      isLocalPeerTheOfferingNewest: false,
+      isLocalPeerTheOfferingNewer: false,
       outgoingSignaling: {
         onLocalJsepAction: jest.fn(),
         onLocalIceCandidate: jest.fn(),
@@ -404,10 +404,10 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     );
   });
 
-  test("starting as newest peer who begins by offer, indeed do the offer", async () => {
+  test("starting as newer peer who begins by offer, indeed do the offer", async () => {
     const p2pCall = makeP2PCallConnection({
       ...mockOptions,
-      isLocalPeerTheOfferingNewest: true,
+      isLocalPeerTheOfferingNewer: true,
     });
     await p2pCall.start();
     expect(mockGetUserMedia).toBeCalled();
@@ -416,10 +416,10 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     ).toBeCalled();
   });
 
-  test("starting as oldest peer who doest not begin the interaction, dont call offer nor answer for now", async () => {
+  test("starting as older peer who doest not begin the interaction, dont call offer nor answer for now", async () => {
     const p2pCall = makeP2PCallConnection({
       ...mockOptions,
-      isLocalPeerTheOfferingNewest: false,
+      isLocalPeerTheOfferingNewer: false,
     });
     await p2pCall.start();
     expect(mockGetUserMedia).toBeCalledTimes(1);
@@ -471,7 +471,7 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
 
     const p2pCall = makeP2PCallConnection({
       ...mockOptions,
-      isLocalPeerTheOfferingNewest: true,
+      isLocalPeerTheOfferingNewer: true,
     });
 
     p2pCall.start(); // doesnt await
@@ -494,7 +494,7 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
   test("has an interface handle incoming offer correctly", async () => {
     const p2pCall = makeP2PCallConnection({
       ...mockOptions,
-      isLocalPeerTheOfferingNewest: false,
+      isLocalPeerTheOfferingNewer: false,
     });
 
     await p2pCall.incomingSignaling.handleRemoteJsepAction({
@@ -513,7 +513,7 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
   test("has an interface handle incoming answer correctly", async () => {
     const p2pCall = makeP2PCallConnection({
       ...mockOptions,
-      isLocalPeerTheOfferingNewest: true,
+      isLocalPeerTheOfferingNewer: true,
     });
 
     await p2pCall.incomingSignaling.handleRemoteJsepAction({

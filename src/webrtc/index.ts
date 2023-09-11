@@ -44,12 +44,12 @@ export interface CallPendingUser extends CallUser {
 }
 
 export interface CallP2PDescription extends UniqueEntity {
-  newestPeerUid?: string;
-  newestPeerOffer?: RTCSessionDescriptionInit;
-  newestPeerIceCandidates?: RTCIceCandidateInit[];
-  oldestPeerUid?: string;
-  oldestPeerAnswer?: RTCSessionDescriptionInit;
-  oldestPeerIceCandidates?: RTCIceCandidateInit[];
+  newerPeerUid?: string;
+  newerPeerOffer?: RTCSessionDescriptionInit;
+  newerPeerIceCandidates?: RTCIceCandidateInit[];
+  olderPeerUid?: string;
+  olderPeerAnswer?: RTCSessionDescriptionInit;
+  olderPeerIceCandidates?: RTCIceCandidateInit[];
 }
 
 export type MediaType = "audio" | "video";

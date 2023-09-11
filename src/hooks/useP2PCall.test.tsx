@@ -41,8 +41,8 @@ describe("useP2PCall", () => {
   };
   const otherPeerP2pDescription: CallP2PDescription = {
     uid: "111111",
-    newestPeerUid: "123-321-123-321",
-    oldestPeerUid: user.uid,
+    newerPeerUid: "123-321-123-321",
+    olderPeerUid: user.uid,
   };
 
   beforeEach(() => {
@@ -54,7 +54,7 @@ describe("useP2PCall", () => {
       () =>
         useP2PCall({
           p2pDescriptionUid: otherPeerP2pDescription.uid,
-          isLocalPeerTheOfferingNewest: false,
+          isLocalPeerTheOfferingNewer: false,
           remoteVideo: () => document.createElement("video"),
         }),
       {
@@ -78,7 +78,7 @@ describe("useP2PCall", () => {
       () =>
         useP2PCall({
           p2pDescriptionUid: otherPeerP2pDescription.uid,
-          isLocalPeerTheOfferingNewest: false,
+          isLocalPeerTheOfferingNewer: false,
           remoteVideo: () => document.createElement("video"),
         }),
       {

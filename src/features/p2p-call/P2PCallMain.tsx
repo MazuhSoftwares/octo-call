@@ -228,7 +228,7 @@ function P2PCallSlotConnection({
 
   useP2PCall({
     p2pDescriptionUid,
-    isLocalPeerTheOfferingNewest: userParticipation > participant.joined,
+    isLocalPeerTheOfferingNewer: userParticipation > participant.joined,
     remoteVideo: () => videoRef.current,
   });
 

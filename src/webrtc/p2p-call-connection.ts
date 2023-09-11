@@ -3,8 +3,8 @@
 Javascript Session Establishment Protocol (JSEP), let's follow this algorithm:
 
 +----------+                              +----------+ 
-|          | Create/sets local Offer      |          | Newest must:
-|          | ---+                         |          | `doNewestPeerOffer`
+|          | Create/sets local Offer      |          | Newer must:
+|          | ---+                         |          | `doNewerPeerOffer`
 |          |    |                         |          |
 |          | <--+                         |          |
 |          |                              |          |
@@ -13,14 +13,14 @@ Javascript Session Establishment Protocol (JSEP), let's follow this algorithm:
 |          | ---------------------------> |          |
 |          |                              |          |
 |          |                              |          | 
-|  Newest  |            Sets remote Offer |  Oldest  | Oldest must:
-|   Peer   |                         +--- |   Peer   | `handleNewestPeerOffer`
+|  Newer  |            Sets remote Offer |  Older  | Older must:
+|   Peer   |                         +--- |   Peer   | `handleNewerPeerOffer`
 |          |                         |    |          |
 |          |                         +--> |          |
 |          |                              |          |
 |          |                              |          | 
-|          |    Creates/sets local Answer |          | Oldest must:
-|          |                         +--- |          | `doOldestPeerAnswer`
+|          |    Creates/sets local Answer |          | Older must:
+|          |                         +--- |          | `doOlderPeerAnswer`
 |          |                         |    |          |
 |          |                         +--> |          |
 |          |                              |          |
@@ -29,8 +29,8 @@ Javascript Session Establishment Protocol (JSEP), let's follow this algorithm:
 |          | <--------------------------- |          |
 |          |                              |          |
 |          |                              |          | 
-|          | Sets remote Answer           |          | Newest must:
-|          | ---+                         |          | `handleOldestPeerAnswer`
+|          | Sets remote Answer           |          | Newer must:
+|          | ---+                         |          | `handleOlderPeerAnswer`
 |          |    |                         |          |
 |          | <--+                         |          |
 +----------+                              +----------+
@@ -61,7 +61,7 @@ export interface P2PCallConnectionOptions {
   uuid?: string;
   audio: string | boolean;
   video: string | boolean;
-  isLocalPeerTheOfferingNewest: boolean;
+  isLocalPeerTheOfferingNewer: boolean;
   outgoingSignaling: P2PCallOutgoingSignaling;
   onLocalStream?: StreamListener;
   onRemoteStream?: StreamListener;
@@ -90,8 +90,8 @@ export function makeP2PCallConnection(
 
       await buildLocalMedia(p2pCall);
 
-      if (p2pCall.options.isLocalPeerTheOfferingNewest) {
-        await doNewestPeerOffer(p2pCall); // hopefully, not a premature idea
+      if (p2pCall.options.isLocalPeerTheOfferingNewer) {
+        await doNewerPeerOffer(p2pCall); // hopefully, not a premature idea
       }
     } finally {
       startingFinished = true; // should release lock on stop function
@@ -151,9 +151,9 @@ export function makeP2PCallConnection(
   );
 
   p2pCall.incomingSignaling = {
-    handleRemoteJsepAction: (p2pCall.options.isLocalPeerTheOfferingNewest
-      ? handleOldestPeerAnswer
-      : handleNewestPeerOffer
+    handleRemoteJsepAction: (p2pCall.options.isLocalPeerTheOfferingNewer
+      ? handleOlderPeerAnswer
+      : handleNewerPeerOffer
     ).bind(null, p2pCall),
     handleRemoteIceCandidate: handleRemoteIceCandidate.bind(null, p2pCall),
   };
@@ -220,50 +220,50 @@ export function buildRemoteMediaFromTrackEvent(
   }
 }
 
-export async function doNewestPeerOffer(p2pCall: P2PCallConnectionDetailed) {
-  const newestPeerLocalOffer = await p2pCall._connection.createOffer();
-  await p2pCall._connection.setLocalDescription(newestPeerLocalOffer);
+export async function doNewerPeerOffer(p2pCall: P2PCallConnectionDetailed) {
+  const newerPeerLocalOffer = await p2pCall._connection.createOffer();
+  await p2pCall._connection.setLocalDescription(newerPeerLocalOffer);
 
   await p2pCall.options.outgoingSignaling.onLocalJsepAction(
-    newestPeerLocalOffer
+    newerPeerLocalOffer
   );
 }
 
-export async function handleNewestPeerOffer(
+export async function handleNewerPeerOffer(
   p2pCall: P2PCallConnectionDetailed,
-  newestPeerRemoteOffer: RTCSessionDescriptionInit
+  newerPeerRemoteOffer: RTCSessionDescriptionInit
 ) {
-  if (newestPeerRemoteOffer.type !== "offer") {
+  if (newerPeerRemoteOffer.type !== "offer") {
     throw new Error(
-      "Tried to handle Jsep action coming from newest peer, but did not receive an offer."
+      "Tried to handle Jsep action coming from newer peer, but did not receive an offer."
     );
   }
 
-  await p2pCall._connection.setRemoteDescription(newestPeerRemoteOffer);
+  await p2pCall._connection.setRemoteDescription(newerPeerRemoteOffer);
 
-  await doOldestPeerAnswer(p2pCall);
+  await doOlderPeerAnswer(p2pCall);
 }
 
-export async function doOldestPeerAnswer(p2pCall: P2PCallConnectionDetailed) {
-  const oldestPeerLocalAnswer = await p2pCall._connection.createAnswer();
-  await p2pCall._connection.setLocalDescription(oldestPeerLocalAnswer);
+export async function doOlderPeerAnswer(p2pCall: P2PCallConnectionDetailed) {
+  const olderPeerLocalAnswer = await p2pCall._connection.createAnswer();
+  await p2pCall._connection.setLocalDescription(olderPeerLocalAnswer);
 
   await p2pCall.options.outgoingSignaling.onLocalJsepAction(
-    oldestPeerLocalAnswer
+    olderPeerLocalAnswer
   );
 }
 
-export async function handleOldestPeerAnswer(
+export async function handleOlderPeerAnswer(
   p2pCall: P2PCallConnectionDetailed,
-  oldestPeerRemoteAnswer: RTCSessionDescriptionInit
+  olderPeerRemoteAnswer: RTCSessionDescriptionInit
 ) {
-  if (oldestPeerRemoteAnswer.type !== "answer") {
+  if (olderPeerRemoteAnswer.type !== "answer") {
     throw new Error(
-      "Tried to handle Jsep action coming from oldest peer, but did not receive an answer."
+      "Tried to handle Jsep action coming from older peer, but did not receive an answer."
     );
   }
 
-  await p2pCall._connection.setRemoteDescription(oldestPeerRemoteAnswer);
+  await p2pCall._connection.setRemoteDescription(olderPeerRemoteAnswer);
 }
 
 export async function handleLocalIceCandidate(

@@ -214,7 +214,7 @@ export const setCallUsers = createAsyncThunk(
       (u) => u.uid === user.uid
     );
     if (call.userStatus === "pending-user" && isAmongParticipants) {
-      await firestoreSignaling.joinAsNewestParticipation({
+      await firestoreSignaling.joinAsNewerParticipation({
         callUid: call.uid,
         userUid: user.uid,
         participantsUids: call.participants.map((p) => p.uid),
@@ -272,20 +272,20 @@ export const selectP2PDescriptionFn =
   (remoteUid: string) => (state: RootState) =>
     state.call.p2pDescriptions.find(
       (it) =>
-        state.user.uid === it.newestPeerUid ||
-        state.user.uid === it.oldestPeerUid ||
-        remoteUid === it.newestPeerUid ||
-        remoteUid === it.oldestPeerUid
+        state.user.uid === it.newerPeerUid ||
+        state.user.uid === it.olderPeerUid ||
+        remoteUid === it.newerPeerUid ||
+        remoteUid === it.olderPeerUid
     );
 
 export const selectP2PDescriptionUidByRemoteUidFn =
   (remoteUid: string) => (state: RootState) =>
     state.call.p2pDescriptions.find(
       (it) =>
-        state.user.uid === it.newestPeerUid ||
-        state.user.uid === it.oldestPeerUid ||
-        remoteUid === it.newestPeerUid ||
-        remoteUid === it.oldestPeerUid
+        state.user.uid === it.newerPeerUid ||
+        state.user.uid === it.olderPeerUid ||
+        remoteUid === it.newerPeerUid ||
+        remoteUid === it.olderPeerUid
     )?.uid;
 
 export const selectP2PDescriptionByUidFn =

@@ -8,7 +8,7 @@ import {
 } from "../state/call";
 
 export interface P2PCallHookOptions {
-  isLocalPeerTheOfferingNewest: boolean;
+  isLocalPeerTheOfferingNewer: boolean;
   p2pDescriptionUid: CallP2PDescription["uid"];
   remoteVideo: () => HTMLVideoElement | null;
   localVideo?: () => HTMLVideoElement | null;
@@ -28,7 +28,7 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
     );
   }
 
-  const { isLocalPeerTheOfferingNewest, localVideo, remoteVideo } =
+  const { isLocalPeerTheOfferingNewer, localVideo, remoteVideo } =
     useRef(options).current; // only consider initial values
 
   const audio = useAppSelector(selectUserAudioId);
@@ -41,38 +41,38 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
       callRef.current = webrtc.makeP2PCallConnection({
         audio,
         video,
-        isLocalPeerTheOfferingNewest,
+        isLocalPeerTheOfferingNewer,
         outgoingSignaling: {
           onLocalJsepAction: async (localJsep) => {
-            if (isLocalPeerTheOfferingNewest) {
+            if (isLocalPeerTheOfferingNewer) {
               dispatch(
                 patchP2PDescription({
                   uid: p2pDescriptionUid,
-                  newestPeerOffer: localJsep,
+                  newerPeerOffer: localJsep,
                 })
               );
             } else {
               dispatch(
                 patchP2PDescription({
                   uid: p2pDescriptionUid,
-                  oldestPeerAnswer: localJsep,
+                  olderPeerAnswer: localJsep,
                 })
               );
             }
           },
           onCompletedLocalIceCandidates(localCandidates) {
-            if (isLocalPeerTheOfferingNewest) {
+            if (isLocalPeerTheOfferingNewer) {
               dispatch(
                 patchP2PDescription({
                   uid: p2pDescriptionUid,
-                  newestPeerIceCandidates: localCandidates,
+                  newerPeerIceCandidates: localCandidates,
                 })
               );
             } else {
               dispatch(
                 patchP2PDescription({
                   uid: p2pDescriptionUid,
-                  oldestPeerIceCandidates: localCandidates,
+                  olderPeerIceCandidates: localCandidates,
                 })
               );
             }
@@ -117,7 +117,7 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
     p2pDescriptionUid,
     audio,
     video,
-    isLocalPeerTheOfferingNewest,
+    isLocalPeerTheOfferingNewer,
     localVideo,
     remoteVideo,
   ]);
@@ -156,42 +156,39 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
 
     setCachedDescription(description);
 
-    if (isLocalPeerTheOfferingNewest) {
-      if (diff.oldestPeerIceCandidates) {
+    if (isLocalPeerTheOfferingNewer) {
+      if (diff.olderPeerIceCandidates) {
         console.log(
-          "Newest peer received incoming ice candidates.",
-          diff.oldestPeerIceCandidates
+          "Newer peer received incoming ice candidates.",
+          diff.olderPeerIceCandidates
         );
-        diff.oldestPeerIceCandidates.forEach((c) => {
+        diff.olderPeerIceCandidates.forEach((c) => {
           call.incomingSignaling.handleRemoteIceCandidate(c);
         });
       }
 
-      if (diff.oldestPeerAnswer) {
+      if (diff.olderPeerAnswer) {
         console.log(
-          "Newest peer received incoming answer.",
-          diff.oldestPeerAnswer
+          "Newer peer received incoming answer.",
+          diff.olderPeerAnswer
         );
-        call.incomingSignaling.handleRemoteJsepAction(diff.oldestPeerAnswer);
+        call.incomingSignaling.handleRemoteJsepAction(diff.olderPeerAnswer);
       }
     } else {
-      if (diff.newestPeerIceCandidates) {
+      if (diff.newerPeerIceCandidates) {
         console.log(
-          "Oldest peer received incoming ice candidates.",
-          diff.newestPeerIceCandidates
+          "Older peer received incoming ice candidates.",
+          diff.newerPeerIceCandidates
         );
-        diff.newestPeerIceCandidates.forEach((c) => {
+        diff.newerPeerIceCandidates.forEach((c) => {
           call.incomingSignaling.handleRemoteIceCandidate(c);
         });
       }
 
-      if (diff.newestPeerOffer) {
-        console.log(
-          "Newest peer received incoming offer.",
-          diff.newestPeerOffer
-        );
-        call.incomingSignaling.handleRemoteJsepAction(diff.newestPeerOffer);
+      if (diff.newerPeerOffer) {
+        console.log("Newer peer received incoming offer.", diff.newerPeerOffer);
+        call.incomingSignaling.handleRemoteJsepAction(diff.newerPeerOffer);
       }
     }
-  }, [isLocalPeerTheOfferingNewest, cachedDescription, description]);
+  }, [isLocalPeerTheOfferingNewer, cachedDescription, description]);
 }

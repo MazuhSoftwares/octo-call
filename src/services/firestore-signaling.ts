@@ -29,7 +29,7 @@ const firestoreSignaling = {
   listenCallUsers,
   updateParticipation,
   listenParticipations,
-  joinAsNewestParticipation,
+  joinAsNewerParticipation,
   acceptPendingUser,
   rejectPendingUser,
   leaveCall,
@@ -108,7 +108,7 @@ export interface ParticipantIntent {
   participantsUids: string[];
 }
 
-export async function joinAsNewestParticipation({
+export async function joinAsNewerParticipation({
   userUid,
   callUid,
   participantsUids,
@@ -119,8 +119,8 @@ export async function joinAsNewestParticipation({
     const uuid = uuidv4();
     const ref = doc(db, `calls/${callUid}/p2p-descriptions/${uuid}`);
     const data: Omit<CallP2PDescription, "uid"> = {
-      newestPeerUid: userUid,
-      oldestPeerUid: participantsUid,
+      newerPeerUid: userUid,
+      olderPeerUid: participantsUid,
     };
     batch.set(ref, data);
   });
@@ -135,20 +135,20 @@ export async function updateParticipation({
   callUid: string;
   p2pDescription: Partial<CallP2PDescription>;
 }) {
-  if (!p2pDescription.oldestPeerUid || !p2pDescription.newestPeerUid) {
+  if (!p2pDescription.olderPeerUid || !p2pDescription.newerPeerUid) {
     throw new Error("Malformed description, not enough uids.");
   }
 
   const p2pDescriptionDTO = {
     ...p2pDescription,
   };
-  if (p2pDescriptionDTO.newestPeerOffer instanceof RTCSessionDescription) {
-    p2pDescriptionDTO.newestPeerOffer =
-      p2pDescriptionDTO.newestPeerOffer.toJSON();
+  if (p2pDescriptionDTO.newerPeerOffer instanceof RTCSessionDescription) {
+    p2pDescriptionDTO.newerPeerOffer =
+      p2pDescriptionDTO.newerPeerOffer.toJSON();
   }
-  if (p2pDescriptionDTO.oldestPeerAnswer instanceof RTCSessionDescription) {
-    p2pDescriptionDTO.oldestPeerAnswer =
-      p2pDescriptionDTO.oldestPeerAnswer.toJSON();
+  if (p2pDescriptionDTO.olderPeerAnswer instanceof RTCSessionDescription) {
+    p2pDescriptionDTO.olderPeerAnswer =
+      p2pDescriptionDTO.olderPeerAnswer.toJSON();
   }
 
   await updateDoc(
@@ -174,11 +174,11 @@ export function listenParticipations(
 
       const subscribedP2pDescriptions = allP2pDescriptions.filter(
         (it) =>
-          it.newestPeerUid &&
-          participantsUids.includes(it.newestPeerUid) &&
-          it.oldestPeerUid &&
-          participantsUids.includes(it.oldestPeerUid) &&
-          (it.newestPeerUid === userUid || it.oldestPeerUid === userUid)
+          it.newerPeerUid &&
+          participantsUids.includes(it.newerPeerUid) &&
+          it.olderPeerUid &&
+          participantsUids.includes(it.olderPeerUid) &&
+          (it.newerPeerUid === userUid || it.olderPeerUid === userUid)
       );
 
       listener(subscribedP2pDescriptions);

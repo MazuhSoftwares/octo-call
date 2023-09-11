@@ -86,8 +86,8 @@ describe("P2PCallMain", () => {
             p2pDescriptions: [
               {
                 uid: "111111",
-                newestPeerUid: "123-321-123-321",
-                oldestPeerUid: user.uid,
+                newerPeerUid: "123-321-123-321",
+                olderPeerUid: user.uid,
               },
             ],
           },
