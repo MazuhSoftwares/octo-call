@@ -1,0 +1,38 @@
+name: Run tests on PR
+"on": pull_request
+jobs:
+  ci:
+    if: "${{ github.event.pull_request.head.repo.full_name == github.repository }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: App clean install
+        run: npm ci
+
+      - name: App lint
+        run: npm run lint
+
+      - name: App types
+        run: npm run types
+
+      - name: App test
+        run: npm test
+
+      - name: App build
+        run: npm run build
+
+      - name: Cloud functions clean install
+        run: cd functions && npm ci
+
+      - name: Cloud functions lint
+        run: cd functions && npm run lint
+
+      - name: Cloud functions types
+        run: cd functions && npm run types

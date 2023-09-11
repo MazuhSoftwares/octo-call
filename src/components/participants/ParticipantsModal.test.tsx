@@ -38,9 +38,7 @@ describe("ParticipantsModal", () => {
       preloadedState: { call },
     });
     expect(
-      screen.getByText(
-        window.location.href + "octo-call/join?callUid=" + call.uid
-      )
+      screen.getByText(window.location.href + "join?callUid=" + call.uid)
     ).toBeVisible();
   });
 
@@ -53,7 +51,7 @@ describe("ParticipantsModal", () => {
     await act(() => fireEvent.click(copyButton));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      window.location.href + "octo-call/join?callUid=" + call.uid
+      window.location.href + "join?callUid=" + call.uid
     );
 
     const successSnackbar = await waitFor(() => screen.getByRole("alert"));

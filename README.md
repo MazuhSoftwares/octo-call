@@ -79,6 +79,28 @@ npm run test:watch
 
 Happy coding!
 
+## Setting up for deployment
+
+It'll need Blaze plan active for the Firebase project. Just for testing,
+its free limit should be enough even being a billable plan.
+
+```sh
+npm ci
+firebase login
+npm run deploy
+```
+
+It'll deploy the static client side code and bunch of serverless functions.
+
+It needs a `.env.production` file in set too.
+
+To achieve more stability for users in different network settings,
+you'll also need to create ICE servers (STUN/TURN) using a proper CPaaS
+that provides it like [Xirsys](https://global.xirsys.net/dashboard/services)
+(it has a free plan for testing), [Twilio](https://www.twilio.com/docs/stun-turn)
+or even [coTURN](https://github.com/coturn/coturn) (free source, but you'll
+host it by yourself in your own infrastructure).
+
 ## More non-functional requirements
 
 ### Technology stack

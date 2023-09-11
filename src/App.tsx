@@ -21,7 +21,7 @@ export default function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
-      <Router base="/octo-call">
+      <Router>
         <Switch>
           <Route path="/" component={AuthMain} />
           <Route path="/create" component={CallCreationMain} />
