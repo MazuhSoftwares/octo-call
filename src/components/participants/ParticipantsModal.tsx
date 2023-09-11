@@ -104,7 +104,7 @@ export default function ParticipantsModal({
 
 function CallLink() {
   const callUid = useAppSelector(selectCallUid);
-  const link = `${window.location.origin}/octo-call/join?callUid=${callUid}`;
+  const link = `${window.location.origin}/join?callUid=${callUid}`;
 
   const handleCopyClick = async () => {
     await navigator.clipboard.writeText(link);
