@@ -92,6 +92,8 @@ npm run deploy
 
 It'll deploy the static client side code and bunch of serverless functions.
 
+It needs a `.env.production` file in set too.
+
 To achieve more stability for users in different network settings,
 you'll also need to create ICE servers (STUN/TURN) using a proper CPaaS
 that provides it like [Xirsys](https://global.xirsys.net/dashboard/services)
