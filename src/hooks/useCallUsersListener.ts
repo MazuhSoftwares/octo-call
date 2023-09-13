@@ -35,7 +35,7 @@ export default function useCallUsersListener() {
       return () => null;
     }
 
-    return firestoreSignaling.listenParticipations(
+    return firestoreSignaling.listenP22Descriptions(
       { callUid, userUid, participantsUids },
       (p2pDescriptions) => dispatch(setP2PDescriptions(p2pDescriptions))
     );

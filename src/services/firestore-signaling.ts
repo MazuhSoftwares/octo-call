@@ -28,7 +28,7 @@ const firestoreSignaling = {
   askToJoinCall,
   listenCallUsers,
   updateParticipation,
-  listenParticipations,
+  listenP22Descriptions,
   joinAsNewerParticipation,
   acceptPendingUser,
   rejectPendingUser,
@@ -157,7 +157,7 @@ export async function updateParticipation({
   );
 }
 
-export function listenParticipations(
+export function listenP22Descriptions(
   { userUid, callUid, participantsUids }: ParticipantIntent,
   listener: (p2pDescriptions: CallP2PDescription[]) => void
 ): Unsubscribe {

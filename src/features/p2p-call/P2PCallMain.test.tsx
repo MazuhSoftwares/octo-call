@@ -33,7 +33,7 @@ jest.mock("../../services/firestore-signaling", () => ({
   createCall: jest.fn(),
   askToJoinCall: jest.fn(),
   listenCallUsers: jest.fn().mockReturnValue(jest.fn()),
-  listenParticipations: jest.fn(),
+  listenP22Descriptions: jest.fn(),
 }));
 
 jest.mock("../../hooks/useRedirectionRule", () =>
