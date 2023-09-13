@@ -11,6 +11,12 @@ service cloud.firestore {
       allow delete: if
       		request.auth.uid != null && (get(/databases/$(database)/documents/calls/$(callId)).data.hostId == request.auth.uid || request.auth.uid == resource.data.userUid);
     }
+    match /calls/{callId}/p2p-descriptions/{descriptionId} {
+      allow create, update, delete: if
+          request.auth.uid != null && (request.auth.uid == request.resource.data.newerPeerUid || request.auth.uid == request.resource.data.olderPeerUid)
+      allow read, list: if
+          request.auth.uid != null
+    }
     match /calls/{document} {
     	allow read: if
       		request.auth.uid != null;

@@ -63,7 +63,12 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
     joined: Date.now(),
   } as CallUser);
 
-  await batch.commit();
+  try {
+    await batch.commit();
+  } catch (error) {
+    console.error("Failed to commit when creating call.", error);
+    throw error;
+  }
 
   return {
     ...callData,
@@ -125,7 +130,15 @@ export async function joinAsNewerParticipation({
     batch.set(ref, data);
   });
 
-  await batch.commit();
+  try {
+    await batch.commit();
+  } catch (error) {
+    console.error(
+      "Failed to commit when joining as newer participation.",
+      error
+    );
+    throw error;
+  }
 }
 
 export async function updateParticipation({
