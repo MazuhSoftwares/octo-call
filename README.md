@@ -2,6 +2,10 @@
 
 Video conference app. A proof of concept.
 
+<a href="https://github.com/MazuhSoftwares/octo-call">
+  <img src=".github/assets/main-char-small.png" width="150" alt="Girl in pixel art" align="right" />
+</a>
+
 ## About it
 
 It implements WebRTC Mesh Architecture.
