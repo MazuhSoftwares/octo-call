@@ -1,3 +1,12 @@
+/* needed because of ios safari issue https://stackoverflow.com/questions/3047337/does-overflowhidden-applied-to-body-work-on-iphone-safari */
+
+html,
+body {
+  overflow: hidden;
+  position: relative;
+  height: 100%;
+}
+
 /* Visually hidden but still readable by screen readers. */
 .visually-hidden {
   border: 0;
