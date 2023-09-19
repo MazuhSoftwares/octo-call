@@ -29,5 +29,6 @@ coverage/
 .firebase/*.cache
 
 # env vars
+.env.development
 .env.development.local
 .env.production
