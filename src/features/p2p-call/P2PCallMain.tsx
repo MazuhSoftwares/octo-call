@@ -21,6 +21,7 @@ import {
 import { selectUserDisplayName, selectUserUid } from "../../state/user";
 import { useDevicePreview } from "../../hooks/useDevicePreview";
 import { selectUserVideoId } from "../../state/devices";
+import { useMediaQuery } from "@mui/material";
 
 export default function P2PCallMain() {
   const windowsSize = useWindowSize();
@@ -94,27 +95,28 @@ export default function P2PCallMain() {
 
   const getSlotStyles = useCallback((): BoxProps["sx"] => {
     return {
-      flexBasis: "45%",
+      flexBasis: "35%",
       margin: 1,
+      width: "100%",
     };
   }, []);
 
   const getVideoWrapperStyles = useCallback((): BoxProps["sx"] => {
-    return { margin: "auto" };
+    return { margin: "auto", width: "100%" };
   }, []);
 
   const getVideoStyles = useCallback((): BoxProps["sx"] => {
     if (windowsSize.width < MEDIUM_WIDTH) {
       if (activeSlotsQtt === 1) {
-        return { maxHeight: "40vh" };
+        return { maxHeight: "40vh", width: "100%" };
       } else if (activeSlotsQtt === 2) {
-        return { maxHeight: "30vh" };
+        return { maxHeight: "30vh", width: "100%" };
       } else if (activeSlotsQtt === 3) {
-        return { maxHeight: "25vh" };
+        return { maxHeight: "25vh", width: "100%" };
       } else if (activeSlotsQtt === 4) {
-        return { maxHeight: "18vh" };
+        return { maxHeight: "18vh", width: "100%" };
       } else {
-        return { maxHeight: "15vh" };
+        return { maxHeight: "15vh", width: "100%" };
       }
     }
 
@@ -122,10 +124,10 @@ export default function P2PCallMain() {
       windowsSize.width < EXTRA_LARGE_WIDTH ||
       windowsSize.height < EXTRA_LARGE_HEIGHT
     ) {
-      return { maxHeight: "35vh" };
+      return { maxHeight: "35vh", width: "100%" };
     }
 
-    return { maxHeight: "37vh" };
+    return { maxHeight: "37vh", width: "100%" };
   }, [windowsSize, activeSlotsQtt]);
 
   const userUid = useAppSelector(selectUserUid);
@@ -144,17 +146,28 @@ export default function P2PCallMain() {
       });
   }, [userUid, participants, findSlot, lockNextFreeSlot]);
 
+  const landscape = useMediaQuery("(min-width: 600px) and (max-width: 899px)");
+
   return (
     <CallTemplate>
       <Box
         data-layoutinfo="call"
         sx={{
-          display: "flex",
+          display: {
+            xs: "grid",
+            md: "flex",
+          },
+          gridTemplateColumns: landscape ? "repeat(5, auto)" : "auto auto",
+          gap: 1,
           alignItems: "center",
           justifyContent: "center",
-          height: "100%",
+          alignContent: {
+            xs: "center",
+            md: "inherit",
+          },
           p: 1,
           ...getMainStyles(),
+          height: landscape ? "100%" : "60vh",
         }}
       >
         <P2PMirrorCallSlot
