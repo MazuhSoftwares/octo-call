@@ -24,6 +24,7 @@ import useCallUsersListener from "../../hooks/useCallUsersListener";
 import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
+import { useMediaQuery } from "@mui/material";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -44,8 +45,11 @@ export default function CallTemplate({ children }: CallTemplateProps) {
         display: "flex",
         flexDirection: "column",
         boxSizing: "border-box",
+        height: {
+          md: "100vh",
+          xs: "100%",
+        },
         width: "100vw",
-        height: "100vh",
         overflow: "hidden",
       }}
     >
@@ -83,6 +87,8 @@ function CallHeader() {
 
   const handleLogoutClick = () => dispatch(logout());
 
+  const landscape = useMediaQuery("(min-width: 600px) and (max-width: 899px)");
+
   return (
     <Box
       component="header"
@@ -96,7 +102,7 @@ function CallHeader() {
         borderColor: getThemedColor("commonBorder"),
       }}
     >
-      <Box>
+      <Box sx={landscape ? { display: "flex" } : undefined}>
         <Typography variant="h1">Octo Call</Typography>
         <Typography variant="h2">
           <Box

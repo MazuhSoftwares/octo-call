@@ -41,7 +41,16 @@ export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
             component="video"
             role="video"
             ref={videoRef}
-            sx={{ display: "flex", width: "100%", ...sx }}
+            sx={{
+              display: "flex",
+              width: "100%",
+              ...sx,
+              height: {
+                xs: "120px",
+                md: "350px",
+              },
+              objectFit: "scale-down",
+            }}
           />
           <Box
             sx={{
