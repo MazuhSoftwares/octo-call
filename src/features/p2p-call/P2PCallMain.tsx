@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import Box, { BoxProps } from "@mui/material/Box";
 import CallTemplate from "../../components/templates/CallTemplate";
 import Video from "../../components/basic/Video";
