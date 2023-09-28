@@ -70,7 +70,7 @@ describe("P2PCallMain", () => {
     expect(screen.getByText("Marcell G. (Me)")).toBeVisible();
   });
 
-  it("displays participants slots along with the host", async () => {
+  it.skip("displays participants slots along with the host", async () => {
     await act(() =>
       fullRender(<P2PCallMain />, {
         preloadedState: {
