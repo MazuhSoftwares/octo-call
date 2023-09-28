@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import Box, { BoxProps } from "@mui/material/Box";
 import CallTemplate from "../../components/templates/CallTemplate";
 import Video from "../../components/basic/Video";
@@ -6,12 +6,7 @@ import type { CallP2PDescription, CallParticipant } from "../../webrtc";
 import webrtc from "../../webrtc";
 import useP2PCall from "../../hooks/useP2PCall";
 import useWindowSize from "../../hooks/useWindowSize";
-import {
-  EXTRA_LARGE_HEIGHT,
-  EXTRA_LARGE_WIDTH,
-  LARGE_HEIGHT,
-  MEDIUM_WIDTH,
-} from "../../components/app/mui-styles";
+import { LARGE_HEIGHT, MEDIUM_WIDTH } from "../../components/app/mui-styles";
 import { useAppSelector } from "../../state";
 import {
   selectP2PDescriptionUidByRemoteUidFn,
@@ -32,13 +27,6 @@ export default function P2PCallMain() {
       .map(() => ({ participant: null }))
   );
 
-  const [activeSlotsQtt, setActiveSlotsQtt] = useState<number>(0); // to be used only for layout
-  const syncActiveSlotsCounting = useCallback(() => {
-    setActiveSlotsQtt(
-      participantsSlotsRef.current.filter((it) => it.participant).length + 1 // plus user themself
-    );
-  }, []);
-
   const findSlot = useCallback(
     (participantUid: string): ParticipantSlot | null =>
       participantsSlotsRef.current.find(
@@ -56,9 +44,8 @@ export default function P2PCallMain() {
   const lockSlot = useCallback(
     (slot: ParticipantSlot, participant: CallParticipant): void => {
       slot.participant = participant;
-      syncActiveSlotsCounting();
     },
-    [syncActiveSlotsCounting]
+    []
   );
 
   const lockNextFreeSlot = useCallback(
@@ -106,29 +93,8 @@ export default function P2PCallMain() {
   }, []);
 
   const getVideoStyles = useCallback((): BoxProps["sx"] => {
-    if (windowsSize.width < MEDIUM_WIDTH) {
-      if (activeSlotsQtt === 1) {
-        return { maxHeight: "40vh", width: "100%" };
-      } else if (activeSlotsQtt === 2) {
-        return { maxHeight: "30vh", width: "100%" };
-      } else if (activeSlotsQtt === 3) {
-        return { maxHeight: "25vh", width: "100%" };
-      } else if (activeSlotsQtt === 4) {
-        return { maxHeight: "18vh", width: "100%" };
-      } else {
-        return { maxHeight: "15vh", width: "100%" };
-      }
-    }
-
-    if (
-      windowsSize.width < EXTRA_LARGE_WIDTH ||
-      windowsSize.height < EXTRA_LARGE_HEIGHT
-    ) {
-      return { maxHeight: "35vh", width: "100%" };
-    }
-
-    return { maxHeight: "37vh", width: "100%" };
-  }, [windowsSize, activeSlotsQtt]);
+    return { maxHeight: "100%", width: "100%" };
+  }, []);
 
   const userUid = useAppSelector(selectUserUid);
   const participants = useAppSelector(selectParticipants);
@@ -146,7 +112,9 @@ export default function P2PCallMain() {
       });
   }, [userUid, participants, findSlot, lockNextFreeSlot]);
 
-  const landscape = useMediaQuery("(min-width: 600px) and (max-width: 899px)");
+  const landscape = useMediaQuery(
+    "(min-width: 600px) and (max-width: 830px) and (orientation: landscape)"
+  );
 
   return (
     <CallTemplate>
@@ -167,7 +135,11 @@ export default function P2PCallMain() {
           },
           p: 1,
           ...getMainStyles(),
-          height: landscape ? "100%" : "60vh",
+          height: {
+            xs: "100%",
+            sm: landscape ? "100%" : "85vh",
+            md: "60vh",
+          },
         }}
       >
         <P2PMirrorCallSlot

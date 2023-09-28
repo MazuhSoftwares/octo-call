@@ -47,7 +47,7 @@ export default function CallTemplate({ children }: CallTemplateProps) {
         boxSizing: "border-box",
         height: {
           md: "100vh",
-          xs: "100%",
+          xs: "100svh",
         },
         width: "100vw",
         overflow: "hidden",
@@ -102,7 +102,7 @@ function CallHeader() {
         borderColor: getThemedColor("commonBorder"),
       }}
     >
-      <Box sx={landscape ? { display: "flex" } : undefined}>
+      <Box sx={landscape ? { display: "flex", gap: 1 } : undefined}>
         <Typography variant="h1">Octo Call</Typography>
         <Typography variant="h2">
           <Box
