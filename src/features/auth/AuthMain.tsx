@@ -3,16 +3,13 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import GoogleIcon from "@mui/icons-material/Google";
 import HomeTemplate from "../../components/templates/HomeTemplate";
-import { useAppDispatch, useAppSelector } from "../../state";
-import { login, selectIsUserPendingAuthentication } from "../../state/user";
+import { useAppSelector } from "../../state";
+import { selectIsUserPendingAuthentication } from "../../state/user";
+import firestoreAuth from "../../services/firestore-auth";
 
 export default function AuthMain() {
-  const dispatch = useAppDispatch();
-
-  const handleLoginClick = () => dispatch(login());
-
+  const handleLoginClick = () => firestoreAuth.redirectLogin();
   const isPending = useAppSelector(selectIsUserPendingAuthentication);
-
   return (
     <HomeTemplate>
       <Typography

@@ -1,10 +1,11 @@
 import once from "lodash.once";
-import type { User as FirebaseUser } from "firebase/auth";
+import type { User as FirebaseUser, UserCredential } from "firebase/auth";
 import {
   browserLocalPersistence,
   getAuth,
+  getRedirectResult,
   setPersistence,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from "firebase/auth";
 import { googleAuthProvider } from "./firestore-connection";
@@ -13,6 +14,7 @@ import type { User } from "../webrtc";
 const firestoreAuth = {
   loadUser,
   login,
+  redirectLogin,
   logout,
 };
 
@@ -44,21 +46,28 @@ async function loadUser(): Promise<User> {
   });
 }
 
-async function login(): Promise<User> {
+async function redirectLogin(): Promise<never> {
   const auth = getAuth();
 
   await setPersistence(auth, browserLocalPersistence);
+  return signInWithRedirect(auth, googleAuthProvider);
+}
 
-  const result = await signInWithPopup(auth, googleAuthProvider);
+async function login(): Promise<User> {
+  const empty: User = { uid: "", displayName: "", email: "" };
+  const auth = getAuth();
+  const result = await getRedirectResult(auth);
+  console.log(result);
+  if (result === null) {
+    Promise.resolve(empty);
+  }
   const {
     user: { uid, displayName, email },
-  } = result;
-
+  } = result as UserCredential;
   if (!email) {
     signOut(auth);
     throw new Error("Login blocked: unidentified user.");
   }
-
   return {
     uid,
     displayName: displayName ?? email,

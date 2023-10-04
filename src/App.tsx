@@ -4,7 +4,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Switch, Route, Router, Redirect } from "wouter";
 import { darkTheme } from "./components/app/mui-styles";
 import { useAppDispatch } from "./state";
-import { loadUser } from "./state/user";
+import { loadUser, login } from "./state/user";
 import AuthMain from "./features/auth/AuthMain";
 import P2PCallMain from "./features/p2p-call/P2PCallMain";
 import CallCreationMain from "./features/call-selection/CallCreationMain";
@@ -15,6 +15,7 @@ export default function App() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    dispatch(login());
     dispatch(loadUser());
   }, [dispatch]);
 
