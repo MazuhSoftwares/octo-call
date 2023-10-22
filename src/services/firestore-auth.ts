@@ -57,7 +57,7 @@ async function login(): Promise<User> {
   const empty: User = { uid: "", displayName: "", email: "" };
   const auth = getAuth();
   const result = await getRedirectResult(auth);
-  console.log(result);
+
   if (result === null) {
     Promise.resolve(empty);
   }
