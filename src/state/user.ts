@@ -64,7 +64,7 @@ export const loadUser = createAsyncThunk(
 
 export const login = createAsyncThunk(
   "user/login",
-  () => firestoreAuth.login(),
+  () => firestoreAuth.login().then(firestoreAuth.loadUser),
   {
     condition: (_arg, thunkAPI) =>
       (thunkAPI.getState() as RootState).user.status === "idle",

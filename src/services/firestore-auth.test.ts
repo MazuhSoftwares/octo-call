@@ -5,8 +5,9 @@ import * as firebaseAuth from "firebase/auth";
 describe("firestoreAuth", () => {
   it("should successfully log in and return user information", async () => {
     jest.spyOn(firebaseAuth, "getAuth");
-    jest.spyOn(firebaseAuth, "signInWithPopup");
-    const user = await firestoreAuth.login();
+    jest.spyOn(firebaseAuth, "getRedirectResult");
+    await firestoreAuth.login();
+    const user = await firestoreAuth.loadUser();
     expect(user).toEqual({
       uid: "abc123def456",
       displayName: "Jane Doe",
@@ -16,7 +17,7 @@ describe("firestoreAuth", () => {
 
   it("should block log in when user email is null", async () => {
     jest.spyOn(firebaseAuth, "getAuth");
-    jest.spyOn(firebaseAuth, "signInWithPopup").mockResolvedValue({
+    jest.spyOn(firebaseAuth, "getRedirectResult").mockResolvedValue({
       operationType: "signIn",
       providerId: "google.com",
       user: {
@@ -39,7 +40,7 @@ describe("firestoreAuth", () => {
         photoURL: "",
       },
     });
-    await expect(firestoreAuth.login()).rejects.toThrow(
+    await expect(firestoreAuth.loadUser()).rejects.toThrow(
       "Login blocked: unidentified user."
     );
   });
