@@ -1,5 +1,5 @@
 import once from "lodash.once";
-import type { User as FirebaseUser, UserCredential } from "firebase/auth";
+import type { User as FirebaseUser } from "firebase/auth";
 import {
   browserLocalPersistence,
   getAuth,
@@ -14,67 +14,56 @@ import type { User } from "../webrtc";
 const firestoreAuth = {
   loadUser,
   login,
-  redirectLogin,
   logout,
 };
 
 export default firestoreAuth;
 
+/** Loads user from redirection result, persistence, whatever. */
 async function loadUser(): Promise<User> {
-  const empty: User = { uid: "", displayName: "", email: "" };
-
-  return new Promise((resolve) => {
-    const done = (user: FirebaseUser | null) => {
-      try {
-        if (user) {
-          const { uid, displayName, email } = user;
-          resolve({
-            uid,
-            displayName: displayName ?? email ?? "",
-            email: email ?? "?@?",
-          });
-        } else {
-          resolve(empty);
-        }
-      } catch (error) {
+  return new Promise((resolve, reject) => {
+    const handleResult = (user: FirebaseUser | null) => {
+      if (!user) {
+        const empty: User = { uid: "", displayName: "", email: "" };
         resolve(empty);
+        return;
       }
+
+      if (!user.uid || !user.email) {
+        reject(new Error("Login blocked: unidentified user."));
+        return;
+      }
+
+      resolve({
+        uid: user.uid,
+        displayName: user.displayName ?? user.email,
+        email: user.email,
+      });
     };
 
-    setTimeout(() => done(null), 3000);
-    getAuth().onAuthStateChanged(once(done));
+    // prepare auth for one of the following events:
+    const auth = getAuth();
+    const onceHandleResult = once(handleResult);
+    // case of timeout (this was specially important for popup method but now not so much)
+    setTimeout(() => onceHandleResult(null), 5 * 1000);
+    // case of loaded by something else (like persistent successfully loaded)
+    auth.onAuthStateChanged(onceHandleResult);
+    // case of got result from redirect flow
+    getRedirectResult(auth)
+      .then((credentials) => credentials?.user || null)
+      .then(onceHandleResult);
   });
 }
 
-async function redirectLogin(): Promise<never> {
+/** Trigger the login function, it redirects to an authentication page. */
+async function login(): Promise<void> {
   const auth = getAuth();
 
   await setPersistence(auth, browserLocalPersistence);
-  return signInWithRedirect(auth, googleAuthProvider);
+  await signInWithRedirect(auth, googleAuthProvider);
 }
 
-async function login(): Promise<User> {
-  const empty: User = { uid: "", displayName: "", email: "" };
-  const auth = getAuth();
-  const result = await getRedirectResult(auth);
-
-  if (result === null) {
-    Promise.resolve(empty);
-  }
-  const {
-    user: { uid, displayName, email },
-  } = result as UserCredential;
-  if (!email) {
-    signOut(auth);
-    throw new Error("Login blocked: unidentified user.");
-  }
-  return {
-    uid,
-    displayName: displayName ?? email,
-    email,
-  };
-}
-
+/** Clears the authentication data. */
 async function logout() {
   signOut(getAuth());
 }

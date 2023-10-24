@@ -9,7 +9,11 @@ describe("CurrentUserStateIndicator", () => {
     (firestoreAuth.login as jest.Mock).mockClear();
   });
 
-  it("can login", async () => {
+  it("login will set loading ui to prevent double trigger", async () => {
+    (firestoreAuth.login as jest.Mock).mockResolvedValue(
+      new Promise((resolve) => setTimeout(resolve, 500))
+    );
+
     const { store } = fullRender(<AuthMain />);
 
     const loginButtonElement = screen.getByRole("button", {
@@ -17,10 +21,11 @@ describe("CurrentUserStateIndicator", () => {
     });
     await act(() => fireEvent.click(loginButtonElement));
 
-    await waitFor(() => expect(store.getState().user.uid).not.toBe(""));
+    await waitFor(() => expect(store.getState().user.uid).toBe(""));
+    await waitFor(() => expect(screen.getByText("Checking...")).toBeTruthy());
   });
 
-  it("login is integrated with firestore", async () => {
+  it("triggering login will rely on firestore module", async () => {
     fullRender(<AuthMain />);
 
     const loginButtonElement = screen.getByRole("button", {

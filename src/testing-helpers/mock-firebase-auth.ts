@@ -1,7 +1,7 @@
 import type { Auth, AuthProvider } from "firebase/auth";
 
 jest.mock("firebase/auth", () => ({
-  getAuth: jest.fn(),
+  getAuth: jest.fn().mockReturnValue({ onAuthStateChanged: jest.fn() }),
   GoogleAuthProvider: jest.fn(() => ({
     Qc: ["client_id", "response_type", "scope", "redirect_uri", "state"],
     providerId: "google.com",
@@ -13,8 +13,9 @@ jest.mock("firebase/auth", () => ({
   })),
   setPersistence: jest.fn(),
   browserLocalPersistence: jest.fn(),
+  signInWithRedirect: jest.fn(),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  signInWithPopup: jest.fn((_: Auth, __: AuthProvider) =>
+  getRedirectResult: jest.fn((_: Auth, __: AuthProvider) =>
     Promise.resolve({
       operationType: "signIn",
       providerId: "google.com",
