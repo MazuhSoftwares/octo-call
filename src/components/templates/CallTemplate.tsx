@@ -26,7 +26,6 @@ import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
 import { useMediaQuery, useTheme } from "@mui/material";
-import { ThemeContext } from "@emotion/react";
 
 export interface CallTemplateProps {
   children: ReactNode;
