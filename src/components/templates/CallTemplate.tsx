@@ -15,8 +15,8 @@ import { useAppDispatch, useAppSelector } from "../../state";
 import {
   leaveCall,
   selectCallDisplayName,
-  selectParticipants,
-  selectPendingUsers,
+  selectParticipantsQuantity,
+  selectPendingUsersQuantity,
 } from "../../state/call";
 import { getThemedColor } from "../app/mui-styles";
 import { logout, selectUserDisplayName } from "../../state/user";
@@ -25,7 +25,8 @@ import useCallUsersListener from "../../hooks/useCallUsersListener";
 import ToggleMicButton from "../devices/ToggleMicButton";
 import ToggleCamButton from "../devices/ToggleCamButton";
 import useRedirectionRule from "../../hooks/useRedirectionRule";
-import { useMediaQuery } from "@mui/material";
+import { useMediaQuery, useTheme } from "@mui/material";
+import { ThemeContext } from "@emotion/react";
 
 export interface CallTemplateProps {
   children: ReactNode;
@@ -170,10 +171,11 @@ function CallMain({ children }: { children: ReactNode }) {
 }
 
 function CallFooter() {
+  const theme = useTheme();
   const dispatch = useAppDispatch();
 
-  const participants = useAppSelector(selectParticipants);
-  const pendingUsers = useAppSelector(selectPendingUsers);
+  const participantsQuantity = useAppSelector(selectParticipantsQuantity);
+  const pendingUsersQuantity = useAppSelector(selectPendingUsersQuantity);
 
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
@@ -206,19 +208,37 @@ function CallFooter() {
           aria-label="Participants"
           title="Participants"
           onClick={openParticipants}
-          startIcon={<PeopleIcon fontSize="medium" />}
+          startIcon={
+            <PeopleIcon
+              fontSize="medium"
+              sx={{ display: { xs: "none", sm: "inherit" } }}
+            />
+          }
           size="large"
           sx={
-            pendingUsers.length
+            pendingUsersQuantity
               ? {
-                  color: getThemedColor("focusBorder"),
-                  border: getThemedColor("focusBorder"),
-                  boxShadow: `0 0 15px 15px ${getThemedColor("focusBorder")}`,
+                  color: theme.palette.warning.main,
+                  border: theme.palette.warning.main,
+                  boxShadow: `0 0 10px 10px ${theme.palette.warning.main}`,
                 }
               : undefined
           }
         >
-          {participants.length}
+          <PeopleIcon
+            fontSize="medium"
+            sx={{ display: { xs: "inherit", sm: "none" }, mr: 1 }}
+          />
+          {participantsQuantity}
+          {!!pendingUsersQuantity && (
+            <Box
+              component="span"
+              className="visually-hidden--xs"
+              sx={{ ml: 1 }}
+            >
+              {`(${pendingUsersQuantity} pending)`}
+            </Box>
+          )}
         </Button>
       </Box>
 

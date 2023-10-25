@@ -260,6 +260,10 @@ export const selectCallUserStatus = (state: RootState) => state.call.userStatus;
 
 export const selectParticipants = (state: RootState) => state.call.participants;
 export const selectPendingUsers = (state: RootState) => state.call.pendingUsers;
+export const selectPendingUsersQuantity = (state: RootState) =>
+  state.call.pendingUsers.length;
+export const selectParticipantsQuantity = (state: RootState) =>
+  state.call.participants.length;
 
 export const selectUserParticipationOrder = (state: RootState): number =>
   get(
