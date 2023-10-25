@@ -16,6 +16,7 @@ import {
   leaveCall,
   selectCallDisplayName,
   selectParticipants,
+  selectPendingUsers,
 } from "../../state/call";
 import { getThemedColor } from "../app/mui-styles";
 import { logout, selectUserDisplayName } from "../../state/user";
@@ -172,6 +173,7 @@ function CallFooter() {
   const dispatch = useAppDispatch();
 
   const participants = useAppSelector(selectParticipants);
+  const pendingUsers = useAppSelector(selectPendingUsers);
 
   const [isParticipantsOpen, setParticipantsOpen] = useState(false);
   const openParticipants = () => setParticipantsOpen(true);
@@ -206,6 +208,15 @@ function CallFooter() {
           onClick={openParticipants}
           startIcon={<PeopleIcon fontSize="medium" />}
           size="large"
+          sx={
+            pendingUsers.length
+              ? {
+                  color: getThemedColor("focusBorder"),
+                  border: getThemedColor("focusBorder"),
+                  boxShadow: `0 0 15px 15px ${getThemedColor("focusBorder")}`,
+                }
+              : undefined
+          }
         >
           {participants.length}
         </Button>
