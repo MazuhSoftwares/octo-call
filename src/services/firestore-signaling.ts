@@ -12,6 +12,7 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import type { DocumentData, Unsubscribe } from "firebase/firestore";
+import { getFunctions, httpsCallable } from "firebase/functions";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "./firestore-connection";
 import type {
@@ -33,6 +34,7 @@ const firestoreSignaling = {
   acceptPendingUser,
   rejectPendingUser,
   leaveCall,
+  getIceServersConfig,
 };
 
 export default firestoreSignaling;
@@ -251,3 +253,32 @@ export async function rejectPendingUser({
 export async function leaveCall({ callUid, userUid }: CallUserExitIntent) {
   await deleteDoc(doc(db, `calls/${callUid}/users/${userUid}`));
 }
+
+export async function getIceServersConfig(): Promise<RTCIceServer> {
+  const functions = getFunctions();
+  const getIceServer = httpsCallable<never, { iceServersConfig: RTCIceServer }>(
+    functions,
+    "getIceServersConfig"
+  );
+
+  try {
+    const iceServersResult = await getIceServer();
+    const iceServersConfig = iceServersResult.data.iceServersConfig;
+    if (!iceServersConfig) {
+      throw new Error(
+        "Bad response from cloud function while retrieving ICE servers."
+      );
+    }
+    return iceServersConfig;
+  } catch (error) {
+    console.error(
+      "Failed to get ICE servers, then putting some default.",
+      error
+    );
+    return DEFAULT_ICE_SERVERS_CONFIG;
+  }
+}
+
+const DEFAULT_ICE_SERVERS_CONFIG: RTCIceServer = {
+  urls: ["stun:stun.l.google.com:19302", "stun:stun2.l.google.com:19302"],
+};

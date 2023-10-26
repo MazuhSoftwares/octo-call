@@ -63,6 +63,7 @@ export interface P2PCallConnectionOptions {
   video: string | boolean;
   isLocalPeerTheOfferingNewer: boolean;
   outgoingSignaling: P2PCallOutgoingSignaling;
+  iceServersConfig?: RTCIceServer;
   onLocalStream?: StreamListener;
   onRemoteStream?: StreamListener;
 }
@@ -70,7 +71,9 @@ export interface P2PCallConnectionOptions {
 export function makeP2PCallConnection(
   options: P2PCallConnectionOptions
 ): P2PCallConnection {
-  const connection = new RTCPeerConnection();
+  const connection = new RTCPeerConnection({
+    iceServers: options.iceServersConfig ? [options.iceServersConfig] : [],
+  });
 
   let startingBegun = false;
   let startingFinished = false;

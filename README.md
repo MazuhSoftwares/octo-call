@@ -65,6 +65,12 @@ First, setup up your cloud environment:
 - On Firebase Console, go to "Firestore Database" menu option,
   and create one for you (in "testing mode" for local tests).
 
+To quickly generate the `.env.development.local` from the template:
+
+```sh
+cp .env.development.sample .env.development.local
+```
+
 Restart your development server so they can load.
 
 ### Testing
@@ -83,7 +89,9 @@ npm run test:watch
 
 Happy coding!
 
-## Setting up for deployment
+## Setting up for remote deployment
+
+### The project itself
 
 The [official repository](https://github.com/MazuhSoftwares/octo-call/) should already
 have a working pipeline of continuous integration and delivery. But here are a few
@@ -92,22 +100,64 @@ summarized instructions for custom deployments.
 It'll need Blaze plan active for the Firebase project. Just for testing,
 its free limit should be enough even being a billable plan.
 
+Then proceed to the manual deploy using CLI:
+
 ```sh
 npm ci
 firebase login
 npm run deploy
 ```
 
-It'll deploy the static client side code and bunch of serverless functions.
+It'll deploy the static client side code, the storage access rules
+and bunch of serverless functions.
 
 It needs a `.env.production` file in set too.
 
-To achieve more stability for users in different network settings,
-you'll also need to create ICE servers (STUN/TURN) using a proper CPaaS
-that provides it like [Xirsys](https://global.xirsys.net/dashboard/services)
-(it has a free plan for testing), [Twilio](https://www.twilio.com/docs/stun-turn)
-or even [coTURN](https://github.com/coturn/coturn) (free source, but you'll
-host it by yourself in your own infrastructure).
+In other words, it's pretty much the same as setting up the project for
+development, you'll even need those steps of enabling the storage and authentication.
+
+### ICE servers
+
+For demonstration of connecting peers in the same network,
+there's no need to consider the scenarios below.
+
+But different networks often have some extra complexity, like hiding peers
+behind [NAT](https://medium.com/@laurayu_653/nat-why-do-we-need-it-f0230bb7d06f).
+Then there's a need of intermediate servers to fix it.
+It will, of course, potentially imply in more costs.
+So be aware of it, and only use it if you want to extend this
+proof of concept availability to everyone over Internet.
+
+These intermediate servers are often "ICE servers", they are
+the [STUN](https://bloggeek.me/webrtcglossary/stun/)
+and [ICE](https://bloggeek.me/webrtcglossary/). In short words,
+while STUN tries to open the way through NAT configurations,
+there's a fallback plan like the ICE server that goes even beyond
+and can relay the entire media flow.
+Because of this level of responsibility, although it's possible to use
+free ICE servers, it's recommendeded to contract STUN/TURN from paid
+service providers, even if it's in their free trial plan.
+
+Currently, this project supports integration with [Xirsys](https://xirsys.com/)
+because it has a free plan available to anyone. And all the work of retrieving the credentials are implemented in the cloud functions.
+
+For manual deployments, put your Xirsys credentials in a `functions/.env` file.
+You can also generate it from the template (note that
+it's a different file from the core env vars):
+
+```sh
+cp functions/.env.sample functions/.env
+```
+
+Remember to deploy the functions if you make changes to them. There's no
+way to run them locally. So even for local tests, you need them deployed.
+You can individually deploy only the serverless functions with
+the `npm run deploy:functions` command.
+
+For custom forks of this project, it wouldn't be hard to use any other vendor.
+The cloud function doing it is very simple and short, and can be easily changed.
+Also, consider hosting the STUN/ICE in your own infrastructure
+using the free source [coTURN](https://github.com/coturn/coturn) project.
 
 ## More non-functional requirements
 
