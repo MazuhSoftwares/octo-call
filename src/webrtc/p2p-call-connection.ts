@@ -71,7 +71,8 @@ export interface P2PCallConnectionOptions {
 export function makeP2PCallConnection(
   options: P2PCallConnectionOptions
 ): P2PCallConnection {
-  const connection = new RTCPeerConnection({
+  const connection = new RTCPeerConnection();
+  connection.setConfiguration({
     iceServers: options.iceServersConfig ? [options.iceServersConfig] : [],
   });
 

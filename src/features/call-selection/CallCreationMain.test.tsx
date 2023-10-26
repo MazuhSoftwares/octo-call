@@ -21,6 +21,7 @@ describe("CallCreationMain", () => {
   beforeEach(() => {
     (firestoreSignaling.createCall as jest.Mock).mockClear();
     (firestoreSignaling.askToJoinCall as jest.Mock).mockClear();
+    (firestoreSignaling.getIceServersConfig as jest.Mock).mockClear();
 
     (webrtc.retrieveMediaInputs as jest.Mock).mockResolvedValue([
       {
@@ -63,6 +64,36 @@ describe("CallCreationMain", () => {
     await act(() => fireEvent.click(callCreationButtonElement));
 
     expect(firestoreSignaling.createCall).toBeCalledTimes(1);
+  });
+
+  it("call creation is integrated with firebase to also gather ice config", async () => {
+    await act(() =>
+      fullRender(<CallCreationMain />, {
+        preloadedState: {
+          user: {
+            ...userInitialState,
+            uid: "1m2kkn3",
+            displayName: "John Doe",
+            status: "authenticated",
+          },
+          devices: {
+            ...devicesInitialState,
+            userAudioId: "my-mic-42",
+          },
+        },
+      })
+    );
+
+    const callNameInputElement = screen.getByLabelText("Call public name:");
+
+    const callCreationButtonElement = screen.getByRole("button", {
+      name: "Create call",
+    });
+
+    fireEvent.change(callNameInputElement, { target: { value: "Daily" } });
+    await act(() => fireEvent.click(callCreationButtonElement));
+
+    expect(firestoreSignaling.getIceServersConfig).toBeCalledTimes(1);
   });
 
   it("can not create call if has no device", async () => {

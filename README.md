@@ -139,7 +139,8 @@ free ICE servers, it's recommendeded to contract STUN/TURN from paid
 service providers, even if it's in their free trial plan.
 
 Currently, this project supports integration with [Xirsys](https://xirsys.com/)
-because it has a free plan available to anyone. And all the work of retrieving the credentials are implemented in the cloud functions.
+because it has a free plan available to anyone. And all the work of retrieving
+the credentials are implemented in the cloud functions.
 
 For manual deployments, put your Xirsys credentials in a `functions/.env` file.
 You can also generate it from the template (note that
