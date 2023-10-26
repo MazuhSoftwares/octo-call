@@ -8,8 +8,10 @@ import {
   signInWithRedirect,
   signOut,
 } from "firebase/auth";
-import { googleAuthProvider } from "./firestore-connection";
+import { v4 as uuidv4 } from "uuid";
+import { db, googleAuthProvider } from "./firestore-connection";
 import type { User } from "../webrtc";
+import { doc, setDoc } from "firebase/firestore";
 
 const firestoreAuth = {
   loadUser,
@@ -24,7 +26,12 @@ async function loadUser(): Promise<User> {
   return new Promise((resolve, reject) => {
     const handleResult = (user: FirebaseUser | null) => {
       if (!user) {
-        const empty: User = { uid: "", displayName: "", email: "" };
+        const empty: User = {
+          uid: "",
+          displayName: "",
+          email: "",
+          deviceUuid: "",
+        };
         resolve(empty);
         return;
       }
@@ -34,10 +41,17 @@ async function loadUser(): Promise<User> {
         return;
       }
 
+      const deviceUuid = uuidv4();
+      // Create or update the user session in collection "session"
+      setDoc(doc(db, `session/${user.uid}`), {
+        deviceUuid,
+      });
+
       resolve({
         uid: user.uid,
         displayName: user.displayName ?? user.email,
         email: user.email,
+        deviceUuid,
       });
     };
 

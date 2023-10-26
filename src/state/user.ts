@@ -17,6 +17,7 @@ export const userInitialState: UserState = {
   displayName: "",
   email: "",
   status: "idle",
+  deviceUuid: "",
   errorMessage: "",
 };
 
@@ -30,6 +31,7 @@ export const userSlice = createSlice({
       state.displayName = "";
       state.email = "";
       state.status = "pending";
+      state.deviceUuid = "";
       state.errorMessage = "";
     });
 
@@ -38,7 +40,8 @@ export const userSlice = createSlice({
       state.displayName = action.payload.displayName || "";
       state.email = action.payload.email || "";
       state.status = action.payload.uid ? "authenticated" : "idle";
-      state.errorMessage = "";
+      state.deviceUuid = action.payload.deviceUuid;
+      state.errorMessage = state.errorMessage = "";
     });
 
     builder.addCase(login.rejected, (state, action) => {
@@ -46,6 +49,7 @@ export const userSlice = createSlice({
       state.displayName = "";
       state.email = "";
       state.status = "error";
+      state.deviceUuid = "";
       state.errorMessage = action.error.message || "Unknown error.";
     });
 
