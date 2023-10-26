@@ -91,6 +91,7 @@ export const selectUserDisplayName = (state: RootState) =>
   state.user.displayName;
 
 export const selectUserUid = (state: RootState) => state.user.uid;
+export const selectUserDeviceUuid = (state: RootState) => state.user.deviceUuid;
 
 export const selectIsUserPendingAuthentication = (state: RootState) =>
   state.user.status === "pending";

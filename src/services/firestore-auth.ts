@@ -11,12 +11,21 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { db, googleAuthProvider } from "./firestore-connection";
 import type { User } from "../webrtc";
-import { doc, setDoc } from "firebase/firestore";
+import {
+  DocumentData,
+  Unsubscribe,
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  setDoc,
+} from "firebase/firestore";
 
 const firestoreAuth = {
   loadUser,
   login,
   logout,
+  listenUserSession,
 };
 
 export default firestoreAuth;
@@ -80,4 +89,26 @@ async function login(): Promise<void> {
 /** Clears the authentication data. */
 async function logout() {
   signOut(getAuth());
+}
+
+interface SessionResult {
+  userUid: string;
+  deviceUuid: string;
+}
+
+function listenUserSession(
+  userUid: string,
+  callback: (result?: Omit<SessionResult, "userUid">) => void
+): Unsubscribe {
+  return onSnapshot(query(collection(db, `session`)), (querySnapshot) => {
+    const sessions: SessionResult[] = [];
+
+    querySnapshot.forEach((doc: DocumentData) => {
+      sessions.push({ ...doc.data(), userUid: doc.id } as SessionResult);
+    });
+
+    const session = sessions.find((s) => s.userUid === userUid);
+
+    callback({ deviceUuid: session?.deviceUuid || "" });
+  });
 }

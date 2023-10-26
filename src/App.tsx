@@ -10,8 +10,10 @@ import P2PCallMain from "./features/p2p-call/P2PCallMain";
 import CallCreationMain from "./features/call-selection/CallCreationMain";
 import CallJoinMain from "./features/call-selection/CallJoinMain";
 import PendingUserMain from "./features/call-selection/PendingUserMain";
+import useValidateSession from "./hooks/useValidateSession";
 
 export default function App() {
+  useValidateSession();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
