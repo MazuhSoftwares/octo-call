@@ -47,6 +47,7 @@ describe("ICE trickling", () => {
 
     mockConnection = {
       addIceCandidate: jest.fn(),
+      setConfiguration: jest.fn(),
     } as unknown as RTCPeerConnection;
 
     mockP2PCall = {
@@ -141,6 +142,7 @@ describe("JSEP flow", () => {
         type: "answer",
         sdp: "mock SDP",
       }),
+      setConfiguration: jest.fn(),
       setLocalDescription: jest.fn(),
       setRemoteDescription: jest.fn(),
     } as unknown as RTCPeerConnection;
@@ -248,6 +250,7 @@ describe("Media gathering for RTC connection", () => {
     mockConnection = {
       addTrack: jest.fn(),
       createOffer: jest.fn(),
+      setConfiguration: jest.fn(),
       setLocalDescription: jest.fn(),
       close: jest.fn(),
     } as unknown as RTCPeerConnection;
@@ -382,6 +385,7 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
         type: "answer",
         sdp: "mock SDP",
       }),
+      setConfiguration: jest.fn(),
       setLocalDescription: jest.fn(),
       setRemoteDescription: jest.fn(),
       addEventListener: jest.fn(),
@@ -402,6 +406,42 @@ describe("P2PCallConnection, its creator, start, stop and a few callbacks", () =
     expect((p2pCall as P2PCallConnectionDetailed)._connection).toBe(
       mockConnection
     );
+  });
+
+  test("will set ice servers configuration (when provided) to the RTC connection", () => {
+    (mockConnection.setConfiguration as jest.Mock).mockClear();
+
+    const iceServersConfig = {
+      username: "dovahkiin",
+      credential: "fus-ro-dah",
+      urls: [
+        "stun:foo.bar",
+        "turn:foo.bar:80?transport=udp",
+        "turn:foo.bar:3478?transport=udp",
+        "turn:foo.bar:80?transport=tcp",
+        "turn:foo.bar:3478?transport=tcp",
+        "turns:foo.bar:443?transport=tcp",
+        "turns:foo.bar:5349?transport=tcp",
+      ],
+    };
+
+    makeP2PCallConnection({ ...mockOptions, iceServersConfig });
+
+    expect(mockConnection.setConfiguration).toBeCalledTimes(1);
+    expect(mockConnection.setConfiguration).toBeCalledWith({
+      iceServers: [iceServersConfig],
+    });
+  });
+
+  test("will not set any default ice servers configuration (when not provided) to the RTC connection", () => {
+    (mockConnection.setConfiguration as jest.Mock).mockClear();
+
+    makeP2PCallConnection(mockOptions);
+
+    expect(mockConnection.setConfiguration).toBeCalledTimes(1);
+    expect(mockConnection.setConfiguration).toBeCalledWith({
+      iceServers: [],
+    });
   });
 
   test("starting as newer peer who begins by offer, indeed do the offer", async () => {

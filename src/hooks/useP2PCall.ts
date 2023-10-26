@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "../state";
 import { selectUserAudioId, selectUserVideoId } from "../state/devices";
 import {
   patchP2PDescription,
+  selectIceServersConfig,
   selectP2PDescriptionByUidFn,
 } from "../state/call";
 
@@ -21,6 +22,8 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
   const description = useAppSelector(
     selectP2PDescriptionByUidFn(options.p2pDescriptionUid)
   );
+
+  const iceServersConfig = useAppSelector(selectIceServersConfig);
 
   if (!description) {
     throw new Error(
@@ -42,6 +45,7 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
         audio,
         video,
         isLocalPeerTheOfferingNewer,
+        iceServersConfig,
         outgoingSignaling: {
           onLocalJsepAction: async (localJsep) => {
             if (isLocalPeerTheOfferingNewer) {
@@ -117,6 +121,7 @@ export default function useP2PCall(options: P2PCallHookOptions): void {
     p2pDescriptionUid,
     audio,
     video,
+    iceServersConfig,
     isLocalPeerTheOfferingNewer,
     localVideo,
     remoteVideo,

@@ -32,3 +32,4 @@ coverage/
 .env.development
 .env.development.local
 .env.production
+functions/.env

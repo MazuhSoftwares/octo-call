@@ -26,6 +26,7 @@ export interface CallState extends Call {
   pendingUsers: CallUser[];
   p2pDescriptions: CallP2PDescription[];
   errorMessage: string;
+  iceServersConfig?: RTCIceServer;
 }
 
 export const callInitialState: CallState = {
@@ -52,6 +53,9 @@ export const callSlice = createSlice({
       action: PayloadAction<CallP2PDescription[]>
     ) => {
       state.p2pDescriptions = action.payload;
+    },
+    setIceServersConfig: (state, action: PayloadAction<RTCIceServer>) => {
+      state.iceServersConfig = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -165,7 +169,13 @@ export const patchP2PDescription = createAsyncThunk(
 export const createCall = createAsyncThunk(
   "create-call",
   async ({ displayName }: Pick<Call, "displayName">, thunkAPI) => {
-    const user = (thunkAPI.getState() as RootState).user;
+    const { user, call } = thunkAPI.getState() as RootState;
+
+    if (!call.iceServersConfig) {
+      console.log("Retrieving ICE servers.");
+      const retrieved = await firestoreSignaling.getIceServersConfig();
+      thunkAPI.dispatch(callSlice.actions.setIceServersConfig(retrieved));
+    }
 
     return firestoreSignaling.createCall({
       displayName,
@@ -214,6 +224,11 @@ export const setCallUsers = createAsyncThunk(
       (u) => u.uid === user.uid
     );
     if (call.userStatus === "pending-user" && isAmongParticipants) {
+      if (!call.iceServersConfig) {
+        const retrieved = await firestoreSignaling.getIceServersConfig();
+        thunkApi.dispatch(callSlice.actions.setIceServersConfig(retrieved));
+      }
+
       await firestoreSignaling.joinAsNewerParticipation({
         callUid: call.uid,
         userUid: user.uid,
@@ -295,5 +310,8 @@ export const selectP2PDescriptionUidByRemoteUidFn =
 export const selectP2PDescriptionByUidFn =
   (descriptionUid: string) => (state: RootState) =>
     state.call.p2pDescriptions.find((it) => it.uid === descriptionUid);
+
+export const selectIceServersConfig = (state: RootState) =>
+  state.call.iceServersConfig;
 
 export default callSlice.reducer;
