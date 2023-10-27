@@ -8,7 +8,6 @@ export default function BlockedSession() {
   const goTo = useRedirectionRule();
 
   if (goTo) {
-    console.log("goTo", goTo);
     return <Redirect to={goTo} />;
   }
 

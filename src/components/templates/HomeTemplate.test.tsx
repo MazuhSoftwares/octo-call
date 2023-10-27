@@ -161,4 +161,25 @@ describe("HomeTemplate", () => {
       )
     ).toBe(null);
   });
+
+  it("does not show logout and settings buttons when user session is blocked", () => {
+    fullRender(
+      <HomeTemplate>
+        <p>Hello World!</p>
+      </HomeTemplate>,
+      {
+        preloadedState: {
+          user: {
+            ...userInitialState,
+            uid: "123",
+            status: "authenticated",
+            isSessionBlocked: true,
+          },
+        },
+      }
+    );
+
+    expect(screen.queryByLabelText("Logout")).toBe(null);
+    expect(screen.queryByLabelText("Settings")).toBe(null);
+  });
 });
