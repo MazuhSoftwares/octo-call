@@ -271,4 +271,4 @@ function P2PMirrorCallSlot({
   );
 }
 
-const MAX_PARTICIPANTS = 2;
+const MAX_PARTICIPANTS = 5;
