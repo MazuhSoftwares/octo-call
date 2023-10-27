@@ -54,8 +54,6 @@ export function getRedirectionRule(
     if (!isSessionBlocked) {
       return "/";
     }
-
-    return "";
   }
 
   if (path === "/") {

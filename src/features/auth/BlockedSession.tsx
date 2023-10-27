@@ -14,7 +14,7 @@ export default function BlockedSession() {
   return (
     <HomeTemplate>
       <Box component="span" pr={1}>
-        <ErrorAlert message="Account in use in another device." />
+        <ErrorAlert message="Account in use in another device. Reload to restore this session." />
       </Box>
     </HomeTemplate>
   );
