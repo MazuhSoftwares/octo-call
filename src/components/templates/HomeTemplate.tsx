@@ -12,7 +12,11 @@ import mainCharWhiteOutlineImg from "../../assets/main-char-white-outline.png";
 import mainCharPinkOutlineImg from "../../assets/main-char-pink-outline.png";
 import { useAppDispatch, useAppSelector } from "../../state";
 import useAgentHelper from "../../hooks/useAgentHelper";
-import { logout, selectIsUserAuthenticated } from "../../state/user";
+import {
+  logout,
+  selectIsSessionBlocked,
+  selectIsUserAuthenticated,
+} from "../../state/user";
 import SettingsModal from "../settings/SettingsModal";
 import ErrorAlert from "../basic/ErrorAlert";
 import WarningAlert from "../basic/WarningAlert";
@@ -32,6 +36,7 @@ export default function HomeTemplate({
   const handleLogoutClick = () => dispatch(logout());
 
   const isAuthenticated = useAppSelector(selectIsUserAuthenticated);
+  const isSessionBlocked = useAppSelector(selectIsSessionBlocked);
 
   const { canRunWebRTC, isChromeBased, isFirefoxBased } = useAgentHelper();
 
@@ -92,7 +97,7 @@ export default function HomeTemplate({
               pb: 1,
             }}
           >
-            {isAuthenticated && (
+            {isAuthenticated && !isSessionBlocked && (
               <IconButton
                 aria-label="Logout"
                 title="Logout"
@@ -103,13 +108,15 @@ export default function HomeTemplate({
                 <LogoutIcon />
               </IconButton>
             )}
-            <IconButton
-              aria-label="Settings"
-              title="Settings"
-              onClick={openSettings}
-            >
-              <SettingsIcon />
-            </IconButton>
+            {!isSessionBlocked && (
+              <IconButton
+                aria-label="Settings"
+                title="Settings"
+                onClick={openSettings}
+              >
+                <SettingsIcon />
+              </IconButton>
+            )}
           </Box>
         </Box>
         {!canRunWebRTC() && (

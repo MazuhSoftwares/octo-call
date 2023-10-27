@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../state";
 import {
-  expireSession,
   selectUserDeviceUuid,
   selectUserUid,
+  setSessionActive,
+  setSessionBlocked,
 } from "../state/user";
 import firestoreAuth from "../services/firestore-auth";
 
@@ -24,10 +25,11 @@ export default function useValidateSession() {
       }
 
       if (session.deviceUuid === userDeviceUuid) {
+        dispatch(setSessionActive());
         return;
       }
 
-      dispatch(expireSession());
+      dispatch(setSessionBlocked());
     });
   }, [dispatch, userDeviceUuid, userUid]);
 }

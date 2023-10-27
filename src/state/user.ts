@@ -10,7 +10,7 @@ type UserStatus = "idle" | "pending" | "authenticated" | "error";
 export interface UserState extends User {
   status: UserStatus;
   errorMessage: string;
-  expiredSessionMessage?: string;
+  isSessionBlocked: boolean;
 }
 
 export const userInitialState: UserState = {
@@ -20,12 +20,20 @@ export const userInitialState: UserState = {
   status: "idle",
   deviceUuid: "",
   errorMessage: "",
+  isSessionBlocked: false,
 };
 
 export const userSlice = createSlice({
   name: "user",
   initialState: userInitialState,
-  reducers: {},
+  reducers: {
+    setSessionBlocked: (state) => {
+      state.isSessionBlocked = true;
+    },
+    setSessionActive: (state) => {
+      state.isSessionBlocked = false;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(login.pending, (state) => {
       state.uid = "";
@@ -55,17 +63,6 @@ export const userSlice = createSlice({
     });
 
     builder.addCase(logout.fulfilled, () => userInitialState);
-
-    builder.addCase(expireSession.fulfilled, (state) => {
-      state.uid = "";
-      state.displayName = "";
-      state.email = "";
-      state.status = "idle";
-      state.deviceUuid = "";
-      state.errorMessage = "";
-      state.expiredSessionMessage =
-        "Session expired. Account in use in another device.";
-    });
   },
 });
 
@@ -99,18 +96,6 @@ export const logout = createAsyncThunk(
   }
 );
 
-export const expireSession = createAsyncThunk(
-  "expire-session",
-  (_, thunkApi) => {
-    firestoreAuth.logout();
-    thunkApi.dispatch(leaveCall());
-  },
-  {
-    condition: (_arg, thunkAPI) =>
-      (thunkAPI.getState() as RootState).user.status === "authenticated",
-  }
-);
-
 export const selectUserDisplayName = (state: RootState) =>
   state.user.displayName;
 
@@ -122,7 +107,9 @@ export const selectIsUserPendingAuthentication = (state: RootState) =>
 export const selectIsUserAuthenticated = (state: RootState) =>
   Boolean(state.user.status === "authenticated" && state.user.uid);
 
-export const selectExpiredSessionMessage = (state: RootState) =>
-  state.user.expiredSessionMessage;
+export const selectIsSessionBlocked = (state: RootState) =>
+  state.user.isSessionBlocked;
+
+export const { setSessionBlocked, setSessionActive } = userSlice.actions;
 
 export default userSlice.reducer;

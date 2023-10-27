@@ -11,6 +11,7 @@ import CallCreationMain from "./features/call-selection/CallCreationMain";
 import CallJoinMain from "./features/call-selection/CallJoinMain";
 import PendingUserMain from "./features/call-selection/PendingUserMain";
 import useValidateSession from "./hooks/useValidateSession";
+import BlockedSession from "./features/auth/BlockedSession";
 
 export default function App() {
   useValidateSession();
@@ -31,6 +32,7 @@ export default function App() {
           <Route path="/join" component={CallJoinMain} />
           <Route path="/left" component={() => <p>Left.</p>} />
           <Route path="/p2p-call/:callUid" component={P2PCallMain} />
+          <Route path="/blocked-session" component={BlockedSession} />
           <Route>
             <Redirect to="/" />
           </Route>
