@@ -2,18 +2,24 @@ import { getRedirectionRule } from "./useRedirectionRule";
 
 describe("getRedirectionRule: / (auth)", () => {
   it("when authenticated, go to creation", () => {
-    const result = getRedirectionRule({ path: "/", hasAuth: true }, {});
+    const result = getRedirectionRule(
+      { path: "/", hasAuth: true, isSessionBlocked: false },
+      {}
+    );
     expect(result).toBe("/create");
   });
 
   it("when not authenticated, stay here for auth", () => {
-    const result = getRedirectionRule({ path: "/", hasAuth: false }, {});
+    const result = getRedirectionRule(
+      { path: "/", hasAuth: false, isSessionBlocked: false },
+      {}
+    );
     expect(result).toBe("");
   });
 
   it("when autenticated and provided joining uid, then go to join page proceed to device testing", () => {
     const result = getRedirectionRule(
-      { path: "/", hasAuth: true },
+      { path: "/", hasAuth: true, isSessionBlocked: false },
       { joining: "123-321" }
     );
     expect(result).toBe("/join?callUid=123-321");
@@ -21,7 +27,7 @@ describe("getRedirectionRule: / (auth)", () => {
 
   it("when autenticated and provided creating display name, then go to create page proceed to device testing", () => {
     const result = getRedirectionRule(
-      { path: "/", hasAuth: true },
+      { path: "/", hasAuth: true, isSessionBlocked: false },
       { creating: "Daily" }
     );
     expect(result).toBe("/create?callDisplayName=Daily"); // TODO: names with special characters?
@@ -56,6 +62,19 @@ describe("getRedirectionRule: /create", () => {
       {}
     );
     expect(result).toBe("/p2p-call/123-321");
+  });
+
+  it("when session is blocked, got to blocked session page", () => {
+    const result = getRedirectionRule(
+      {
+        path: "/create",
+        hasAuth: true,
+        ongoingCall: "123-321",
+        isSessionBlocked: true,
+      },
+      {}
+    );
+    expect(result).toBe("/blocked-session");
   });
 });
 
@@ -104,6 +123,19 @@ describe("getRedirectionRule: /join", () => {
     );
     expect(result).toBe("/pending");
   });
+
+  it("when session is blocked, got to blocked session page", () => {
+    const result = getRedirectionRule(
+      {
+        path: "/join",
+        hasAuth: true,
+        pendingCall: "123-call-321",
+        isSessionBlocked: true,
+      },
+      {}
+    );
+    expect(result).toBe("/blocked-session");
+  });
 });
 
 describe("getRedirectionRule: /join", () => {
@@ -148,6 +180,14 @@ describe("getRedirectionRule: /join", () => {
     );
     expect(result).toBe("/");
   });
+
+  it("when session is blocked, got to blocked session page", () => {
+    const result = getRedirectionRule(
+      { path: "/pending", hasAuth: true, isSessionBlocked: true },
+      {}
+    );
+    expect(result).toBe("/blocked-session");
+  });
 });
 
 describe("getRedirectionRule: /p2p-call", () => {
@@ -180,5 +220,13 @@ describe("getRedirectionRule: /p2p-call", () => {
       {}
     );
     expect(result).toBe("/");
+  });
+
+  it("when session is blocked, got to blocked session page", () => {
+    const result = getRedirectionRule(
+      { path: "/p2p-call/123-321", hasAuth: false, isSessionBlocked: true },
+      {}
+    );
+    expect(result).toBe("/blocked-session");
   });
 });
