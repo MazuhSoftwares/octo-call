@@ -48,7 +48,7 @@ export const Video = forwardRef<HTMLVideoElement | null, VideoProps>(
               height: {
                 xs: "120px",
                 md: "230px",
-                xl: "350px",
+                xl: "315px",
               },
               objectFit: "scale-down",
             }}
