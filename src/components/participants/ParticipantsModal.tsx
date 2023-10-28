@@ -103,7 +103,7 @@ export default function ParticipantsModal({
 }
 
 function CallLink() {
-  const link = window.location.href;
+  const link = `${window.location.origin}${window.location.pathname}`;
 
   const handleCopyClick = async () => {
     await navigator.clipboard.writeText(link);
