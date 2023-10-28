@@ -93,9 +93,18 @@ export function getRedirectionRule(
   }
 
   if (path.startsWith("/p2p-call")) {
+    const callUuid = path.replace("/p2p-call/", "");
+    if (hasAuth && !ongoingCall && callUuid) {
+      return `/join?callUid=${callUuid}`;
+    }
+
     if (hasAuth && !ongoingCall) {
       return "/create";
       // return "/left";
+    }
+
+    if (!hasAuth && callUuid) {
+      return `/join?callUid=${callUuid}`;
     }
 
     if (!hasAuth) {

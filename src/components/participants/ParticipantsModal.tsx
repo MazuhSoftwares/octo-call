@@ -18,7 +18,7 @@ import {
   selectPendingUsers,
 } from "../../state/call";
 import DialogModal from "../basic/DialogModal";
-import { selectCallHostId, selectCallUid } from "../../state/call";
+import { selectCallHostId } from "../../state/call";
 import { selectUserUid } from "../../state/user";
 
 export interface ParticipantsModalProps {
@@ -103,8 +103,7 @@ export default function ParticipantsModal({
 }
 
 function CallLink() {
-  const callUid = useAppSelector(selectCallUid);
-  const link = `${window.location.origin}/join?callUid=${callUid}`;
+  const link = window.location.href;
 
   const handleCopyClick = async () => {
     await navigator.clipboard.writeText(link);
