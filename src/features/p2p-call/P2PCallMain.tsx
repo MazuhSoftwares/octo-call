@@ -82,8 +82,11 @@ export default function P2PCallMain() {
 
   const getSlotStyles = useCallback((): BoxProps["sx"] => {
     return {
-      flexBasis: "35%",
-      margin: 1,
+      flexBasis: "30%",
+      margin: {
+        xs: 0,
+        md: 1,
+      },
       width: "100%",
     };
   }, []);
@@ -124,6 +127,10 @@ export default function P2PCallMain() {
           display: {
             xs: "grid",
             md: "flex",
+          },
+          flexWrap: {
+            xs: "unset",
+            md: "wrap",
           },
           gridTemplateColumns: landscape ? "repeat(5, auto)" : "auto auto",
           gap: 1,

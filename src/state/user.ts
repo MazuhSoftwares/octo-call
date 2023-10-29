@@ -10,6 +10,7 @@ type UserStatus = "idle" | "pending" | "authenticated" | "error";
 export interface UserState extends User {
   status: UserStatus;
   errorMessage: string;
+  isSessionBlocked: boolean;
 }
 
 export const userInitialState: UserState = {
@@ -17,19 +18,29 @@ export const userInitialState: UserState = {
   displayName: "",
   email: "",
   status: "idle",
+  deviceUuid: "",
   errorMessage: "",
+  isSessionBlocked: false,
 };
 
 export const userSlice = createSlice({
   name: "user",
   initialState: userInitialState,
-  reducers: {},
+  reducers: {
+    setSessionBlocked: (state) => {
+      state.isSessionBlocked = true;
+    },
+    setSessionActive: (state) => {
+      state.isSessionBlocked = false;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(login.pending, (state) => {
       state.uid = "";
       state.displayName = "";
       state.email = "";
       state.status = "pending";
+      state.deviceUuid = "";
       state.errorMessage = "";
     });
 
@@ -38,7 +49,8 @@ export const userSlice = createSlice({
       state.displayName = action.payload.displayName || "";
       state.email = action.payload.email || "";
       state.status = action.payload.uid ? "authenticated" : "idle";
-      state.errorMessage = "";
+      state.deviceUuid = action.payload.deviceUuid;
+      state.errorMessage = state.errorMessage = "";
     });
 
     builder.addCase(login.rejected, (state, action) => {
@@ -46,6 +58,7 @@ export const userSlice = createSlice({
       state.displayName = "";
       state.email = "";
       state.status = "error";
+      state.deviceUuid = "";
       state.errorMessage = action.error.message || "Unknown error.";
     });
 
@@ -87,10 +100,16 @@ export const selectUserDisplayName = (state: RootState) =>
   state.user.displayName;
 
 export const selectUserUid = (state: RootState) => state.user.uid;
+export const selectUserDeviceUuid = (state: RootState) => state.user.deviceUuid;
 
 export const selectIsUserPendingAuthentication = (state: RootState) =>
   state.user.status === "pending";
 export const selectIsUserAuthenticated = (state: RootState) =>
   Boolean(state.user.status === "authenticated" && state.user.uid);
+
+export const selectIsSessionBlocked = (state: RootState) =>
+  state.user.isSessionBlocked;
+
+export const { setSessionBlocked, setSessionActive } = userSlice.actions;
 
 export default userSlice.reducer;

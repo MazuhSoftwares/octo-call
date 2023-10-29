@@ -6,6 +6,7 @@ export function createUser(overrideValues: Partial<User> = {}): User {
     uid: uuidv4(),
     displayName: getRandomString(),
     email: getRandomEmail(),
+    deviceUuid: uuidv4(),
   };
 
   return { ...defaultValues, ...overrideValues };

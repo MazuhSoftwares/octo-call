@@ -8,13 +8,24 @@ import {
   signInWithRedirect,
   signOut,
 } from "firebase/auth";
-import { googleAuthProvider } from "./firestore-connection";
+import { v4 as uuidv4 } from "uuid";
+import { db, googleAuthProvider } from "./firestore-connection";
 import type { User } from "../webrtc";
+import {
+  DocumentData,
+  Unsubscribe,
+  collection,
+  doc,
+  onSnapshot,
+  query,
+  setDoc,
+} from "firebase/firestore";
 
 const firestoreAuth = {
   loadUser,
   login,
   logout,
+  listenUserSession,
 };
 
 export default firestoreAuth;
@@ -24,7 +35,12 @@ async function loadUser(): Promise<User> {
   return new Promise((resolve, reject) => {
     const handleResult = (user: FirebaseUser | null) => {
       if (!user) {
-        const empty: User = { uid: "", displayName: "", email: "" };
+        const empty: User = {
+          uid: "",
+          displayName: "",
+          email: "",
+          deviceUuid: "",
+        };
         resolve(empty);
         return;
       }
@@ -34,10 +50,17 @@ async function loadUser(): Promise<User> {
         return;
       }
 
+      const deviceUuid = uuidv4();
+      // Create or update the user session in collection "session"
+      setDoc(doc(db, `session/${user.uid}`), {
+        deviceUuid,
+      });
+
       resolve({
         uid: user.uid,
         displayName: user.displayName ?? user.email,
         email: user.email,
+        deviceUuid,
       });
     };
 
@@ -66,4 +89,26 @@ async function login(): Promise<void> {
 /** Clears the authentication data. */
 async function logout() {
   signOut(getAuth());
+}
+
+interface SessionResult {
+  userUid: string;
+  deviceUuid: string;
+}
+
+function listenUserSession(
+  userUid: string,
+  callback: (result?: Omit<SessionResult, "userUid">) => void
+): Unsubscribe {
+  return onSnapshot(query(collection(db, `session`)), (querySnapshot) => {
+    const sessions: SessionResult[] = [];
+
+    querySnapshot.forEach((doc: DocumentData) => {
+      sessions.push({ ...doc.data(), userUid: doc.id } as SessionResult);
+    });
+
+    const session = sessions.find((s) => s.userUid === userUid);
+
+    callback({ deviceUuid: session?.deviceUuid || "" });
+  });
 }
