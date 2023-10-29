@@ -2,6 +2,7 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import GoogleIcon from "@mui/icons-material/Google";
+import pkg from "../../../package.json";
 import HomeTemplate from "../../components/templates/HomeTemplate";
 import { useAppDispatch, useAppSelector } from "../../state";
 import { login, selectIsUserPendingAuthentication } from "../../state/user";
@@ -24,7 +25,7 @@ export default function AuthMain() {
         <Box component="span" pr={1}>
           Video conference app.
         </Box>
-        <Box component="span">A proof of concept.</Box>
+        <Box component="span">A proof of concept. (v{pkg.version})</Box>
       </Typography>
       <Button
         onClick={handleLoginClick}
