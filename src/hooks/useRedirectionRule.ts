@@ -35,7 +35,7 @@ export default function useRedirectionRule(): string {
 export interface RedirectionContext {
   path: string;
   hasAuth: boolean;
-  isSessionBlocked: boolean;
+  isSessionBlocked?: boolean;
   pendingCall?: string;
   ongoingCall?: string;
 }
