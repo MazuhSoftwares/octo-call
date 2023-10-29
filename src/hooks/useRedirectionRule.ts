@@ -35,7 +35,7 @@ export default function useRedirectionRule(): string {
 export interface RedirectionContext {
   path: string;
   hasAuth: boolean;
-  isSessionBlocked: boolean;
+  isSessionBlocked?: boolean;
   pendingCall?: string;
   ongoingCall?: string;
 }
@@ -127,6 +127,8 @@ export function getRedirectionRule(
   }
 
   if (path.startsWith("/p2p-call")) {
+    const callUuid = path.replace("/p2p-call/", "");
+
     if (isSessionBlocked) {
       return "/blocked-session";
     }
@@ -134,6 +136,10 @@ export function getRedirectionRule(
     if (hasAuth && !ongoingCall) {
       return "/create";
       // return "/left";
+    }
+
+    if (!hasAuth && callUuid) {
+      return `/join?callUid=${callUuid}`;
     }
 
     if (!hasAuth) {

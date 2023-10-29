@@ -38,7 +38,7 @@ describe("ParticipantsModal", () => {
       preloadedState: { call },
     });
     expect(
-      screen.getByText(window.location.href + "join?callUid=" + call.uid)
+      screen.getByText(`${window.location.origin}${window.location.pathname}`)
     ).toBeVisible();
   });
 
@@ -51,7 +51,7 @@ describe("ParticipantsModal", () => {
     await act(() => fireEvent.click(copyButton));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
-      window.location.href + "join?callUid=" + call.uid
+      `${window.location.origin}${window.location.pathname}`
     );
 
     const successSnackbar = await waitFor(() => screen.getByRole("alert"));
