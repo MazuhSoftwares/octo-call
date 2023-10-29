@@ -27,6 +27,28 @@
         "source": "**",
         "destination": "/index.html"
       }
+    ],
+    "redirects": [
+      {
+        "source": "https://octo-call-c277f.web.app",
+        "destination": "https://octocall.net",
+        "type": 301
+      },
+      {
+        "source": "https://octo-call-c277f.firebaseapp.com",
+        "destination": "https://octocall.net",
+        "type": 301
+      },
+      {
+        "source": "https://octo-call-c277f.web.app/:path*",
+        "destination": "https://octocall.net",
+        "type": 301
+      },
+      {
+        "source": "https://octo-call-c277f.firebaseapp.com/:path*",
+        "destination": "https://octocall.net",
+        "type": 301
+      }
     ]
   }
 }
