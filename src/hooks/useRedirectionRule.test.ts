@@ -130,10 +130,18 @@ describe("getRedirectionRule: /p2p-call", () => {
     expect(result).toBe("/create");
   });
 
-  it("when not authenticated, be forced to reset flow", () => {
+  it("when not authenticated and the url has call uuid, then go to join page", () => {
     // TODO: retrieve attempt call uid and convert into "/?joining=" flow
     const result = getRedirectionRule(
       { path: "/p2p-call/123-321", hasAuth: false },
+      {}
+    );
+    expect(result).toBe("/join?callUid=123-321");
+  });
+
+  it("when not authenticated and the url has not call uuid, be forced to reset flow", () => {
+    const result = getRedirectionRule(
+      { path: "/p2p-call/", hasAuth: false },
       {}
     );
     expect(result).toBe("/");
