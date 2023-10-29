@@ -21,6 +21,7 @@ export default {
 export interface User extends UniqueEntity {
   displayName: string;
   email: string;
+  deviceUuid: string;
 }
 
 export interface Call extends UniqueEntity {
