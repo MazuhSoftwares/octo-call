@@ -160,6 +160,26 @@ The cloud function doing it is very simple and short, and can be easily changed.
 Also, consider hosting the STUN/ICE in your own infrastructure
 using the free source [coTURN](https://github.com/coturn/coturn) project.
 
+### A few reverse proxy considerations on authentication
+
+If you're using a custom domain, you might notice that the redirecion authentication
+will work for desktop but not for mobile. To fix it,
+open [Google Cloud Credentials](https://console.cloud.google.com/apis/credentials/)
+and add this new domain of yours to the client IDs settings.
+
+For example, considering the official domain of the project, there's an extra
+authorized JavaScript origin "https://octocall.net" and an extra authorized
+redirection URIs "https://octocall.net/__/auth/handler" there.
+
+You'll also need to change the `VITE_FIREBASE_AUTH_DOMAIN` variable to target
+the custom domain.
+
+Also, you might want to edit [firebase.json](firebase.json) to reflect
+redirections from default Firebase origins to the custom.
+
+All of this is somewhat explained in
+[the docs about redirect auth](https://firebase.google.com/docs/auth/web/redirect-best-practices).
+
 ## More non-functional requirements
 
 ### Technology stack
@@ -235,24 +255,30 @@ A reasonable code coverage is required to keep it all together. Because
 there's a fairly complex client side code here, considering the
 serverless (cloud) nature of the architecture.
 
-### Browsers support
+### Client side portability
 
-Supported mobile devices:
+Supported mobile devices, anything in long term support:
 
 - iOS.
 - Android.
 
-And their browsers:
+And their browsers, only up-to-date versions:
 
 - Chrome.
 - Firefox.
 - Safari.
 
-Only up-to-date versions.
+Supported viewports:
 
-Supported resolutions:
+- 390x844 (mobile)
+- 768x1024 (tablet)
+- 1280x720 (laptop)
+- 1920x1080 (desktop)
 
-- ?
+All resolutions are expected to work in both landscape and portrait orientations.
+
+These lists above are more like a "checklist for Quality Assurance", but in reality
+anything similar to them should work.
 
 ## Functional requirements
 
