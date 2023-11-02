@@ -14,7 +14,7 @@ import {
 import type { DocumentData, Unsubscribe } from "firebase/firestore";
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { v4 as uuidv4 } from "uuid";
-import { db } from "./firestore-connection";
+import { db } from "./firestore-infra/firestore-connection";
 import type {
   Call,
   CallP2PDescription,

@@ -9,7 +9,7 @@ import {
   signOut,
 } from "firebase/auth";
 import { v4 as uuidv4 } from "uuid";
-import { db, googleAuthProvider } from "./firestore-connection";
+import { db, googleAuthProvider } from "./firestore-infra/firestore-connection";
 import type { User } from "../webrtc";
 import {
   DocumentData,
