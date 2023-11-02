@@ -60,6 +60,6 @@ export interface SignalingBackend {
   getIceServersConfig: () => Promise<RTCIceServer>;
 }
 
-const SignalingBackend: SignalingBackend = firestoreSignaling;
+const signalingBackend: SignalingBackend = firestoreSignaling;
 
-export default SignalingBackend;
+export default signalingBackend;

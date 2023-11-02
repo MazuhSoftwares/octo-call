@@ -6,7 +6,7 @@ import CallTemplate from "./CallTemplate";
 import { UserState, userInitialState } from "../../state/user";
 import { CallState, callInitialState } from "../../state/call";
 import { createCall, createUser } from "../../testing-helpers/call-fixtures";
-import firestoreSignaling from "../../services/firestore-signaling";
+import signalingBackend from "../../services/signaling-backend";
 
 jest.mock("../../hooks/useRedirectionRule", () =>
   jest.fn().mockReturnValue("")
@@ -14,7 +14,7 @@ jest.mock("../../hooks/useRedirectionRule", () =>
 
 jest.mock("../../hooks/useCallUsersListener", () => jest.fn());
 
-jest.mock("../../services/firestore-signaling", () => ({
+jest.mock("../../services/signaling-backend", () => ({
   leaveCall: jest.fn(),
 }));
 
@@ -35,8 +35,8 @@ describe("CallTemplate", () => {
   };
 
   beforeEach(() => {
-    (firestoreSignaling.acceptPendingUser as jest.Mock).mockClear();
-    (firestoreSignaling.rejectPendingUser as jest.Mock).mockClear();
+    (signalingBackend.acceptPendingUser as jest.Mock).mockClear();
+    (signalingBackend.rejectPendingUser as jest.Mock).mockClear();
   });
 
   it("renders", async () => {
@@ -102,7 +102,7 @@ describe("CallTemplate", () => {
   });
 
   it("leaves call", async () => {
-    firestoreSignaling.leaveCall = jest.fn().mockResolvedValueOnce(null);
+    signalingBackend.leaveCall = jest.fn().mockResolvedValueOnce(null);
     const { store } = await act(() =>
       fullRender(<CallTemplate>Call.</CallTemplate>, {
         preloadedState: { user, call },
@@ -115,7 +115,7 @@ describe("CallTemplate", () => {
   });
 
   it("leaves call even if signaling throws error", async () => {
-    firestoreSignaling.leaveCall = jest.fn().mockImplementationOnce(() => {
+    signalingBackend.leaveCall = jest.fn().mockImplementationOnce(() => {
       throw new Error();
     });
     const { store } = await act(() =>

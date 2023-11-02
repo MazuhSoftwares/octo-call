@@ -29,7 +29,7 @@ jest.mock("uuid", () => ({
   v4: jest.fn(),
 }));
 
-jest.mock("./firestore-infra/firestore-connection", () => ({
+jest.mock("./firestore-connection", () => ({
   db: jest.fn(),
 }));
 

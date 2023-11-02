@@ -28,7 +28,7 @@ jest.mock("../../webrtc", () => ({
   },
 }));
 
-jest.mock("../../services/firestore-signaling", () => ({
+jest.mock("../../services/signaling-backend", () => ({
   create: jest.fn(),
   createCall: jest.fn(),
   askToJoinCall: jest.fn(),

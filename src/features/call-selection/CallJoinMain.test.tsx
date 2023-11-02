@@ -3,7 +3,7 @@ import CallJoinMain from "./CallJoinMain";
 import { act, fireEvent, screen } from "@testing-library/react";
 import webrtc from "../../webrtc";
 import fullRender from "../../testing-helpers/fullRender";
-import firestoreSignaling from "../../services/firestore-signaling";
+import signalingBackend from "../../services/signaling-backend";
 import { userInitialState } from "../../state/user";
 import { devicesInitialState } from "../../state/devices";
 
@@ -19,8 +19,8 @@ jest.mock("../../webrtc", () => ({
 
 describe("CallJoinMain", () => {
   beforeEach(() => {
-    (firestoreSignaling.createCall as jest.Mock).mockClear();
-    (firestoreSignaling.askToJoinCall as jest.Mock).mockClear();
+    (signalingBackend.createCall as jest.Mock).mockClear();
+    (signalingBackend.askToJoinCall as jest.Mock).mockClear();
 
     (webrtc.retrieveMediaInputs as jest.Mock).mockResolvedValue([
       {
@@ -63,8 +63,8 @@ describe("CallJoinMain", () => {
     });
     await act(() => fireEvent.click(joinCallButtonElement));
 
-    expect(firestoreSignaling.askToJoinCall).toHaveBeenCalledTimes(1);
-    expect(firestoreSignaling.askToJoinCall).toHaveBeenCalledWith({
+    expect(signalingBackend.askToJoinCall).toHaveBeenCalledTimes(1);
+    expect(signalingBackend.askToJoinCall).toHaveBeenCalledWith({
       callUid: "b385c5fe-5da5-476d-b66f-a4580581be61",
       userUid: "1m2kkn3",
       userDisplayName: "John Doe",

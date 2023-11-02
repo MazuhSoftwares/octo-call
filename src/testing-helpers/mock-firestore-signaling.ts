@@ -1,4 +1,4 @@
-jest.mock("../services/firestore-signaling.ts", () => ({
+jest.mock("../services/signaling-backend.ts", () => ({
   create: jest.fn().mockResolvedValue({
     uid: "1a2b3c",
     displayName: "Daily",

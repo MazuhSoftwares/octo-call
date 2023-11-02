@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import firestoreSignaling from "../services/firestore-signaling";
+import signalingBackend from "../services/signaling-backend";
 import { useAppDispatch, useAppSelector } from "../state";
 import {
   selectCallUid,
@@ -25,7 +25,7 @@ export default function useCallUsersListener() {
       return () => null;
     }
 
-    return firestoreSignaling.listenCallUsers(callUid, (callUsersResult) =>
+    return signalingBackend.listenCallUsers(callUid, (callUsersResult) =>
       dispatch(setCallUsers(callUsersResult))
     );
   }, [dispatch, callUid]);
@@ -35,7 +35,7 @@ export default function useCallUsersListener() {
       return () => null;
     }
 
-    return firestoreSignaling.listenP22Descriptions(
+    return signalingBackend.listenP22Descriptions(
       { callUid, userUid, participantsUids },
       (p2pDescriptions) => dispatch(setP2PDescriptions(p2pDescriptions))
     );

@@ -3,7 +3,7 @@ import CallCreationMain from "./CallCreationMain";
 import { act, fireEvent, screen } from "@testing-library/react";
 import webrtc from "../../webrtc";
 import fullRender from "../../testing-helpers/fullRender";
-import firestoreSignaling from "../../services/firestore-signaling";
+import signalingBackend from "../../services/signaling-backend";
 import { userInitialState } from "../../state/user";
 import { devicesInitialState } from "../../state/devices";
 
@@ -19,9 +19,9 @@ jest.mock("../../webrtc", () => ({
 
 describe("CallCreationMain", () => {
   beforeEach(() => {
-    (firestoreSignaling.createCall as jest.Mock).mockClear();
-    (firestoreSignaling.askToJoinCall as jest.Mock).mockClear();
-    (firestoreSignaling.getIceServersConfig as jest.Mock).mockClear();
+    (signalingBackend.createCall as jest.Mock).mockClear();
+    (signalingBackend.askToJoinCall as jest.Mock).mockClear();
+    (signalingBackend.getIceServersConfig as jest.Mock).mockClear();
 
     (webrtc.retrieveMediaInputs as jest.Mock).mockResolvedValue([
       {
@@ -63,7 +63,7 @@ describe("CallCreationMain", () => {
     fireEvent.change(callNameInputElement, { target: { value: "Daily" } });
     await act(() => fireEvent.click(callCreationButtonElement));
 
-    expect(firestoreSignaling.createCall).toBeCalledTimes(1);
+    expect(signalingBackend.createCall).toBeCalledTimes(1);
   });
 
   it("call creation is integrated with firebase to also gather ice config", async () => {
@@ -93,7 +93,7 @@ describe("CallCreationMain", () => {
     fireEvent.change(callNameInputElement, { target: { value: "Daily" } });
     await act(() => fireEvent.click(callCreationButtonElement));
 
-    expect(firestoreSignaling.getIceServersConfig).toBeCalledTimes(1);
+    expect(signalingBackend.getIceServersConfig).toBeCalledTimes(1);
   });
 
   it("can not create call if has no device", async () => {

@@ -6,11 +6,11 @@ import type {
   CallParticipant,
   CallUser,
 } from "../webrtc";
-import firestoreSignaling, {
+import { RootState } from ".";
+import signalingBackend, {
   CallUserJoinIntent,
   CallUsersResult,
-} from "../services/firestore-signaling";
-import { RootState } from ".";
+} from "../services/signaling-backend";
 
 type HostCallStatus = "creating-and-joining" | "failed-as-host";
 type GuestCallStatus = "asking-to-join" | "pending-user" | "failed-as-guest";
@@ -162,7 +162,7 @@ export const patchP2PDescription = createAsyncThunk(
       },
     };
 
-    firestoreSignaling.updateParticipation(patchingParticipation);
+    signalingBackend.updateParticipation(patchingParticipation);
   }
 );
 
@@ -173,11 +173,11 @@ export const createCall = createAsyncThunk(
 
     if (!call.iceServersConfig) {
       console.log("Retrieving ICE servers.");
-      const retrieved = await firestoreSignaling.getIceServersConfig();
+      const retrieved = await signalingBackend.getIceServersConfig();
       thunkAPI.dispatch(callSlice.actions.setIceServersConfig(retrieved));
     }
 
-    return firestoreSignaling.createCall({
+    return signalingBackend.createCall({
       displayName,
       hostDisplayName: user.displayName,
       hostId: user.uid,
@@ -190,7 +190,7 @@ export const askToJoinCall = createAsyncThunk(
   ({ callUid }: Pick<CallUserJoinIntent, "callUid">, thunkApi) => {
     const { user } = thunkApi.getState() as RootState;
 
-    return firestoreSignaling.askToJoinCall({
+    return signalingBackend.askToJoinCall({
       callUid,
       userUid: user.uid,
       userDisplayName: user.displayName,
@@ -202,7 +202,7 @@ export const leaveCall = createAsyncThunk("leave-call", async (_, thunkApi) => {
   const { user, call } = thunkApi.getState() as RootState;
 
   try {
-    await firestoreSignaling.leaveCall({
+    await signalingBackend.leaveCall({
       // TODO: dont await?
       userUid: user.uid,
       callUid: call.uid,
@@ -225,11 +225,11 @@ export const setCallUsers = createAsyncThunk(
     );
     if (call.userStatus === "pending-user" && isAmongParticipants) {
       if (!call.iceServersConfig) {
-        const retrieved = await firestoreSignaling.getIceServersConfig();
+        const retrieved = await signalingBackend.getIceServersConfig();
         thunkApi.dispatch(callSlice.actions.setIceServersConfig(retrieved));
       }
 
-      await firestoreSignaling.joinAsNewerParticipation({
+      await signalingBackend.joinAsNewerParticipation({
         callUid: call.uid,
         userUid: user.uid,
         participantsUids: call.participants.map((p) => p.uid),
@@ -250,7 +250,7 @@ export const acceptPendingUser = createAsyncThunk(
   ({ userUid }: Pick<CallUserJoinIntent, "userUid">, thunkApi) => {
     const { call } = thunkApi.getState() as RootState;
 
-    return firestoreSignaling.acceptPendingUser(userUid, call.uid);
+    return signalingBackend.acceptPendingUser(userUid, call.uid);
   }
 );
 
@@ -259,7 +259,7 @@ export const rejectPendingUser = createAsyncThunk(
   ({ userUid }: Pick<CallUserJoinIntent, "userUid">, thunkApi) => {
     const { call } = thunkApi.getState() as RootState;
 
-    return firestoreSignaling.rejectPendingUser({ userUid, callUid: call.uid });
+    return signalingBackend.rejectPendingUser({ userUid, callUid: call.uid });
   }
 );
 
