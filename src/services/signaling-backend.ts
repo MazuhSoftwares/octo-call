@@ -5,8 +5,9 @@ import type {
   CallPendingUser,
 } from "../webrtc";
 import firestoreSignaling from "./firestore-infra/firestore-signaling";
+import pythonSignaling from "./python-infra/python-signaling";
 
-type listenerUnsubscribe = {
+export type listenerUnsubscribe = {
   (): void;
 };
 
@@ -60,6 +61,9 @@ export interface SignalingBackend {
   getIceServersConfig: () => Promise<RTCIceServer>;
 }
 
-const signalingBackend: SignalingBackend = firestoreSignaling;
+const signalingBackend: SignalingBackend =
+  process.env.VITE_SIGNALING_BACKEND === "firestore"
+    ? firestoreSignaling
+    : pythonSignaling;
 
 export default signalingBackend;

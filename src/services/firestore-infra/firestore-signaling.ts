@@ -22,38 +22,13 @@ import type {
   CallPendingUser,
   CallUser,
 } from "../../webrtc";
-
-type listenerUnsubscribe = {
-  (): void;
-};
-
-export interface SignalingBackend {
-  create: <T extends Record<string, unknown>>(
-    collectionName: string,
-    rawCreatingData: T
-  ) => Promise<T & { uid: string }>;
-  createCall: (callData: Omit<Call, "uid">) => Promise<Call>;
-  askToJoinCall: (callUserJoinIntent: CallUserJoinIntent) => Promise<void>;
-  listenCallUsers: (
-    callUid: string,
-    callback: (result: CallUsersResult) => void
-  ) => listenerUnsubscribe;
-  updateParticipation: (participation: {
-    callUid: string;
-    p2pDescription: Partial<CallP2PDescription>;
-  }) => Promise<void>;
-  listenP22Descriptions: (
-    participantIntent: ParticipantIntent,
-    listener: (p2pDescriptions: CallP2PDescription[]) => void
-  ) => listenerUnsubscribe;
-  joinAsNewerParticipation: (
-    participantIntent: ParticipantIntent
-  ) => Promise<void>;
-  acceptPendingUser: (userUid: string, callUid: string) => Promise<void>;
-  rejectPendingUser: (callUserExitIntent: CallUserExitIntent) => Promise<void>;
-  leaveCall: (callUserExitIntent: CallUserExitIntent) => Promise<void>;
-  getIceServersConfig: () => Promise<RTCIceServer>;
-}
+import {
+  CallUserExitIntent,
+  CallUserJoinIntent,
+  CallUsersResult,
+  ParticipantIntent,
+  SignalingBackend,
+} from "../signaling-backend";
 
 const firestoreSignaling: SignalingBackend = {
   create,
@@ -110,12 +85,6 @@ export async function createCall(callData: Omit<Call, "uid">): Promise<Call> {
   };
 }
 
-export interface CallUserJoinIntent {
-  userUid: string;
-  userDisplayName: string;
-  callUid: string;
-}
-
 export async function askToJoinCall({
   callUid,
   userDisplayName,
@@ -139,12 +108,6 @@ export async function askToJoinCall({
     userUid,
   };
   await setDoc(ref, data);
-}
-
-export interface ParticipantIntent {
-  userUid: string;
-  callUid: string;
-  participantsUids: string[];
 }
 
 export async function joinAsNewerParticipation({
@@ -233,11 +196,6 @@ export function listenP22Descriptions(
   );
 }
 
-export interface CallUsersResult {
-  participants: CallParticipant[];
-  pendingUsers: CallPendingUser[];
-}
-
 export function listenCallUsers(
   callUid: string,
   callback: (result: CallUsersResult) => void
@@ -268,11 +226,6 @@ export async function acceptPendingUser(userUid: string, callUid: string) {
   await updateDoc(doc(db, `calls/${callUid}/users/${userUid}`), {
     joined: Date.now(),
   });
-}
-
-export interface CallUserExitIntent {
-  userUid: string;
-  callUid: string;
 }
 
 export async function rejectPendingUser({
