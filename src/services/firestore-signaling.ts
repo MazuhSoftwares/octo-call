@@ -23,7 +23,39 @@ import type {
   CallUser,
 } from "../webrtc";
 
-const firestoreSignaling = {
+type listenerUnsubscribe = {
+  (): void;
+};
+
+export interface SignalingBackend {
+  create: <T extends Record<string, unknown>>(
+    collectionName: string,
+    rawCreatingData: T
+  ) => Promise<T & { uid: string }>;
+  createCall: (callData: Omit<Call, "uid">) => Promise<Call>;
+  askToJoinCall: (callUserJoinIntent: CallUserJoinIntent) => Promise<void>;
+  listenCallUsers: (
+    callUid: string,
+    callback: (result: CallUsersResult) => void
+  ) => listenerUnsubscribe;
+  updateParticipation: (participation: {
+    callUid: string;
+    p2pDescription: Partial<CallP2PDescription>;
+  }) => Promise<void>;
+  listenP22Descriptions: (
+    participantIntent: ParticipantIntent,
+    listener: (p2pDescriptions: CallP2PDescription[]) => void
+  ) => listenerUnsubscribe;
+  joinAsNewerParticipation: (
+    participantIntent: ParticipantIntent
+  ) => Promise<void>;
+  acceptPendingUser: (userUid: string, callUid: string) => Promise<void>;
+  rejectPendingUser: (callUserExitIntent: CallUserExitIntent) => Promise<void>;
+  leaveCall: (callUserExitIntent: CallUserExitIntent) => Promise<void>;
+  getIceServersConfig: () => Promise<RTCIceServer>;
+}
+
+const firestoreSignaling: SignalingBackend = {
   create,
   createCall,
   askToJoinCall,
